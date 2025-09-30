@@ -1,0 +1,50 @@
+<mat-card class="status-card">
+  <mat-card-header>
+    <mat-card-title>System Status</mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div class="status-grid">
+      <!-- API Status -->
+      <div class="status-item">
+        <mat-icon [style.color]="getStatusColor()">{{ databaseStatus.apiStatus === 'ready' ? 'cloud_done' : 'cloud_off' }}</mat-icon>
+        <span class="status-label">API Status:</span>
+        <span class="status-value" [style.color]="getStatusColor()">{{ getApiStatusText() }}</span>
+      </div>
+      
+      <!-- Database Status -->
+      <div class="status-item">
+        <mat-icon [style.color]="getStatusColor()">{{ databaseStatus.connected ? 'storage' : 'portable_wifi_off' }}</mat-icon>
+        <span class="status-label">Database:</span>
+        <span class="status-value" [style.color]="getStatusColor()">{{ getDatabaseStatusText() }}</span>
+      </div>
+      
+      <!-- Last Update -->
+      <div class="status-item" *ngIf="databaseStatus.lastChecked">
+        <mat-icon>access_time</mat-icon>
+        <span class="status-label">Last Checked:</span>
+        <span class="status-value">{{ formatDate(databaseStatus.lastChecked) }}</span>
+      </div>
+    </div>
+    
+    <!-- Latest Records -->
+    <div class="records-section">
+      <h4>Latest Import Records</h4>
+      <div class="records-grid">
+        <div class="record-item">
+          <span class="record-label">SolarMan:</span>
+          <span class="record-value">{{ formatDate(latestRecords.solarman) }}</span>
+        </div>
+        <div class="record-item">
+          <span class="record-label">Tshwane:</span>
+          <span class="record-value">{{ formatDate(latestRecords.tshwane) }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Status Message -->
+    <div class="status-message" *ngIf="databaseStatus.message">
+      <small>{{ databaseStatus.message }}</small>
+    </div>
+  </mat-card-content>
+</mat-card>

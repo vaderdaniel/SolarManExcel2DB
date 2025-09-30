@@ -1,0 +1,79 @@
+<mat-toolbar color="primary">
+  <span>{{ title }}</span>
+</mat-toolbar>
+
+<div class="main-container">
+  <!-- Status Panel Component -->
+  <app-status-panel></app-status-panel>
+  
+  <!-- File Upload View -->
+  <div class="view-container" *ngIf="currentView === 'upload'">
+    <app-file-upload (fileUploaded)="onFileUploaded($event)"></app-file-upload>
+  </div>
+  
+  <!-- Preview View -->
+  <div class="view-container" *ngIf="currentView === 'preview'">
+    <app-data-preview 
+      [previewData]="previewData" 
+      [fileType]="fileType"
+      (confirmImport)="onImportConfirmed($event)"
+      (cancelImport)="onImportCanceled()"
+    ></app-data-preview>
+  </div>
+  
+  <!-- Result View -->
+  <div class="view-container" *ngIf="currentView === 'result' && importResult">
+    <div class="import-result-container">
+      <mat-card class="result-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>task_alt</mat-icon>
+            Import Completed
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="result-stats">
+            <div class="stat-item">
+              <span class="stat-label">Records Inserted:</span>
+              <span class="stat-value">{{ importResult.recordsInserted }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Records Updated:</span>
+              <span class="stat-value">{{ importResult.recordsUpdated }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">First Record Date:</span>
+              <span class="stat-value">{{ importResult.firstRecordDate | date:'medium' }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Last Record Date:</span>
+              <span class="stat-value">{{ importResult.lastRecordDate | date:'medium' }}</span>
+            </div>
+            <div class="stat-item" *ngIf="importResult.errorCount > 0">
+              <span class="stat-label error">Errors:</span>
+              <span class="stat-value error">{{ importResult.errorCount }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+        
+        <mat-card-actions class="result-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="resetToUpload()"
+          >
+            <mat-icon>add_circle</mat-icon>
+            Import Another File
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-content">
+    <p>SolarManExcel2DB &copy; 2024 | Version 1.0</p>
+  </div>
+</footer>

@@ -1,0 +1,110 @@
+<mat-card class="upload-card">
+  <mat-card-header>
+    <mat-card-title>File Upload</mat-card-title>
+    <mat-card-subtitle>Select and upload Excel files for data import</mat-card-subtitle>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div class="upload-section">
+      <!-- SolarMan File Upload -->
+      <div class="upload-option">
+        <div class="upload-header">
+          <mat-icon>wb_sunny</mat-icon>
+          <h4>SolarMan Excel File</h4>
+        </div>
+        <div class="file-input-container">
+          <input 
+            type="file" 
+            id="solarman-file" 
+            accept=".xlsx,.xls" 
+            (change)="onFileSelected($event, 'solarman')"
+            class="file-input"
+          >
+          <label for="solarman-file" class="file-label">
+            <mat-icon>cloud_upload</mat-icon>
+            <span>Choose SolarMan File</span>
+          </label>
+        </div>
+      </div>
+      
+      <!-- Divider -->
+      <div class="divider">OR</div>
+      
+      <!-- Tshwane File Upload -->
+      <div class="upload-option">
+        <div class="upload-header">
+          <mat-icon>electrical_services</mat-icon>
+          <h4>Tshwane Electricity File</h4>
+        </div>
+        <div class="file-input-container">
+          <input 
+            type="file" 
+            id="tshwane-file" 
+            accept=".xlsx,.xls" 
+            (change)="onFileSelected($event, 'tshwane')"
+            class="file-input"
+          >
+          <label for="tshwane-file" class="file-label">
+            <mat-icon>cloud_upload</mat-icon>
+            <span>Choose Tshwane File</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Selected File Info -->
+    <div class="selected-file-info" *ngIf="selectedFile">
+      <div class="file-details">
+        <mat-icon>description</mat-icon>
+        <div class="file-info">
+          <span class="file-name">{{ getSelectedFileName() }}</span>
+          <span class="file-size">{{ getFileSize() }}</span>
+          <span class="file-type">Type: {{ selectedFileType }}</span>
+        </div>
+        <button 
+          mat-icon-button 
+          (click)="clearFileSelection()" 
+          matTooltip="Remove file"
+          class="remove-btn"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Upload Actions -->
+    <div class="upload-actions" *ngIf="selectedFile">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="uploadFile()" 
+        [disabled]="isUploading"
+        class="upload-btn"
+      >
+        <mat-icon *ngIf="!isUploading">upload</mat-icon>
+        <mat-icon *ngIf="isUploading" class="spinner">refresh</mat-icon>
+        {{ isUploading ? 'Processing...' : 'Upload & Preview' }}
+      </button>
+      
+      <button 
+        mat-button 
+        (click)="clearFileSelection()" 
+        [disabled]="isUploading"
+        class="cancel-btn"
+      >
+        Cancel
+      </button>
+    </div>
+    
+    <!-- Upload Guidelines -->
+    <div class="upload-guidelines">
+      <h5>Upload Guidelines:</h5>
+      <ul>
+        <li>Maximum file size: 10MB</li>
+        <li>Supported formats: .xlsx, .xls</li>
+        <li>SolarMan files should have 12 columns with proper headers</li>
+        <li>Tshwane files should contain electricity reading data</li>
+      </ul>
+    </div>
+  </mat-card-content>
+</mat-card>
