@@ -35,6 +35,8 @@ export class App {
   currentView: 'upload' | 'preview' | 'result' = 'upload';
   previewData: any[] = [];
   fileType: 'solarman' | 'tshwane' | null = null;
+  fileId: string | null = null;
+  totalRecords: number = 0;
   importResult: ImportResult | null = null;
   isImporting = false;
 
@@ -43,27 +45,48 @@ export class App {
     private snackBar: MatSnackBar
   ) {}
 
-  onFileUploaded(event: {data: any[], fileType: 'solarman' | 'tshwane'}): void {
+  onFileUploaded(event: {data: any[], fileType: 'solarman' | 'tshwane', fileId?: string, totalRecords?: number}): void {
     this.previewData = event.data;
     this.fileType = event.fileType;
+    this.fileId = event.fileId || null;
+    this.totalRecords = event.totalRecords || event.data.length;
     this.currentView = 'preview';
   }
 
   onImportConfirmed(event: {data: any[], fileType: 'solarman' | 'tshwane'}): void {
     this.isImporting = true;
-    this.importService.importData(event.fileType, event.data)
-      .subscribe({
-        next: (result) => {
-          this.isImporting = false;
-          this.importResult = result;
-          this.currentView = 'result';
-          this.showSuccess('Data imported successfully!');
-        },
-        error: (error) => {
-          this.isImporting = false;
-          this.showError(error.message || 'Import failed');
-        }
-      });
+    
+    // Use fileId if available, otherwise fallback to data array
+    if (this.fileId) {
+      this.importService.importDataByFileId(event.fileType, this.fileId)
+        .subscribe({
+          next: (result) => {
+            this.isImporting = false;
+            this.importResult = result;
+            this.currentView = 'result';
+            this.showSuccess(`Successfully imported ${result.recordsInserted + result.recordsUpdated} records!`);
+          },
+          error: (error) => {
+            this.isImporting = false;
+            this.showError(error.message || 'Import failed');
+          }
+        });
+    } else {
+      // Fallback to old method
+      this.importService.importData(event.fileType, event.data)
+        .subscribe({
+          next: (result) => {
+            this.isImporting = false;
+            this.importResult = result;
+            this.currentView = 'result';
+            this.showSuccess('Data imported successfully!');
+          },
+          error: (error) => {
+            this.isImporting = false;
+            this.showError(error.message || 'Import failed');
+          }
+        });
+    }
   }
 
   onImportCanceled(): void {
@@ -74,6 +97,8 @@ export class App {
     this.currentView = 'upload';
     this.previewData = [];
     this.fileType = null;
+    this.fileId = null;
+    this.totalRecords = 0;
     this.importResult = null;
   }
 

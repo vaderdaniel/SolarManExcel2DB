@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend Upload</title>
+</head>
+<body>
+    <h1>Frontend Upload Test</h1>
+    <input type="file" id="fileInput" accept=".xlsx,.xls">
+    <button onclick="testUpload()">Test Upload</button>
+    <div id="result"></div>
+
+    <script>
+        async function testUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const resultDiv = document.getElementById('result');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<p style="color: red;">Please select a file first.</p>';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                resultDiv.innerHTML = '<p>Uploading...</p>';
+                
+                const response = await fetch('http://localhost:8080/api/upload/solarman', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Backend response:', data);
+                
+                // Test the frontend service logic
+                const previewData = data.previewData || [];
+                
+                resultDiv.innerHTML = `
+                    <h3>Upload Successful!</h3>
+                    <p><strong>Total Records:</strong> ${data.totalRecords}</p>
+                    <p><strong>File Type:</strong> ${data.fileType}</p>
+                    <p><strong>Preview Records:</strong> ${previewData.length}</p>
+                    <h4>Sample Data:</h4>
+                    <pre>${JSON.stringify(previewData.slice(0, 2), null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

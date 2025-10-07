@@ -14,7 +14,7 @@ import { FileUploadService } from '../../services/file-upload.service';
   styleUrl: './file-upload.scss'
 })
 export class FileUploadComponent {
-  @Output() fileUploaded = new EventEmitter<{data: any[], fileType: 'solarman' | 'tshwane'}>();
+  @Output() fileUploaded = new EventEmitter<{data: any[], fileType: 'solarman' | 'tshwane', fileId?: string, totalRecords?: number}>();
   
   selectedFile: File | null = null;
   selectedFileType: 'solarman' | 'tshwane' | null = null;
@@ -53,10 +53,16 @@ export class FileUploadComponent {
     this.isUploading = true;
     this.fileUploadService.uploadFile(this.selectedFile, this.selectedFileType)
       .subscribe({
-        next: (data) => {
+        next: (response) => {
           this.isUploading = false;
-          this.fileUploaded.emit({ data, fileType: this.selectedFileType! });
-          this.showSuccess('File uploaded successfully');
+          this.fileUploaded.emit({ 
+            data: response.data, 
+            fileType: this.selectedFileType!,
+            fileId: response.fileId,
+            totalRecords: response.totalRecords
+          });
+          const recordCount = response.totalRecords || response.data.length;
+          this.showSuccess(`File uploaded successfully! Found ${recordCount} records.`);
         },
         error: (error) => {
           this.isUploading = false;

@@ -16,6 +16,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 export class DataPreviewComponent {
   @Input() previewData: any[] = [];
   @Input() fileType: 'solarman' | 'tshwane' | null = null;
+  @Input() totalRecords: number = 0;
   @Output() confirmImport = new EventEmitter<{data: any[], fileType: 'solarman' | 'tshwane'}>();
   @Output() cancelImport = new EventEmitter<void>();
 

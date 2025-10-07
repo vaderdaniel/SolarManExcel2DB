@@ -9,7 +9,8 @@
   
   <mat-card-content>
     <div class="preview-info">
-      <p><strong>Records to import:</strong> {{ previewData.length }}</p>
+      <p><strong>Total records to import:</strong> {{ totalRecords > 0 ? totalRecords : previewData.length }}</p>
+      <p *ngIf="totalRecords > previewData.length"><em>Showing first {{ previewData.length }} records for preview</em></p>
     </div>
     
     <div class="table-container">

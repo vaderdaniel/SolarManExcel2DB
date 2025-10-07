@@ -51,6 +51,14 @@ public class ImportService {
 
             for (SolarManRecord record : records) {
                 try {
+                    // Check for null updated field
+                    if (record.getUpdated() == null) {
+                        String errorMessage = "Record has null updated field, skipping";
+                        result.addError(errorMessage);
+                        logError(errorMessage, new IllegalArgumentException("Null updated field"));
+                        continue;
+                    }
+                    
                     pstmt.setTimestamp(1, Timestamp.valueOf(record.getUpdated()));
                     pstmt.setDouble(2, record.getProductionPower() != null ? record.getProductionPower() : 0.0);
                     pstmt.setDouble(3, record.getConsumePower() != null ? record.getConsumePower() : 0.0);
@@ -67,12 +75,14 @@ public class ImportService {
                         inserted++;
                     }
 
-                    // Track date range
-                    if (firstDate == null || record.getUpdated().isBefore(firstDate)) {
-                        firstDate = record.getUpdated();
-                    }
-                    if (lastDate == null || record.getUpdated().isAfter(lastDate)) {
-                        lastDate = record.getUpdated();
+                    // Track date range - with null check
+                    if (record.getUpdated() != null) {
+                        if (firstDate == null || record.getUpdated().isBefore(firstDate)) {
+                            firstDate = record.getUpdated();
+                        }
+                        if (lastDate == null || record.getUpdated().isAfter(lastDate)) {
+                            lastDate = record.getUpdated();
+                        }
                     }
 
                 } catch (SQLException e) {

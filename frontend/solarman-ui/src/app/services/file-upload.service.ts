@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,7 @@ export class FileUploadService {
 
   constructor(private http: HttpClient) { }
 
-  uploadFile(file: File, fileType: 'solarman' | 'tshwane'): Observable<any[]> {
+  uploadFile(file: File, fileType: 'solarman' | 'tshwane'): Observable<{data: any[], fileId?: string, totalRecords?: number}> {
     if (!this.validateFile(file)) {
       return throwError(() => new Error('Invalid file format or size'));
     }
@@ -20,8 +20,17 @@ export class FileUploadService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post<any[]>(`${this.baseUrl}/upload/${fileType}`, formData)
+    return this.http.post<{previewData: any[], totalRecords: number, fileType: string, fileId?: string}>(`${this.baseUrl}/upload/${fileType}`, formData)
       .pipe(
+        map(response => {
+          console.log('Backend response:', response);
+          // Return the structured response with fileId
+          return {
+            data: response.previewData || [],
+            fileId: response.fileId,
+            totalRecords: response.totalRecords
+          };
+        }),
         catchError(error => {
           console.error('File upload error:', error);
           return throwError(() => new Error(this.getErrorMessage(error)));

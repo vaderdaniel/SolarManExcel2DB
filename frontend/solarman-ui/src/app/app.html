@@ -16,6 +16,7 @@
     <app-data-preview 
       [previewData]="previewData" 
       [fileType]="fileType"
+      [totalRecords]="totalRecords"
       (confirmImport)="onImportConfirmed($event)"
       (cancelImport)="onImportCanceled()"
     ></app-data-preview>

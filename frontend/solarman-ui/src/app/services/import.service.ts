@@ -13,7 +13,17 @@ export class ImportService {
   constructor(private http: HttpClient) { }
 
   importData(fileType: 'solarman' | 'tshwane', data: any[]): Observable<ImportResult> {
-    return this.http.post<ImportResult>(`${this.baseUrl}/import/${fileType}`, data)
+    return this.http.post<ImportResult>(`${this.baseUrl}/import/${fileType}`, { data })
+      .pipe(
+        catchError(error => {
+          console.error('Data import error:', error);
+          return throwError(() => new Error(this.getErrorMessage(error)));
+        })
+      );
+  }
+
+  importDataByFileId(fileType: 'solarman' | 'tshwane', fileId: string): Observable<ImportResult> {
+    return this.http.post<ImportResult>(`${this.baseUrl}/import/${fileType}`, { fileId })
       .pipe(
         catchError(error => {
           console.error('Data import error:', error);
