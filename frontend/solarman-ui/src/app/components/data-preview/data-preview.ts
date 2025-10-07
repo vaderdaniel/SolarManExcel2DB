@@ -74,6 +74,31 @@ export class DataPreviewComponent {
     if (typeof value === 'number') {
       return value.toLocaleString();
     }
+    
+    // Check if the value is a date or a date-like string
+    if (value instanceof Date || (typeof value === 'string' && this.isDateString(value))) {
+      return this.formatDate(new Date(value));
+    }
+    
     return String(value);
+  }
+  
+  private isDateString(value: string): boolean {
+    // Check if string looks like a date (basic check for common date patterns)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4}|\d{2}-\d{2}-\d{4}/;
+    return dateRegex.test(value) && !isNaN(Date.parse(value));
+  }
+  
+  private formatDate(date: Date): string {
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
 }
