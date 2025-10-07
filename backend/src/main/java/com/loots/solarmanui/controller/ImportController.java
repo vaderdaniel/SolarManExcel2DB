@@ -145,7 +145,55 @@ public class ImportController {
     }
 
     @PostMapping("/tshwane")
-    public ResponseEntity<?> importTshwaneData(@RequestBody List<Map<String, Object>> data) {
+    public ResponseEntity<?> importTshwaneData(@RequestBody Map<String, Object> request) {
+        // Check if request contains fileId (new approach) or data array (legacy)
+        if (request.containsKey("fileId")) {
+            return importTshwaneFromFile((String) request.get("fileId"));
+        } else if (request.containsKey("data")) {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> data = (List<Map<String, Object>>) request.get("data");
+            return importTshwaneFromData(data);
+        } else {
+            return ResponseEntity.badRequest().body("Request must contain either 'fileId' or 'data'");
+        }
+    }
+    
+    public ResponseEntity<?> importTshwaneFromFile(String fileId) {
+        try {
+            // Get file info
+            FileUploadController.FileInfo fileInfo = FileUploadController.getFileInfo(fileId);
+            if (fileInfo == null) {
+                return ResponseEntity.badRequest().body("File not found or expired. Please upload the file again.");
+            }
+            
+            // Load and process the full file
+            File file = new File(fileInfo.getFilePath());
+            if (!file.exists()) {
+                return ResponseEntity.badRequest().body("File not found on disk. Please upload the file again.");
+            }
+            
+            try (FileInputStream fis = new FileInputStream(file)) {
+                MultipartFile multipartFile = new MockMultipartFile(
+                    "file",
+                    file.getName(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    fis
+                );
+                
+                // Process ALL records from the file
+                List<TshwaneRecord> records = excelProcessingService.processTshwaneFile(multipartFile);
+                
+                // Import all records
+                ImportResult result = importService.importTshwaneData(records);
+                return ResponseEntity.ok(result);
+            }
+            
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error importing Tshwane data: " + e.getMessage());
+        }
+    }
+    
+    public ResponseEntity<?> importTshwaneFromData(List<Map<String, Object>> data) {
         try {
             // Convert Map data back to TshwaneRecord objects
             List<TshwaneRecord> records = new ArrayList<>();
