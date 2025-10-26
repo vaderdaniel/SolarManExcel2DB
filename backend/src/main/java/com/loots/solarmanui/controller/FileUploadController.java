@@ -70,11 +70,10 @@ public class FileUploadController {
             // Process the Excel file
             List<SolarManRecord> records = excelProcessingService.processSolarManFile(file);
 
-            // Convert to preview format (first 10 records for preview)
+            // Convert to preview format (all records)
             List<Map<String, Object>> previewData = new ArrayList<>();
-            int previewLimit = Math.min(records.size(), 10);
 
-            for (int i = 0; i < previewLimit; i++) {
+            for (int i = 0; i < records.size(); i++) {
                 SolarManRecord record = records.get(i);
                 Map<String, Object> previewRecord = new HashMap<>();
                 previewRecord.put("Plant", "SolarMan Plant"); // Add plant info if available
@@ -131,11 +130,10 @@ public class FileUploadController {
             // Process the Excel file
             List<TshwaneRecord> records = excelProcessingService.processTshwaneFile(file);
 
-            // Convert to preview format (first 10 records for preview)
+            // Convert to preview format (all records)
             List<Map<String, Object>> previewData = new ArrayList<>();
-            int previewLimit = Math.min(records.size(), 10);
 
-            for (int i = 0; i < previewLimit; i++) {
+            for (int i = 0; i < records.size(); i++) {
                 TshwaneRecord record = records.get(i);
                 Map<String, Object> previewRecord = new HashMap<>();
                 previewRecord.put("Reading Date", record.getReadingDate().toString());

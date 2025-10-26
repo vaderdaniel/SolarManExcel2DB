@@ -9,12 +9,12 @@
   
   <mat-card-content>
     <div class="preview-info">
-      <p><strong>Total records to import:</strong> {{ totalRecords > 0 ? totalRecords : previewData.length }}</p>
-      <p *ngIf="totalRecords > previewData.length"><em>Showing first {{ previewData.length }} records for preview</em></p>
+      <p><strong>Total records to import:</strong> {{ totalRecords > 0 ? totalRecords : dataSource.data.length }}</p>
+      <p *ngIf="totalRecords > dataSource.data.length"><em>Showing first {{ dataSource.data.length }} records for preview</em></p>
     </div>
     
     <div class="table-container">
-      <table mat-table [dataSource]="previewData" class="preview-table">
+      <table mat-table [dataSource]="dataSource" class="preview-table">
         <!-- Dynamic columns -->
         <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
           <th mat-header-cell *matHeaderCellDef class="table-header">{{ column }}</th>
@@ -28,8 +28,10 @@
       </table>
       
       <mat-paginator 
-        [pageSizeOptions]="pageSizeOptions" 
-        [pageSize]="pageSize"
+        #paginator
+        [length]="dataSource.data.length"
+        [pageSizeOptions]="pageSizeOptions"
+        [pageSize]="10"
         showFirstLastButtons
         class="table-paginator">
       </mat-paginator>

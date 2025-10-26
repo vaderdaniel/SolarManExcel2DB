@@ -1,10 +1,10 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-data-preview',
@@ -13,15 +13,21 @@ import { MatPaginatorModule } from '@angular/material/paginator';
   templateUrl: './data-preview.html',
   styleUrl: './data-preview.scss'
 })
-export class DataPreviewComponent {
-  @Input() previewData: any[] = [];
+export class DataPreviewComponent implements AfterViewInit {
+  @Input() set previewData(data: any[]) {
+    this.dataSource.data = data;
+    if (this.paginator) {
+      this.paginator.firstPage();
+    }
+  }
   @Input() fileType: 'solarman' | 'tshwane' | null = null;
   @Input() totalRecords: number = 0;
   @Output() confirmImport = new EventEmitter<{data: any[], fileType: 'solarman' | 'tshwane'}>();
   @Output() cancelImport = new EventEmitter<void>();
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  dataSource = new MatTableDataSource<any>([]);
   displayedColumns: string[] = [];
-  pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50];
 
   ngOnInit(): void {
@@ -32,8 +38,12 @@ export class DataPreviewComponent {
     this.setDisplayedColumns();
   }
 
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+  }
+
   private setDisplayedColumns(): void {
-    if (this.previewData.length === 0) {
+    if (this.dataSource.data.length === 0) {
       this.displayedColumns = [];
       return;
     }
@@ -50,13 +60,13 @@ export class DataPreviewComponent {
       ];
     } else {
       // Auto-detect columns from data
-      this.displayedColumns = Object.keys(this.previewData[0] || {});
+      this.displayedColumns = Object.keys(this.dataSource.data[0] || {});
     }
   }
 
   onConfirmImport(): void {
     if (this.fileType) {
-      this.confirmImport.emit({ data: this.previewData, fileType: this.fileType });
+      this.confirmImport.emit({ data: this.dataSource.data, fileType: this.fileType });
     }
   }
 
