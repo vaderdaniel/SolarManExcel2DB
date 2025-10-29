@@ -32,13 +32,53 @@ A modern web application for importing solar power generation data from SolarMan
 
 ## 🚦 Quick Start
 
-### Prerequisites
+### Choose Your Deployment Method
+
+You can run the application in three different ways:
+
+#### 🐳 **Option 1: Docker & Kubernetes (Recommended)**
+
+Run the complete application stack in containers with Kubernetes orchestration:
+
+```bash
+# 1. Build Docker images
+./scripts/build-images.sh
+
+# 2. Deploy to Kubernetes
+./scripts/k8s-deploy.sh
+
+# 3. Access the application
+open http://localhost:30080
+```
+
+📘 **[Full Docker & Kubernetes Documentation →](DOCKER_KUBERNETES_DEPLOYMENT.md)**
+
+#### 🐋 **Option 2: Docker Compose (Quick Testing)**
+
+Run all services with Docker Compose for quick local testing:
+
+```bash
+# Start all services
+./scripts/docker-compose-up.sh
+
+# Access the application
+open http://localhost:8081
+
+# Stop services
+docker-compose down
+```
+
+#### 💻 **Option 3: Local Development (Native)**
+
+Run components natively for active development:
+
+**Prerequisites:**
 - Java 11 or higher
 - Node.js 18+ and npm
 - PostgreSQL database
 - Maven 3.6+
 
-### 1. Database Setup
+**1. Database Setup**
 ```bash
 # Start your PostgreSQL database
 /Users/danieloots/LOOTS_PG/loots_pg.sh
@@ -48,7 +88,7 @@ export DB_USER=your_database_username
 export DB_PASSWORD=your_database_password
 ```
 
-### 2. Backend Setup
+**2. Backend Setup**
 ```bash
 # Navigate to backend directory
 cd backend
@@ -58,7 +98,7 @@ mvn spring-boot:run
 # Backend runs on http://localhost:8080
 ```
 
-### 3. Frontend Setup
+**3. Frontend Setup**
 ```bash
 # Navigate to frontend directory
 cd frontend/solarman-ui
@@ -69,12 +109,28 @@ npm start
 # Frontend runs on http://localhost:4200
 ```
 
-### 4. Access the Application
+**4. Access the Application**
+
 Open your browser to **http://localhost:4200** and start importing your Excel files!
 
 ## 📚 Documentation
 
 This project includes comprehensive documentation organized into specialized files:
+
+### 🐳 [DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)
+**Docker & Kubernetes Deployment Guide**
+
+Complete guide for containerized deployment with Docker and Kubernetes (Rancher Desktop), including:
+- Docker image building from source (multi-stage builds)
+- Kubernetes manifests and configuration
+- PostgreSQL with persistent volume mounting
+- Service networking and exposure strategies
+- Deployment scripts and automation
+- Troubleshooting and monitoring
+- Production deployment considerations
+- Docker Compose for local testing
+
+*Essential for DevOps engineers and production deployments. Start here for containerized environments.*
 
 ### 📖 [README-oldCLI.md](README-oldCLI.md)
 **Original Command-Line Interface Documentation**
@@ -153,8 +209,10 @@ Detailed technical documentation for the Spring Boot backend system, covering:
 - **Hibernate**: Advanced database operations and caching
 
 ### Database & Infrastructure
-- **PostgreSQL**: Robust relational database
-- **Docker Ready**: Containerization support
+- **PostgreSQL**: Robust relational database with persistent storage
+- **Docker**: Multi-stage builds for optimized images
+- **Kubernetes**: Production-ready orchestration with Rancher Desktop
+- **nginx**: High-performance reverse proxy for frontend
 - **Environment Configuration**: Flexible deployment options
 
 ## 📊 Supported Data Formats
@@ -172,6 +230,7 @@ Detailed technical documentation for the Spring Boot backend system, covering:
 
 ## 🔄 Development Workflow
 
+### Native Development (Local)
 ```bash
 # 1. Start Database
 /Users/danieloots/LOOTS_PG/loots_pg.sh
@@ -189,7 +248,66 @@ npm run build                    # Frontend
 mvn clean package               # Backend
 ```
 
+### Docker Development (Containerized)
+```bash
+# 1. Build all images
+./scripts/build-images.sh
+
+# 2. Run with Docker Compose
+./scripts/docker-compose-up.sh
+
+# 3. View logs
+docker-compose logs -f
+
+# 4. Stop services
+docker-compose down
+```
+
+### Kubernetes Development (Production-like)
+```bash
+# 1. Build images
+./scripts/build-images.sh
+
+# 2. Deploy to Kubernetes
+./scripts/k8s-deploy.sh
+
+# 3. View logs
+kubectl logs -l app=backend -f
+
+# 4. Clean up
+./scripts/k8s-delete.sh
+```
+
 ## 🚀 Production Deployment
+
+### Option 1: Kubernetes (Recommended for Production)
+
+Deploy the complete application stack to Kubernetes with proper orchestration:
+
+```bash
+# Build Docker images
+./scripts/build-images.sh
+
+# Deploy to Kubernetes
+./scripts/k8s-deploy.sh
+
+# Access application at http://localhost:30080
+```
+
+For detailed deployment instructions, see **[DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)**
+
+### Option 2: Docker Compose
+
+Deploy with Docker Compose for simpler environments:
+
+```bash
+# Start all services
+./scripts/docker-compose-up.sh
+
+# Access application at http://localhost:8081
+```
+
+### Option 3: Single JAR Deployment
 
 The application builds into a single executable JAR file containing both frontend and backend:
 
@@ -200,6 +318,8 @@ cd ../../backend && mvn clean package
 
 # Deploy single JAR
 java -jar target/solarman-ui-1.0.jar
+
+# Access application at http://localhost:8080
 ```
 
 ## 🤝 Contributing
