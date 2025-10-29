@@ -4,30 +4,30 @@ FROM node:20-alpine AS frontend-build
 WORKDIR /app/frontend
 
 # Copy frontend package files
-COPY ../frontend/solarman-ui/package*.json ./
+COPY frontend/solarman-ui/package*.json ./
 
 # Install dependencies
 RUN npm ci
 
 # Copy frontend source
-COPY ../frontend/solarman-ui/ ./
+COPY frontend/solarman-ui/ ./
 
 # Build Angular app
 RUN npm run build
 
 # Stage 2: Build Spring Boot backend
-FROM maven:3.9-eclipse-temurin-11 AS backend-build
+FROM maven:3.9-eclipse-temurin-17 AS backend-build
 
 WORKDIR /app/backend
 
 # Copy backend pom.xml
-COPY pom.xml ./
+COPY backend/pom.xml ./
 
 # Download dependencies (cached layer)
 RUN mvn dependency:go-offline -B
 
 # Copy backend source
-COPY src ./src
+COPY backend/src ./src
 
 # Copy Angular build output to static resources
 COPY --from=frontend-build /app/frontend/dist/solarman-ui ./src/main/resources/static/
@@ -36,7 +36,7 @@ COPY --from=frontend-build /app/frontend/dist/solarman-ui ./src/main/resources/s
 RUN mvn clean package -DskipTests
 
 # Stage 3: Runtime
-FROM eclipse-temurin:11-jre-alpine
+FROM amazoncorretto:17-alpine
 
 WORKDIR /app
 

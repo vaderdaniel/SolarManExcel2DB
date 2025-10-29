@@ -8,7 +8,7 @@ import { ImportResult } from '../models/import-result.model';
   providedIn: 'root'
 })
 export class ImportService {
-  private readonly baseUrl = 'http://localhost:8080/api';
+  private readonly baseUrl = '/api';
 
   constructor(private http: HttpClient) { }
 

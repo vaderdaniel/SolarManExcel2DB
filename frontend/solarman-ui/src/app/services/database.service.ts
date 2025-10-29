@@ -8,7 +8,7 @@ import { DatabaseStatus, LatestRecords, DatabaseCredentials } from '../models/da
   providedIn: 'root'
 })
 export class DatabaseService {
-  private readonly baseUrl = 'http://localhost:8080/api';
+  private readonly baseUrl = '/api';
   private statusSubject = new BehaviorSubject<DatabaseStatus>({
     connected: false,
     message: 'Checking connection...',

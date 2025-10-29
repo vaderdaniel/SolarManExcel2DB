@@ -7,7 +7,7 @@ import { catchError, map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class FileUploadService {
-  private readonly baseUrl = 'http://localhost:8080/api';
+  private readonly baseUrl = '/api';
   private readonly maxFileSize = 10 * 1024 * 1024; // 10MB
 
   constructor(private http: HttpClient) { }

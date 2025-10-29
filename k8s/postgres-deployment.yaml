@@ -18,7 +18,7 @@ spec:
       containers:
       - name: postgres
         image: solarman-postgres:latest
-        imagePullPolicy: Never  # Use local image built with Docker
+        imagePullPolicy: IfNotPresent  # Use local image if available
         ports:
         - containerPort: 5432
           name: postgres

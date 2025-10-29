@@ -11,7 +11,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/Users/danieloots/LOOTS_PG"
+    path: "/tmp/postgres-k8s-test"
     type: DirectoryOrCreate
 ---
 apiVersion: v1

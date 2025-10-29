@@ -19,7 +19,8 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy built Angular app to nginx html directory
-COPY --from=build /app/dist/solarman-ui /usr/share/nginx/html
+# Angular 17+ outputs to dist/solarman-ui/browser
+COPY --from=build /app/dist/solarman-ui/browser /usr/share/nginx/html
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
