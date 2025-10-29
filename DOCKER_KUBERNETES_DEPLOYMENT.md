@@ -7,15 +7,17 @@ This guide covers deploying the SolarMan application using Docker and Kubernetes
 - **Docker**: Installed via Rancher Desktop
 - **Kubernetes**: Running via Rancher Desktop
 - **kubectl**: Command-line tool for Kubernetes
-- **PostgreSQL Data**: Existing database at `/Users/danieloots/LOOTS_PG/`
+- **rdctl**: Rancher Desktop CLI (for VM access)
+- **PostgreSQL Data**: Will be stored in Rancher Desktop VM (imported from your existing database)
 
 ## 🏗️ Architecture Overview
 
 The application consists of three containerized services:
 
 1. **PostgreSQL**: Database service (ClusterIP)
-   - Uses existing data at `/Users/danieloots/LOOTS_PG/`
+   - Data stored in Rancher Desktop VM at `/tmp/postgres-k8s-test/pgdata/`
    - Internal port: 5432
+   - See [PostgreSQL Data Location](#🗄️-postgresql-data-location-rancher-desktop) for details
    
 2. **Spring Boot Backend**: REST API service (ClusterIP)
    - Internal port: 8080
@@ -142,7 +144,7 @@ kubectl logs -l app=postgres -f
 ./scripts/k8s-delete.sh
 ```
 
-**Note**: This does NOT delete the PostgreSQL data at `/Users/danieloots/LOOTS_PG/`
+**Note**: This does NOT delete the PostgreSQL data. See [PostgreSQL Data Location](#🗄️-postgresql-data-location-rancher-desktop) section for details on where data is stored.
 
 ## 🐳 Docker Compose Deployment
 
@@ -212,7 +214,7 @@ SolarManExcel2DB/
 Stored in `k8s/configmap.yaml`:
 ```yaml
 DB_USER: danieloots
-DB_PASSWORD: SeweEen0528
+DB_PASSWORD: *****
 POSTGRES_DB: LOOTS
 ```
 
@@ -221,14 +223,14 @@ POSTGRES_DB: LOOTS
 **Backend** (from ConfigMap):
 - `SPRING_DATASOURCE_URL`: jdbc:postgresql://postgres-service:5432/LOOTS
 - `SPRING_DATASOURCE_USERNAME`: danieloots
-- `SPRING_DATASOURCE_PASSWORD`: SeweEen0528
+- `SPRING_DATASOURCE_PASSWORD`: *****
 - `DB_USER`: danieloots
-- `DB_PASSWORD`: SeweEen0528
+- `DB_PASSWORD`: *****
 
 **PostgreSQL** (from ConfigMap):
 - `POSTGRES_DB`: LOOTS
 - `POSTGRES_USER`: danieloots
-- `POSTGRES_PASSWORD`: SeweEen0528
+- `POSTGRES_PASSWORD`: *****
 - `PGDATA`: /var/lib/postgresql/data/pgdata
 
 ### Networking
@@ -257,6 +259,151 @@ POSTGRES_DB: LOOTS
 **Frontend**:
 - Requests: 128Mi memory, 100m CPU
 - Limits: 256Mi memory, 200m CPU
+
+## 🗄️ PostgreSQL Data Location (Rancher Desktop)
+
+When deploying with Kubernetes on Rancher Desktop, understanding where your PostgreSQL data actually lives is important for backups and troubleshooting.
+
+### Data Storage Hierarchy
+
+Rancher Desktop runs Kubernetes in a Linux VM (Lima), so the data location depends on your perspective:
+
+**1. Inside the PostgreSQL Container**
+```bash
+Path: /var/lib/postgresql/data/pgdata
+Size: ~85.6 MB (for 240K+ records)
+
+# View from container
+kubectl exec -it $(kubectl get pod -l app=postgres -o jsonpath='{.items[0].metadata.name}') -- \
+  ls -lah /var/lib/postgresql/data/pgdata
+```
+
+**2. Inside Rancher Desktop VM (Lima)**
+```bash
+Path: /tmp/postgres-k8s-test/pgdata
+User: UID 70 (postgres)
+
+# View from VM
+rdctl shell ls -lah /tmp/postgres-k8s-test/
+```
+
+**3. On macOS Host**
+```bash
+Path: /tmp/postgres-k8s-test/
+Status: ❌ Empty/Not Directly Accessible
+
+# Directory exists but appears empty because it's actually in the VM
+ls -la /tmp/postgres-k8s-test/
+```
+
+### Volume Mapping Diagram
+
+```
+macOS Host: /tmp/postgres-k8s-test/
+              ↓ (not directly mapped)
+ Lima VM:    /tmp/postgres-k8s-test/pgdata/  ← Actual database files here
+              ↓ (hostPath PersistentVolume)
+Container:  /var/lib/postgresql/data/pgdata/  ← PostgreSQL sees this
+```
+
+### Current Configuration
+
+From `k8s/postgres-pv.yaml`:
+```yaml
+hostPath:
+  path: "/tmp/postgres-k8s-test"  # This path is inside the Lima VM!
+  type: DirectoryOrCreate
+```
+
+### Data Persistence
+
+✅ **Survives:**
+- Pod restarts
+- Deployment rollouts
+- kubectl delete pod
+
+❌ **Does NOT Survive:**
+- Rancher Desktop VM reset/deletion
+- Deleting the PersistentVolume (`kubectl delete pv postgres-pv`)
+- Rancher Desktop complete uninstall
+
+### Backup Your Data (Recommended)
+
+Since you can't directly access files on macOS, use PostgreSQL's native tools:
+
+```bash
+# Backup database to your macOS host
+kubectl exec -it $(kubectl get pod -l app=postgres -o jsonpath='{.items[0].metadata.name}') -- \
+  pg_dump -U danieloots LOOTS | gzip > ~/loots_backup_$(date +%Y%m%d).sql.gz
+
+# Check backup size
+ls -lh ~/loots_backup_*.sql.gz
+
+# Restore from backup (if needed)
+gunzip -c ~/loots_backup_20251029.sql.gz | \
+  kubectl exec -i $(kubectl get pod -l app=postgres -o jsonpath='{.items[0].metadata.name}') -- \
+  psql -U danieloots -d LOOTS
+```
+
+### Accessing Data Files Directly
+
+If you need to access the actual PostgreSQL data files (advanced):
+
+```bash
+# Enter the Rancher Desktop VM
+rdctl shell
+
+# Navigate to the data directory
+cd /tmp/postgres-k8s-test/
+
+# List contents (may need sudo for pgdata subdirectory)
+ls -lah
+
+# Exit VM
+exit
+```
+
+### Database Size Monitoring
+
+```bash
+# Check database size from inside the container
+kubectl exec -it $(kubectl get pod -l app=postgres -o jsonpath='{.items[0].metadata.name}') -- \
+  psql -U danieloots -d LOOTS -c "SELECT pg_size_pretty(pg_database_size('LOOTS'));"
+
+# Check disk usage in VM
+rdctl shell du -sh /tmp/postgres-k8s-test/ 2>/dev/null || echo "VM directory check"
+```
+
+### For Production Use
+
+Consider these alternatives for production deployments:
+
+1. **Use Kubernetes-native storage:**
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: local-path  # Rancher Desktop default
+```
+
+2. **Implement automated backups:**
+```bash
+# Create a CronJob for daily backups
+# See k8s/postgres-backup-cronjob.yaml (to be created)
+```
+
+3. **Use external database:**
+```bash
+# Point backend to external PostgreSQL instance
+SPRING_DATASOURCE_URL: jdbc:postgresql://external-db-host:5432/LOOTS
+```
 
 ## 🔍 Troubleshooting
 
