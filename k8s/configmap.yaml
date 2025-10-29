@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: solarman-config
+  namespace: default
+data:
+  DB_USER: "danieloots"
+  DB_PASSWORD: "SeweEen0528"
+  POSTGRES_DB: "LOOTS"
+  POSTGRES_USER: "danieloots"
+  POSTGRES_PASSWORD: "SeweEen0528"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/LOOTS"

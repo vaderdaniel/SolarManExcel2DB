@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  postgres:
+    build:
+      context: ./docker/postgresql
+      dockerfile: Dockerfile
+    container_name: solarman-postgres
+    environment:
+      POSTGRES_DB: LOOTS
+      POSTGRES_USER: danieloots
+      POSTGRES_PASSWORD: SeweEen0528
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /Users/danieloots/LOOTS_PG:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - solarman-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U danieloots -d LOOTS"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: solarman-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/LOOTS
+      SPRING_DATASOURCE_USERNAME: danieloots
+      SPRING_DATASOURCE_PASSWORD: SeweEen0528
+      DB_USER: danieloots
+      DB_PASSWORD: SeweEen0528
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - solarman-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: solarman-frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+    networks:
+      - solarman-network
+
+networks:
+  solarman-network:
+    driver: bridge
