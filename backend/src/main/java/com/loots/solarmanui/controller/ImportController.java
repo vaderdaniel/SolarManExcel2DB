@@ -22,7 +22,7 @@ import org.springframework.mock.web.MockMultipartFile;
 
 @RestController
 @RequestMapping("/api/import")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:30080"})
 public class ImportController {
 
     @Autowired
