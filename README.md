@@ -4,6 +4,7 @@
 [![Angular](https://img.shields.io/badge/Angular-20-red.svg)](https://angular.io/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-green.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://www.postgresql.org/)
+[![Grafana](https://img.shields.io/badge/Grafana-Latest-orange.svg)](https://grafana.com/)
 
 A modern web application for importing solar power generation data from SolarMan Excel exports into a PostgreSQL database. Features a complete full-stack implementation with Angular frontend and Spring Boot backend.
 
@@ -14,7 +15,15 @@ A modern web application for importing solar power generation data from SolarMan
 │   Angular 20    │◄────────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
 │     Frontend    │                  │     Backend      │             │    Database     │
 │  (Port: 4200)   │                  │   (Port: 8080)   │             │   (Port: 5432)  │
-└─────────────────┘                  └──────────────────┘             └─────────────────┘
+└─────────────────┘                  └──────────────────┘             └────────┬────────┘
+                                                                                │
+                                                                                │ Read-Only
+                                                                                │
+                                                                       ┌────────▼────────┐
+                                                                       │     Grafana     │
+                                                                       │   Monitoring    │
+                                                                       │  (Port: 3000)   │
+                                                                       └─────────────────┘
 ```
 
 ## ✨ Key Features
@@ -29,6 +38,7 @@ A modern web application for importing solar power generation data from SolarMan
 - 🛡️ **Data Validation**: Comprehensive file and data validation
 - ⚡ **High Performance**: Optimized for large Excel files
 - 🎯 **Production Ready**: Complete build and deployment pipeline
+- 📊 **Grafana Integration**: Optional monitoring and data visualization
 
 ## 🚦 Quick Start
 
@@ -213,6 +223,7 @@ Detailed technical documentation for the Spring Boot backend system, covering:
 - **Docker**: Multi-stage builds for optimized images
 - **Kubernetes**: Production-ready orchestration with Rancher Desktop
 - **nginx**: High-performance reverse proxy for frontend
+- **Grafana**: Analytics and monitoring platform with PostgreSQL datasource
 - **Environment Configuration**: Flexible deployment options
 
 ## 📊 Supported Data Formats

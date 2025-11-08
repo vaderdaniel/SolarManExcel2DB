@@ -12,7 +12,7 @@ This guide covers deploying the SolarMan application using Docker and Kubernetes
 
 ## 🏗️ Architecture Overview
 
-The application consists of three containerized services:
+The application consists of four containerized services:
 
 1. **PostgreSQL**: Database service (ClusterIP)
    - Data stored in Rancher Desktop VM at `/tmp/postgres-k8s-test/pgdata/`
@@ -26,6 +26,11 @@ The application consists of three containerized services:
 3. **Angular Frontend**: Web UI with nginx (NodePort)
    - External access: `http://localhost:30080`
    - Proxies API requests to backend
+
+4. **Grafana**: Analytics and monitoring platform (ClusterIP)
+   - Access via port-forward: `http://localhost:3000`
+   - Pre-configured PostgreSQL datasource
+   - Persistent storage for dashboards
 
 ## 🚀 Quick Start
 
@@ -198,7 +203,10 @@ SolarManExcel2DB/
 │   ├── postgres-pv.yaml           # PersistentVolume with hostPath
 │   ├── postgres-deployment.yaml   # PostgreSQL Deployment & Service
 │   ├── backend-deployment.yaml    # Backend Deployment & Service
-│   └── frontend-deployment.yaml   # Frontend Deployment & Service
+│   ├── frontend-deployment.yaml   # Frontend Deployment & Service
+│   ├── grafana-pvc.yaml           # Grafana PersistentVolumeClaim
+│   ├── grafana-deployment.yaml    # Grafana Deployment with datasource
+│   └── grafana-service.yaml       # Grafana Service
 ├── scripts/
 │   ├── build-images.sh            # Build all Docker images
 │   ├── docker-compose-up.sh       # Start Docker Compose
@@ -562,6 +570,132 @@ kubectl exec -it $(kubectl get pod -l app=postgres -o jsonpath='{.items[0].metad
 \i /path/to/migration.sql
 ```
 
+## 📊 Grafana Monitoring Setup
+
+Grafana is included as an optional monitoring and analytics platform for visualizing your solar power data.
+
+### Quick Start
+
+```bash
+# 1. Deploy Grafana resources
+kubectl apply -f k8s/grafana-pvc.yaml
+kubectl apply -f k8s/grafana-deployment.yaml
+kubectl apply -f k8s/grafana-service.yaml
+
+# 2. Wait for Grafana to be ready
+kubectl wait --for=condition=ready pod -l app=grafana --timeout=120s
+
+# 3. Set up port-forward to access Grafana
+kubectl port-forward -n default svc/grafana-service 3000:3000
+
+# 4. Access Grafana
+open http://localhost:3000
+```
+
+### Login Credentials
+
+- **Username**: `admin`
+- **Password**: `admin123`
+
+### PostgreSQL Datasource
+
+Grafana comes pre-configured with a PostgreSQL datasource:
+
+- **Name**: PostgreSQL-LOOTS
+- **Database**: LOOTS
+- **User**: grafana (read-only access)
+- **Connection**: postgres-service:5432
+- **SSL Mode**: Disabled (internal cluster communication)
+
+### Database User
+
+A dedicated `grafana` user has been created with read-only permissions:
+
+```sql
+-- User: grafana
+-- Password: grafana123
+-- Permissions: SELECT on all tables in public schema
+-- Database: LOOTS
+```
+
+### Persistent Storage
+
+Grafana uses a 5Gi PersistentVolumeClaim to store:
+- Dashboards
+- Users and organizations
+- Alerting configurations
+- Preferences and settings
+
+### Creating Dashboards
+
+1. Log in to Grafana at http://localhost:3000
+2. Navigate to **Dashboards** → **New Dashboard**
+3. Add a new panel
+4. Select **PostgreSQL-LOOTS** as the datasource
+5. Write SQL queries to visualize your solar data
+
+Example query for production power over time:
+```sql
+SELECT
+  updated AS time,
+  production_power
+FROM public.loots_inverter
+WHERE $__timeFilter(updated)
+ORDER BY updated
+```
+
+### Managing Grafana
+
+```bash
+# View Grafana logs
+kubectl logs -l app=grafana -f
+
+# Check Grafana status
+kubectl get pods -l app=grafana
+
+# Restart Grafana
+kubectl rollout restart deployment/grafana
+
+# Delete Grafana (keeps PVC)
+kubectl delete -f k8s/grafana-deployment.yaml
+kubectl delete -f k8s/grafana-service.yaml
+
+# Delete everything including data
+kubectl delete -f k8s/grafana-deployment.yaml
+kubectl delete -f k8s/grafana-service.yaml
+kubectl delete -f k8s/grafana-pvc.yaml
+```
+
+### Port-Forward Management
+
+The port-forward runs in the background. To manage it:
+
+```bash
+# Check if port-forward is running
+lsof -i :3000
+
+# Stop port-forward
+kill <PID>
+
+# Or stop all kubectl port-forwards
+pkill -f "kubectl port-forward"
+```
+
+### Security Considerations
+
+**Current Setup** (Development):
+- Simple admin/admin123 credentials
+- Read-only database access for safety
+- Internal cluster communication (no SSL)
+
+**Production Recommendations**:
+- Change default admin password immediately
+- Enable HTTPS/TLS
+- Configure proper authentication (LDAP, OAuth, etc.)
+- Implement role-based access control
+- Enable audit logging
+- Regular security updates
+
 ## 📚 Additional Resources
 
 - [Docker Documentation](https://docs.docker.com/)
@@ -569,6 +703,8 @@ kubectl exec -it $(kubectl get pod -l app=postgres -o jsonpath='{.items[0].metad
 - [Rancher Desktop](https://rancherdesktop.io/)
 - [Spring Boot on Kubernetes](https://spring.io/guides/gs/spring-boot-kubernetes/)
 - [Angular Deployment](https://angular.io/guide/deployment)
+- [Grafana Documentation](https://grafana.com/docs/)
+- [Grafana PostgreSQL Datasource](https://grafana.com/docs/grafana/latest/datasources/postgres/)
 
 ## 🆘 Support
 
