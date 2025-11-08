@@ -423,7 +423,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "WITH daily_soc AS (\n    -- Step 1: Daily min and max SOC\n    SELECT\n        DATE_TRUNC('day', updated) AS day,\n        MIN(soc) AS minsoc,\n        MAX(soc) AS maxsoc\n    FROM public.loots_inverter\n    WHERE $__timeFilter(updated)\n    GROUP BY DATE_TRUNC('day', updated)\n),\nmonthly_energy AS (\n    -- Step 2: Monthly energy calculations (unchanged logic)\n    SELECT\n        DATE_TRUNC('month', li.updated) AS month,\n        SUM(EXTRACT(EPOCH FROM (\n            li.updated - (\n                SELECT MAX(li2.updated)\n                FROM public.loots_inverter li2\n                WHERE li2.updated < li.updated\n            )\n        )) / 3600 * li.consume_power) AS consumed_units,\n\n        SUM(EXTRACT(EPOCH FROM (\n            li.updated - (\n                SELECT MAX(li2.updated)\n                FROM public.loots_inverter li2\n                WHERE li2.updated < li.updated\n            )\n        )) / 3600 * (-li.charge_power)) AS charging_units\n    FROM public.loots_inverter li\n    WHERE $__timeFilter(updated)\n    GROUP BY DATE_TRUNC('month', li.updated)\n)\n\n-- Final join: Combine monthly energy with average of daily SOC extremes\nSELECT\n    me.month AS time,\n    AVG(ds.minsoc) AS avg_minsoc,\n    AVG(ds.maxsoc) AS avg_maxsoc,\n    me.consumed_units,\n    me.charging_units\nFROM monthly_energy me\nJOIN daily_soc ds\n    ON ds.day >= me.month\n   AND ds.day < me.month + INTERVAL '1 month'\nGROUP BY me.month, me.consumed_units, me.charging_units\nORDER BY time;",
+          "rawSql": "WITH daily_soc AS (\n    -- Step 1: Daily min and max SOC\n    SELECT\n        DATE_TRUNC('day', updated) AS day,\n        MIN(soc) AS minsoc,\n        MAX(soc) AS maxsoc\n    FROM public.loots_inverter\n    WHERE $__timeFilter(updated)\n    GROUP BY DATE_TRUNC('day', updated)\n),\nmonthly_energy AS (\n    -- Step 2: Monthly energy calculations (unchanged logic)\n    SELECT\n        DATE_TRUNC('month', li.updated) AS month,\n        SUM(EXTRACT(EPOCH FROM (\n            li.updated - (\n                SELECT MAX(li2.updated)\n                FROM public.loots_inverter li2\n                WHERE li2.updated < li.updated\n            )\n        )) / 3600 * li.consume_power) AS consumed_units,\n\n        SUM(EXTRACT(EPOCH FROM (\n            li.updated - (\n                SELECT MAX(li2.updated)\n                FROM public.loots_inverter li2\n                WHERE li2.updated < li.updated\n            )\n        )) / 3600 * (-li.charge_power)) AS charging_units,\n\n        SUM(EXTRACT(EPOCH FROM (\n            li.updated - (\n                SELECT MAX(li2.updated)\n                FROM public.loots_inverter li2\n                WHERE li2.updated < li.updated\n            )\n        )) / 3600 * (-li.feed_in)) AS feed_in_units\n    FROM public.loots_inverter li\n    WHERE $__timeFilter(updated)\n    GROUP BY DATE_TRUNC('month', li.updated)\n)\n\n-- Final join: Combine monthly energy with average of daily SOC extremes\nSELECT\n    me.month AS time,\n    AVG(ds.minsoc) AS avg_minsoc,\n    AVG(ds.maxsoc) AS avg_maxsoc,\n    me.consumed_units,\n    me.charging_units,\n    me.feed_in_units\nFROM monthly_energy me\nJOIN daily_soc ds\n    ON ds.day >= me.month\n   AND ds.day < me.month + INTERVAL '1 month'\nGROUP BY me.month, me.consumed_units, me.charging_units, feed_in_units\nORDER BY time;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -445,7 +445,7 @@
           "table": "loots_inverter"
         }
       ],
-      "title": "Consumed and charing units",
+      "title": "Consumed and charging units",
       "type": "timeseries"
     }
   ],
@@ -457,7 +457,7 @@
     "list": []
   },
   "time": {
-    "from": "now-1y",
+    "from": "now-2y",
     "to": "now"
   },
   "timepicker": {
@@ -470,5 +470,5 @@
   "timezone": "",
   "title": "Monthly Stats",
   "uid": "208863de-7e71-4c6d-b5f7-ede14cb35b61",
-  "version": 2
+  "version": 4
 }

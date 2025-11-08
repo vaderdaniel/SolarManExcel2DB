@@ -423,7 +423,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT DATE(li.updated) AS time, MIN(soc) AS minsoc, MAX(soc) AS maxsoc,\n  SUM(EXTRACT(EPOCH FROM (li.updated-(SELECT MAX(li2.updated) FROM public.loots_inverter li2 WHERE li2.updated < li.updated)))/3600*li.consume_power) AS consumed_units,\n    SUM(EXTRACT(EPOCH FROM (li.updated-(SELECT MAX(li2.updated) FROM public.loots_inverter li2 WHERE li2.updated < li.updated)))/3600*-li.charge_power) AS charing_units\nFROM public.loots_inverter li\nWHERE $__timeFilter(updated)\nGROUP BY DATE(li.updated)\nORDER BY time",
+          "rawSql": "SELECT DATE(li.updated) AS time, MIN(soc) AS minsoc, MAX(soc) AS maxsoc,\n  SUM(EXTRACT(EPOCH FROM (li.updated-(SELECT MAX(li2.updated) FROM public.loots_inverter li2 WHERE li2.updated < li.updated)))/3600*li.consume_power) AS consumed_units,\n  SUM(EXTRACT(EPOCH FROM (li.updated-(SELECT MAX(li2.updated) FROM public.loots_inverter li2 WHERE li2.updated < li.updated)))/3600*-li.charge_power) AS charing_units,\n  SUM(EXTRACT(EPOCH FROM (li.updated-(SELECT MAX(li2.updated) FROM public.loots_inverter li2 WHERE li2.updated < li.updated)))/3600*-li.feed_in) AS feed_in_units\nFROM public.loots_inverter li\nWHERE $__timeFilter(updated)\nGROUP BY DATE(li.updated)\nORDER BY time",
           "refId": "A",
           "sql": {
             "columns": [
@@ -457,7 +457,7 @@
     "list": []
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {
@@ -470,5 +470,5 @@
   "timezone": "",
   "title": "Daily Stats",
   "uid": "feab8f79-92e8-412e-83a6-99d262725b68",
-  "version": 11
+  "version": 13
 }
