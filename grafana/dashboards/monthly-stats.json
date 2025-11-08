@@ -1,0 +1,474 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Stats per day",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 3,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "P7D58F15E2B4BC203"
+      },
+      "description": "Units produced and purchased",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg_minsoc"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Minimum battery level"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg_maxsoc"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Maximum battery level"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 25
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "avg_minsoc"
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "timezone": [
+          "utc"
+        ],
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.1",
+      "targets": [
+        {
+          "dataset": "LOOTS",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "P7D58F15E2B4BC203"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH daily_soc AS (\n    SELECT\n        DATE_TRUNC('day', updated) AS day,\n        MIN(soc) AS minsoc,\n        MAX(soc) AS maxsoc\n    FROM public.loots_inverter\n    WHERE $__timeFilter(updated)\n    GROUP BY 1\n),\nmonthly AS (\n    SELECT\n        DATE_TRUNC('month', li.updated) AS month,\n        SUM(EXTRACT(EPOCH FROM (li.updated -\n               (SELECT MAX(li2.updated)\n                FROM public.loots_inverter li2\n                WHERE li2.updated < li.updated))) / 3600 * li.production_power) AS production_units,\n        SUM(EXTRACT(EPOCH FROM (li.updated -\n               (SELECT MAX(li2.updated)\n                FROM public.loots_inverter li2\n                WHERE li2.updated < li.updated))) / 3600 * li.purchase_power)   AS purchased_units\n    FROM public.loots_inverter li\n    WHERE $__timeFilter(updated)\n    GROUP BY 1\n)\nSELECT\n    m.month               AS time,\n    AVG(ds.minsoc)        AS avg_minsoc,\n    AVG(ds.maxsoc)        AS avg_maxsoc,\n    m.production_units,\n    m.purchased_units\nFROM monthly m\nJOIN daily_soc ds\n  ON ds.day >= m.month\n AND ds.day <  m.month + INTERVAL '1 month'\nGROUP BY m.month, m.production_units, m.purchased_units\nORDER BY time;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "loots_inverter"
+        }
+      ],
+      "title": "Produced and purchased",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "P7D58F15E2B4BC203"
+      },
+      "description": "Units used",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg_minsoc"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Minimum battery level"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg_maxsoc"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Maximum battery level"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 25
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "avg_minsoc"
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "timezone": [
+          "utc"
+        ],
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.1",
+      "targets": [
+        {
+          "dataset": "LOOTS",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "P7D58F15E2B4BC203"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH daily_soc AS (\n    -- Step 1: Daily min and max SOC\n    SELECT\n        DATE_TRUNC('day', updated) AS day,\n        MIN(soc) AS minsoc,\n        MAX(soc) AS maxsoc\n    FROM public.loots_inverter\n    WHERE $__timeFilter(updated)\n    GROUP BY DATE_TRUNC('day', updated)\n),\nmonthly_energy AS (\n    -- Step 2: Monthly energy calculations (unchanged logic)\n    SELECT\n        DATE_TRUNC('month', li.updated) AS month,\n        SUM(EXTRACT(EPOCH FROM (\n            li.updated - (\n                SELECT MAX(li2.updated)\n                FROM public.loots_inverter li2\n                WHERE li2.updated < li.updated\n            )\n        )) / 3600 * li.consume_power) AS consumed_units,\n\n        SUM(EXTRACT(EPOCH FROM (\n            li.updated - (\n                SELECT MAX(li2.updated)\n                FROM public.loots_inverter li2\n                WHERE li2.updated < li.updated\n            )\n        )) / 3600 * (-li.charge_power)) AS charging_units\n    FROM public.loots_inverter li\n    WHERE $__timeFilter(updated)\n    GROUP BY DATE_TRUNC('month', li.updated)\n)\n\n-- Final join: Combine monthly energy with average of daily SOC extremes\nSELECT\n    me.month AS time,\n    AVG(ds.minsoc) AS avg_minsoc,\n    AVG(ds.maxsoc) AS avg_maxsoc,\n    me.consumed_units,\n    me.charging_units\nFROM monthly_energy me\nJOIN daily_soc ds\n    ON ds.day >= me.month\n   AND ds.day < me.month + INTERVAL '1 month'\nGROUP BY me.month, me.consumed_units, me.charging_units\nORDER BY time;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "loots_inverter"
+        }
+      ],
+      "title": "Consumed and charing units",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "5m",
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1y",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5m",
+      "30m",
+      "1h"
+    ]
+  },
+  "timezone": "",
+  "title": "Monthly Stats",
+  "uid": "208863de-7e71-4c6d-b5f7-ede14cb35b61",
+  "version": 2
+}
