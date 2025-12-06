@@ -28,9 +28,26 @@ Displays daily aggregated solar power statistics with two main visualization pan
 **Panel 2: Consumed and Charging Units**
 - **Consumed Units**: Total energy consumption (Wh)
 - **Charging Units**: Total energy used to charge the battery (Wh)
+- **Feed-in Units**: Total energy fed back to the grid (Wh)
 - **Battery Level**: Shows minimum and maximum battery State of Charge (%) as a yellow line overlay
 
-Both panels use stacked bar charts with battery levels displayed as line graphs on a secondary axis.
+**Panel 3: Solar Production Heatmap (Hour vs Day)**
+- **Visualization**: Heatmap showing hourly production patterns across days
+- **X-axis**: Days
+- **Y-axis**: Hours of the day (0-23)
+- **Cell Color**: Energy produced (Wh) during that specific hour
+- **Color Scheme**: Green gradient
+- **Use Case**: Identify peak production times and daily patterns
+
+**Panel 4: Energy Consumption Heatmap (Hour vs Day)**
+- **Visualization**: Heatmap showing hourly consumption patterns across days
+- **X-axis**: Days
+- **Y-axis**: Hours of the day (0-23)
+- **Cell Color**: Energy consumed (Wh) during that specific hour
+- **Color Scheme**: Red gradient
+- **Use Case**: Identify peak usage times and daily consumption patterns
+
+Panels 1-2 use stacked bar charts with battery levels displayed as line graphs on a secondary axis. Panels 3-4 use heatmap visualizations with 24 hourly buckets.
 
 ---
 
@@ -51,9 +68,26 @@ Displays monthly aggregated solar power statistics, providing a long-term view o
 **Panel 2: Consumed and Charging Units (Monthly)**
 - **Consumed Units**: Total monthly energy consumption (Wh)
 - **Charging Units**: Total monthly energy used to charge the battery (Wh)
+- **Feed-in Units**: Total monthly energy fed back to the grid (Wh)
 - **Average Battery Level**: Shows average minimum and maximum daily battery State of Charge (%) as a yellow line overlay
 
-Both panels aggregate data by month and display averages of daily battery extremes.
+**Panel 3: Solar Production Heatmap (Hour vs Month)**
+- **Visualization**: Heatmap showing average daily hourly production patterns per month
+- **X-axis**: Months
+- **Y-axis**: Hours of the day (0-23)
+- **Cell Color**: Average energy produced per day (Wh) during that hour for each month
+- **Color Scheme**: Green gradient
+- **Use Case**: Identify seasonal production patterns and monthly variations
+
+**Panel 4: Energy Consumption Heatmap (Hour vs Month)**
+- **Visualization**: Heatmap showing average daily hourly consumption patterns per month
+- **X-axis**: Months
+- **Y-axis**: Hours of the day (0-23)
+- **Cell Color**: Average energy consumed per day (Wh) during that hour for each month
+- **Color Scheme**: Red gradient
+- **Use Case**: Identify seasonal consumption patterns and monthly usage variations
+
+Panels 1-2 aggregate data by month and display averages of daily battery extremes. Panels 3-4 show hourly patterns averaged per day for each month.
 
 ---
 
@@ -79,7 +113,23 @@ Displays weekly aggregated solar power statistics based on ISO week numbers, pro
 - **Feed-in Units**: Average daily energy fed back to the grid per ISO week (Wh)
 - Displays energy usage patterns and grid interaction across different weeks
 
-Both panels use stacked bar charts displaying average daily energy per ISO week. Each bar represents one week's average daily amounts.
+**Panel 3: Solar Production Heatmap (Hour vs Week)**
+- **Visualization**: Heatmap showing average daily hourly production patterns per ISO week
+- **X-axis**: ISO weeks
+- **Y-axis**: Hours of the day (0-23)
+- **Cell Color**: Average energy produced per day (Wh) during that hour for each week
+- **Color Scheme**: Green gradient
+- **Use Case**: Compare weekly production patterns and identify typical hourly profiles
+
+**Panel 4: Energy Consumption Heatmap (Hour vs Week)**
+- **Visualization**: Heatmap showing average daily hourly consumption patterns per ISO week
+- **X-axis**: ISO weeks
+- **Y-axis**: Hours of the day (0-23)
+- **Cell Color**: Average energy consumed per day (Wh) during that hour for each week
+- **Color Scheme**: Red gradient
+- **Use Case**: Compare weekly consumption patterns and identify typical hourly usage profiles
+
+Panels 1-2 use stacked bar charts displaying average daily energy per ISO week. Panels 3-4 show hourly patterns averaged per day for each week.
 
 ---
 
@@ -149,7 +199,8 @@ grafana/
 
 ### Backup Information
 - **Created**: 2025-11-08
-- **Grafana Version**: 12.2.1
+- **Last Updated**: 2025-12-06
+- **Grafana Version**: 12.3.0
 - **Format**: JSON (Grafana dashboard export format)
 
 ---
@@ -261,5 +312,5 @@ This accounts for varying intervals between measurements to provide accurate ene
 
 ---
 
-**Last Updated**: 2025-11-08  
+**Last Updated**: 2025-12-06  
 **Maintained By**: Daniel Oots
