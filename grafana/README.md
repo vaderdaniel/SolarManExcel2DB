@@ -57,6 +57,32 @@ Both panels aggregate data by month and display averages of daily battery extrem
 
 ---
 
+### 3. Weekly Stats Dashboard
+**File**: `dashboards/weekly-stats.json`  
+**UID**: `weekly-stats-iso-week`  
+**Title**: Weekly Stats  
+**Time Range**: Last 2 years  
+**Refresh Rate**: 5 minutes
+
+#### Description
+Displays weekly aggregated solar power statistics based on ISO week numbers, providing insights into weekly patterns across different seasons:
+
+**Panel 1: Produced and Purchased (Average per day by ISO week)**
+- **Production Units**: Average daily energy produced by solar panels per ISO week (Wh)
+- **Purchased Units**: Average daily energy purchased from the grid per ISO week (Wh)
+- Shows patterns across different weeks of the year
+- Useful for identifying seasonal trends and comparing similar weeks across years
+
+**Panel 2: Consumed, Charging, and Feed-in (Average per day by ISO week)**
+- **Consumed Units**: Average daily energy consumption per ISO week (Wh)
+- **Charging Units**: Average daily energy used to charge the battery per ISO week (Wh)
+- **Feed-in Units**: Average daily energy fed back to the grid per ISO week (Wh)
+- Displays energy usage patterns and grid interaction across different weeks
+
+Both panels use stacked bar charts displaying average daily energy per ISO week. Each bar represents one week's average daily amounts.
+
+---
+
 ## 🗄️ Data Source
 
 Both dashboards query the PostgreSQL database:
@@ -89,7 +115,8 @@ grafana/
 ├── README.md (this file)
 └── dashboards/
     ├── daily-stats.json
-    └── monthly-stats.json
+    ├── monthly-stats.json
+    └── weekly-stats.json
 ```
 
 ### Backup Information
@@ -150,6 +177,11 @@ curl -s -u admin \
 curl -s -u admin \
   'http://localhost:3000/api/dashboards/uid/208863de-7e71-4c6d-b5f7-ede14cb35b61' \
   | jq '.dashboard' > grafana/dashboards/monthly-stats.json
+
+# Export By Week dashboard
+curl -s -u admin \
+  'http://localhost:3000/api/dashboards/uid/weekly-stats-iso-week' \
+  | jq '.dashboard' > grafana/dashboards/weekly-stats.json
 ```
 
 ---
