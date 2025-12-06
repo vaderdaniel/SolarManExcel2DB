@@ -83,6 +83,33 @@ Both panels use stacked bar charts displaying average daily energy per ISO week.
 
 ---
 
+### 4. By ISO week number Dashboard
+**File**: `dashboards/by-week.json`  
+**UID**: `by-week-dashboard`  
+**Title**: By ISO week number  
+**Time Range**: Ignored (uses all available data)  
+**Refresh Rate**: 5 minutes
+
+#### Description
+Displays seasonal patterns by aggregating data across all years for each ISO week number (1-53). Unlike other dashboards, this ignores the time range picker and always uses all available data in the database.
+
+**Key Difference from Weekly Stats Dashboard:**
+- **X-axis**: Shows ISO week numbers (W1-W53) instead of dates, with labels rotated 45° for better readability
+- **Data Aggregation**: Combines data from the same ISO week across multiple years
+- **Example**: Week 25 shows the average of Week 25 from 2023, 2024, and any other years in the database
+- **Use Case**: Identify seasonal trends - "Week 25 typically produces X Wh regardless of year"
+
+**Panel 1: Produced and Purchased (Average per day by ISO week number)**
+- **Production Units**: Average daily energy produced per ISO week number across all years (Wh)
+- **Purchased Units**: Average daily energy purchased per ISO week number across all years (Wh)
+
+**Panel 2: Consumed, Charging, and Feed-in (Average per day by ISO week number)**
+- **Consumed Units**: Average daily energy consumption per ISO week number across all years (Wh)
+- **Charging Units**: Average daily battery charging per ISO week number across all years (Wh)
+- **Feed-in Units**: Average daily energy fed to grid per ISO week number across all years (Wh)
+
+---
+
 ## 🗄️ Data Source
 
 Both dashboards query the PostgreSQL database:
@@ -114,6 +141,7 @@ Dashboard configuration files are stored in JSON format in the `dashboards/` dir
 grafana/
 ├── README.md (this file)
 └── dashboards/
+    ├── by-week.json
     ├── daily-stats.json
     ├── monthly-stats.json
     └── weekly-stats.json
@@ -178,10 +206,15 @@ curl -s -u admin \
   'http://localhost:3000/api/dashboards/uid/208863de-7e71-4c6d-b5f7-ede14cb35b61' \
   | jq '.dashboard' > grafana/dashboards/monthly-stats.json
 
-# Export By Week dashboard
+# Export Weekly Stats dashboard
 curl -s -u admin \
   'http://localhost:3000/api/dashboards/uid/weekly-stats-iso-week' \
   | jq '.dashboard' > grafana/dashboards/weekly-stats.json
+
+# Export By ISO week number dashboard
+curl -s -u admin \
+  'http://localhost:3000/api/dashboards/uid/by-week-dashboard' \
+  | jq '.dashboard' > grafana/dashboards/by-week.json
 ```
 
 ---

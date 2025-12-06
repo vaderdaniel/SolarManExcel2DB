@@ -1,0 +1,283 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Stats per ISO week for all time",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 7,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "cf5afpmxgogzkc"
+      },
+      "description": "Average daily units produced and purchased per ISO week",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "normal",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 45,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "LOOTS",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "cf5afpmxgogzkc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH time_deltas AS (\n    SELECT\n        EXTRACT(WEEK FROM updated) AS iso_week,\n        DATE(updated) AS day,\n        updated,\n        LAG(updated) OVER (ORDER BY updated) AS prev_updated,\n        production_power,\n        purchase_power\n    FROM public.loots_inverter\n),\ndaily AS (\n    SELECT\n        iso_week,\n        day,\n        SUM(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600 * production_power) AS daily_production,\n        SUM(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600 * purchase_power) AS daily_purchased\n    FROM time_deltas\n    WHERE prev_updated IS NOT NULL\n    GROUP BY iso_week, day\n)\nSELECT\n    'W' || CAST(iso_week AS TEXT) AS week_number,\n    AVG(daily_production) AS production_units,\n    AVG(daily_purchased) AS purchased_units\nFROM daily\nGROUP BY iso_week\nORDER BY iso_week",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "loots_inverter"
+        }
+      ],
+      "title": "Produced and purchased (average per day by ISO week)",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "cf5afpmxgogzkc"
+      },
+      "description": "Average daily units consumed, charging, and fed in per ISO week",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 2,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "normal",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 45,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "LOOTS",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "cf5afpmxgogzkc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH time_deltas AS (\n    SELECT\n        EXTRACT(WEEK FROM updated) AS iso_week,\n        DATE(updated) AS day,\n        updated,\n        LAG(updated) OVER (ORDER BY updated) AS prev_updated,\n        consume_power,\n        charge_power,\n        feed_in\n    FROM public.loots_inverter\n),\ndaily AS (\n    SELECT\n        iso_week,\n        day,\n        SUM(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600 * consume_power) AS daily_consumed,\n        SUM(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600 * (-charge_power)) AS daily_charging,\n        SUM(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600 * (-feed_in)) AS daily_feed_in\n    FROM time_deltas\n    WHERE prev_updated IS NOT NULL\n    GROUP BY iso_week, day\n)\nSELECT\n    'W' || CAST(iso_week AS TEXT) AS week_number,\n    AVG(daily_consumed) AS consumed_units,\n    AVG(daily_charging) AS charging_units,\n    AVG(daily_feed_in) AS feed_in_units\nFROM daily\nGROUP BY iso_week\nORDER BY iso_week",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "loots_inverter"
+        }
+      ],
+      "title": "Consumed, charging, and feed-in (average per day by ISO week)",
+      "type": "barchart"
+    }
+  ],
+  "preload": false,
+  "refresh": "1h",
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5m",
+      "30m",
+      "1h"
+    ]
+  },
+  "timezone": "",
+  "title": "By ISO week number",
+  "uid": "by-week-dashboard",
+  "version": 11,
+  "weekStart": ""
+}
