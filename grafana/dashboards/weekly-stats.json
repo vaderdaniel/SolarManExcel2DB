@@ -269,6 +269,206 @@
       ],
       "title": "Consumed, charging, and feed-in (average per day by ISO week)",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "cf5afpmxgogzkc"
+      },
+      "description": "Average solar production per day by hour for each ISO week",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 3,
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "cellValues": {},
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": true,
+          "scale": "exponential",
+          "scheme": "Greens",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1E-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "LOOTS",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "cf5afpmxgogzkc"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH samples AS (\n  SELECT\n    updated,\n    production_power,\n    EXTRACT(ISOYEAR FROM updated) AS iso_year,\n    EXTRACT(WEEK FROM updated) AS iso_week,\n    LAG(updated) OVER (ORDER BY updated) AS prev_updated\n  FROM public.loots_inverter\n  WHERE $__timeFilter(updated)\n), per_point AS (\n  SELECT\n    DATE_TRUNC('week', updated) AS week_start,\n    iso_year,\n    iso_week,\n    EXTRACT(HOUR FROM updated)::int AS hour,\n    GREATEST(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600, 0) * production_power AS wh\n  FROM samples\n  WHERE prev_updated IS NOT NULL\n), weekly_totals AS (\n  SELECT\n    week_start,\n    hour,\n    SUM(wh) AS total_wh,\n    COUNT(DISTINCT DATE_TRUNC('day', week_start + (hour || ' hours')::interval)) AS days_in_week\n  FROM per_point\n  GROUP BY week_start, hour\n)\nSELECT\n  week_start AS time,\n  CAST(hour AS text) AS metric,\n  total_wh / 7.0 AS value\nFROM weekly_totals\nORDER BY time, hour",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "loots_inverter"
+        }
+      ],
+      "title": "Solar Production Heatmap (Hour vs Week)",
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "cf5afpmxgogzkc"
+      },
+      "description": "Average energy consumption per day by hour for each ISO week",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 4,
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "cellValues": {},
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": true,
+          "scale": "exponential",
+          "scheme": "Reds",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1E-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "LOOTS",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "cf5afpmxgogzkc"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH samples AS (\n  SELECT\n    updated,\n    consume_power,\n    EXTRACT(ISOYEAR FROM updated) AS iso_year,\n    EXTRACT(WEEK FROM updated) AS iso_week,\n    LAG(updated) OVER (ORDER BY updated) AS prev_updated\n  FROM public.loots_inverter\n  WHERE $__timeFilter(updated)\n), per_point AS (\n  SELECT\n    DATE_TRUNC('week', updated) AS week_start,\n    iso_year,\n    iso_week,\n    EXTRACT(HOUR FROM updated)::int AS hour,\n    GREATEST(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600, 0) * consume_power AS wh\n  FROM samples\n  WHERE prev_updated IS NOT NULL\n), weekly_totals AS (\n  SELECT\n    week_start,\n    hour,\n    SUM(wh) AS total_wh,\n    COUNT(DISTINCT DATE_TRUNC('day', week_start + (hour || ' hours')::interval)) AS days_in_week\n  FROM per_point\n  GROUP BY week_start, hour\n)\nSELECT\n  week_start AS time,\n  CAST(hour AS text) AS metric,\n  total_wh / 7.0 AS value\nFROM weekly_totals\nORDER BY time, hour",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "loots_inverter"
+        }
+      ],
+      "title": "Energy Consumption Heatmap (Hour vs Week)",
+      "type": "heatmap"
     }
   ],
   "preload": false,
@@ -292,6 +492,6 @@
   "timezone": "",
   "title": "Weekly Stats",
   "uid": "weekly-stats-iso-week",
-  "version": 5,
+  "version": 6,
   "weekStart": ""
 }

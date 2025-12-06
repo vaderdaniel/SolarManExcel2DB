@@ -25,7 +25,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "P7D58F15E2B4BC203"
+        "uid": "cf5afpmxgogzkc"
       },
       "description": "Units produced and purchased",
       "fieldConfig": {
@@ -199,13 +199,13 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.2.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "P7D58F15E2B4BC203"
+            "uid": "cf5afpmxgogzkc"
           },
           "editorMode": "code",
           "format": "table",
@@ -238,7 +238,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "P7D58F15E2B4BC203"
+        "uid": "cf5afpmxgogzkc"
       },
       "description": "Units used",
       "fieldConfig": {
@@ -412,13 +412,13 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.2.1",
+      "pluginVersion": "12.3.0",
       "targets": [
         {
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "P7D58F15E2B4BC203"
+            "uid": "cf5afpmxgogzkc"
           },
           "editorMode": "code",
           "format": "table",
@@ -447,6 +447,206 @@
       ],
       "title": "Consumed and charing units",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "cf5afpmxgogzkc"
+      },
+      "description": "Solar production patterns by hour and day",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 3,
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "cellValues": {},
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": true,
+          "scale": "exponential",
+          "scheme": "Greens",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1E-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "LOOTS",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "cf5afpmxgogzkc"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH samples AS (\n  SELECT\n    updated,\n    production_power,\n    LAG(updated) OVER (ORDER BY updated) AS prev_updated\n  FROM public.loots_inverter\n  WHERE $__timeFilter(updated)\n), per_point AS (\n  SELECT\n    DATE_TRUNC('day', updated) AS time,\n    EXTRACT(HOUR FROM updated)::int AS hour,\n    GREATEST(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600, 0) * production_power AS wh\n  FROM samples\n  WHERE prev_updated IS NOT NULL\n)\nSELECT\n  time,\n  CAST(hour AS text) AS metric,\n  SUM(wh) AS value\nFROM per_point\nGROUP BY time, hour\nORDER BY time, hour",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "loots_inverter"
+        }
+      ],
+      "title": "Solar Production Heatmap (Hour vs Day)",
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "cf5afpmxgogzkc"
+      },
+      "description": "Energy consumption patterns by hour and day",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 4,
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "cellValues": {},
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": true,
+          "scale": "exponential",
+          "scheme": "Reds",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1E-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "dataset": "LOOTS",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "cf5afpmxgogzkc"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH samples AS (\n  SELECT\n    updated,\n    consume_power,\n    LAG(updated) OVER (ORDER BY updated) AS prev_updated\n  FROM public.loots_inverter\n  WHERE $__timeFilter(updated)\n), per_point AS (\n  SELECT\n    DATE_TRUNC('day', updated) AS time,\n    EXTRACT(HOUR FROM updated)::int AS hour,\n    GREATEST(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600, 0) * consume_power AS wh\n  FROM samples\n  WHERE prev_updated IS NOT NULL\n)\nSELECT\n  time,\n  CAST(hour AS text) AS metric,\n  SUM(wh) AS value\nFROM per_point\nGROUP BY time, hour\nORDER BY time, hour",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "loots_inverter"
+        }
+      ],
+      "title": "Energy Consumption Heatmap (Hour vs Day)",
+      "type": "heatmap"
     }
   ],
   "preload": false,
@@ -470,5 +670,6 @@
   "timezone": "",
   "title": "Daily Stats",
   "uid": "feab8f79-92e8-412e-83a6-99d262725b68",
-  "version": 13
+  "version": 21,
+  "weekStart": ""
 }
