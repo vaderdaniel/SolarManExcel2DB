@@ -18,19 +18,42 @@ The application consists of four containerized services:
    - Data stored in Rancher Desktop VM at `/tmp/postgres-k8s-test/pgdata/`
    - Internal port: 5432
    - See [PostgreSQL Data Location](#🗄️-postgresql-data-location-rancher-desktop) for details
+   - **Starts first** - no dependencies
    
 2. **Spring Boot Backend**: REST API service (ClusterIP)
    - Internal port: 8080
    - Not exposed externally
+   - **Waits for PostgreSQL** to be ready before starting (init container)
    
 3. **Angular Frontend**: Web UI with nginx (NodePort)
    - External access: `http://localhost:30080`
    - Proxies API requests to backend
+   - **Waits for Backend** to be ready before starting (init container)
 
 4. **Grafana**: Analytics and monitoring platform (ClusterIP)
    - Access via port-forward: `http://localhost:3000`
    - Pre-configured PostgreSQL datasource
    - Persistent storage for dashboards
+   - **Waits for PostgreSQL** to be ready before starting (init container)
+
+### Startup Sequence
+
+The application uses Kubernetes init containers to ensure proper startup order:
+
+```
+PostgreSQL (starts first)
+    ↓
+    ├─→ Backend (waits for postgres:5432)
+    │       ↓
+    │       └─→ Frontend (waits for backend:8080)
+    │
+    └─→ Grafana (waits for postgres:5432)
+```
+
+This ensures:
+- Backend and Grafana never start before the database is ready
+- Frontend never starts before the backend API is available
+- Clean startup with no connection errors or race conditions
 
 ## 🚀 Quick Start
 
@@ -102,8 +125,11 @@ This script performs the following steps:
 1. Applies ConfigMap with database credentials
 2. Creates PersistentVolume and PersistentVolumeClaim for PostgreSQL
 3. Deploys PostgreSQL and waits for readiness
-4. Deploys Backend and waits for readiness
-5. Deploys Frontend and waits for readiness
+4. Deploys Backend (init container waits for PostgreSQL) and waits for readiness
+5. Deploys Frontend (init container waits for Backend) and waits for readiness
+6. Deploys Grafana (init container waits for PostgreSQL) and waits for readiness
+
+**Note**: Init containers ensure proper startup order automatically. Backend/Grafana pods won't start their main containers until PostgreSQL is responding on port 5432, and Frontend won't start until Backend is responding on port 8080.
 
 ### Access Application
 
@@ -202,10 +228,10 @@ SolarManExcel2DB/
 │   ├── configmap.yaml             # Database credentials
 │   ├── postgres-pv.yaml           # PersistentVolume with hostPath
 │   ├── postgres-deployment.yaml   # PostgreSQL Deployment & Service
-│   ├── backend-deployment.yaml    # Backend Deployment & Service
-│   ├── frontend-deployment.yaml   # Frontend Deployment & Service
+│   ├── backend-deployment.yaml    # Backend Deployment & Service (with init container)
+│   ├── frontend-deployment.yaml   # Frontend Deployment & Service (with init container)
 │   ├── grafana-pvc.yaml           # Grafana PersistentVolumeClaim
-│   ├── grafana-deployment.yaml    # Grafana Deployment with datasource
+│   ├── grafana-deployment.yaml    # Grafana Deployment with datasource (with init container)
 │   └── grafana-service.yaml       # Grafana Service
 ├── scripts/
 │   ├── build-images.sh            # Build all Docker images
@@ -452,6 +478,30 @@ kubectl get pods -l app=postgres
 
 # Test database connection
 kubectl exec -it $(kubectl get pod -l app=postgres -o jsonpath='{.items[0].metadata.name}') -- psql -U danieloots -d LOOTS -c '\dt'
+```
+
+### Init Containers Not Completing
+
+If pods are stuck in `Init:0/1` status:
+
+```bash
+# Check init container logs
+kubectl logs <pod-name> -c wait-for-postgres  # For backend/grafana
+kubectl logs <pod-name> -c wait-for-backend   # For frontend
+
+# Check if the dependency service exists
+kubectl get svc postgres-service
+kubectl get svc backend-service
+
+# Verify service endpoints
+kubectl get endpoints postgres-service
+kubectl get endpoints backend-service
+
+# Manually test connectivity from a debug pod
+kubectl run -it --rm debug --image=busybox:1.35 --restart=Never -- sh
+# Inside the pod:
+nc -zv postgres-service 5432
+nc -zv backend-service 8080
 ```
 
 ### Port Already in Use (Docker Compose)

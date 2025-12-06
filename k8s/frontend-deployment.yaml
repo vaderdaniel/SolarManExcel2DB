@@ -15,6 +15,10 @@ spec:
       labels:
         app: frontend
     spec:
+      initContainers:
+      - name: wait-for-backend
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z backend-service 8080; do echo waiting for backend; sleep 2; done']
       containers:
       - name: frontend
         image: solarman-frontend:latest

@@ -11,20 +11,29 @@ A modern web application for importing solar power generation data from SolarMan
 ## 🏗️ Architecture Overview
 
 ```
-┌─────────────────┐    REST API     ┌──────────────────┐    JDBC     ┌─────────────────┐
-│   Angular 20    │◄────────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
+┌─────────────────┌    REST API     ┌──────────────────┌    JDBC     ┌─────────────────┌
+│   Angular 20    │◄──────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
 │     Frontend    │                  │     Backend      │             │    Database     │
 │  (Port: 4200)   │                  │   (Port: 8080)   │             │   (Port: 5432)  │
 └─────────────────┘                  └──────────────────┘             └────────┬────────┘
                                                                                 │
                                                                                 │ Read-Only
                                                                                 │
-                                                                       ┌────────▼────────┐
+                                                                       ┌────────▼────────┌
                                                                        │     Grafana     │
                                                                        │   Monitoring    │
                                                                        │  (Port: 3000)   │
                                                                        └─────────────────┘
 ```
+
+### Kubernetes Startup Sequence
+
+When deployed to Kubernetes, init containers ensure proper startup order:
+- **PostgreSQL** starts first (no dependencies)
+- **Backend & Grafana** wait for PostgreSQL to be ready (port 5432)
+- **Frontend** waits for Backend to be ready (port 8080)
+
+This prevents connection errors and ensures clean application startup.
 
 ## ✨ Key Features
 
