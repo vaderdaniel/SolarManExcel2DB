@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { DatabaseStatus, LatestRecords, DatabaseCredentials } from '../models/database-status.model';
+import { ProductionStat } from '../models/production-stat.model';
 
 @Injectable({
   providedIn: 'root'
@@ -66,6 +67,16 @@ export class DatabaseService {
 
   getCurrentStatus(): DatabaseStatus {
     return this.statusSubject.value;
+  }
+
+  getProductionStats(days: number): Observable<ProductionStat[]> {
+    return this.http.get<ProductionStat[]>(`${this.baseUrl}/database/production-stats?days=${days}`)
+      .pipe(
+        catchError(error => {
+          console.error('Production stats fetch error:', error);
+          return throwError(() => new Error(this.getErrorMessage(error)));
+        })
+      );
   }
 
   private getErrorMessage(error: any): string {

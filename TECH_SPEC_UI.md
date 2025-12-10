@@ -3,12 +3,13 @@
 ## 📋 Project Overview
 
 **Project Name**: SolarManExcel2DB Web UI  
-**Version**: 1.0.0 (MVP1)  
+**Version**: 1.1.0  
 **Architecture**: Separate frontend/backend projects with REST API communication  
-**Frontend**: Angular 20 with Angular Material  
+**Frontend**: Angular 20 with Angular Material & Routing  
 **Backend**: Spring Boot 3.x with embedded Tomcat  
 **Database**: PostgreSQL  
 **Build Tools**: Maven (backend) + Angular CLI (frontend)  
+**Deployment**: Kubernetes (Rancher Desktop)
 
 ---
 
@@ -41,6 +42,7 @@ SolarManExcel2DB/
 │   │       ├── model/
 │   │       │   ├── ImportResult.java
 │   │       │   ├── DatabaseStatus.java
+│   │       │   ├── ProductionStat.java      # NEW: v1.1
 │   │       │   ├── SolarManRecord.java
 │   │       │   └── TshwaneRecord.java
 │   │       └── config/
@@ -48,25 +50,41 @@ SolarManExcel2DB/
 │   ├── src/main/resources/
 │   │   ├── application.properties
 │   │   └── static/                   # Angular build output
+│   ├── Dockerfile
 │   └── pom.xml
 ├── frontend/                         # Angular Frontend
-│   ├── src/app/
-│   │   ├── components/
-│   │   │   ├── file-upload/
-│   │   │   ├── data-preview/
-│   │   │   ├── status-panel/
-│   │   │   └── import-result/
-│   │   ├── services/
-│   │   │   ├── file-upload.service.ts
-│   │   │   ├── database.service.ts
-│   │   │   └── import.service.ts
-│   │   ├── models/
-│   │   └── app.component.ts
-│   ├── angular.json
-│   ├── package.json
-│   └── dist/                         # Build output (copied to backend/static)
-├── pom.xml                          # Root Maven configuration
-└── README_UI.md                     # UI-specific documentation
+│   ├── solarman-ui/
+│   │   ├── src/app/
+│   │   │   ├── pages/               # NEW: v1.1 - Route pages
+│   │   │   │   ├── home/            # Home page with chart
+│   │   │   │   └── upload/          # Upload page
+│   │   │   ├── components/
+│   │   │   │   ├── file-upload/
+│   │   │   │   ├── data-preview/
+│   │   │   │   ├── status-panel/
+│   │   │   │   ├── production-chart/ # NEW: v1.1
+│   │   │   │   └── import-result/
+│   │   │   ├── services/
+│   │   │   │   ├── file-upload.service.ts
+│   │   │   │   ├── database.service.ts
+│   │   │   │   ├── import.service.ts
+│   │   │   │   └── chart-refresh.service.ts # NEW: v1.1
+│   │   │   ├── models/
+│   │   │   │   └── production-stat.model.ts # NEW: v1.1
+│   │   │   ├── app.config.ts        # Router configuration
+│   │   │   └── app.component.ts
+│   │   ├── angular.json
+│   │   ├── package.json
+│   │   └── dist/                    # Build output
+│   ├── Dockerfile
+│   └── nginx.conf
+├── k8s/                             # Kubernetes deployments
+│   ├── backend-deployment.yaml
+│   ├── frontend-deployment.yaml
+│   ├── postgres-deployment.yaml
+│   └── ...
+├── docker-compose.yml
+└── README.md
 ```
 
 ---
@@ -82,29 +100,115 @@ SolarManExcel2DB/
 
 ### UI Components
 
-#### 1. Main Application Layout
+#### 1. Main Application Layout (v1.1 - With Routing)
 ```typescript
 // app.component.ts
-export class AppComponent {
+export class App {
   title = 'SolarMan Excel Import';
 }
 ```
 
 **Layout Structure**:
 ```html
-<mat-toolbar>
-  <span>SolarMan Excel Import</span>
+<mat-toolbar color="primary">
+  <span>{{ title }}</span>
+  <span class="spacer"></span>
+  <button mat-button routerLink="/" routerLinkActive="active-link">
+    <mat-icon>home</mat-icon>
+    Home
+  </button>
+  <button mat-button routerLink="/upload" routerLinkActive="active-link">
+    <mat-icon>cloud_upload</mat-icon>
+    Upload
+  </button>
 </mat-toolbar>
 
 <div class="main-container">
+  <router-outlet></router-outlet>
+</div>
+
+<footer class="footer">
+  <p>SolarManExcel2DB © 2024 | Version 1.1</p>
+</footer>
+```
+
+**Routing Configuration** (v1.1):
+```typescript
+// app.config.ts
+const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'upload', component: UploadComponent },
+  { path: '**', redirectTo: '' }
+];
+```
+
+#### 2. Home Page Component (v1.1 - NEW)
+```typescript
+// pages/home/home.component.ts
+export class HomeComponent {
+  // Displays production chart and status panel
+}
+```
+
+**Home Page Layout**:
+```html
+<div class="home-container">
+  <app-production-chart></app-production-chart>
   <app-status-panel></app-status-panel>
-  <app-file-upload></app-file-upload>
-  <app-data-preview *ngIf="showPreview"></app-data-preview>
-  <app-import-result *ngIf="showResult"></app-import-result>
 </div>
 ```
 
-#### 2. Status Panel Component
+#### 3. Upload Page Component (v1.1 - NEW)
+```typescript
+// pages/upload/upload.component.ts
+export class UploadComponent {
+  currentView: 'upload' | 'preview' | 'result' = 'upload';
+  
+  onFileUploaded(event) {
+    // Show preview
+  }
+  
+  onImportConfirmed(event) {
+    // Trigger import and refresh chart
+    this.chartRefreshService.triggerRefresh();
+  }
+}
+```
+
+#### 4. Production Chart Component (v1.1 - NEW)
+```typescript
+// components/production-chart/production-chart.component.ts
+export class ProductionChartComponent implements OnInit, OnDestroy {
+  chartData: ChartBar[] = [];
+  yAxisMax: number = 0;
+  yAxisLabels: number[] = [];
+  
+  ngOnInit() {
+    this.loadChartData();
+    // Subscribe to chart refresh events
+    this.chartRefreshService.refresh$.subscribe(() => {
+      this.loadChartData();
+    });
+  }
+  
+  loadChartData() {
+    this.databaseService.getProductionStats(7).subscribe(stats => {
+      this.processChartData(stats);
+    });
+  }
+}
+```
+
+**Production Chart Features**:
+- CSS-based bar chart (no external libraries)
+- Displays last 7 days of production data
+- Dynamic Y-axis scaling (0 to max with nice numbers)
+- Time-weighted calculation matching Grafana dashboards
+- Hover tooltips showing exact kWh values
+- Responsive design with mobile support
+- Auto-refreshes after data imports
+
+#### 5. Status Panel Component
 ```typescript
 // components/status-panel/status-panel.component.ts
 export class StatusPanelComponent implements OnInit, OnDestroy {
@@ -349,7 +453,37 @@ public class DatabaseController {
 **Endpoints**:
 - `GET /api/database/status` - Check database connectivity
 - `GET /api/database/latest-records` - Get latest record timestamps
+- `GET /api/database/production-stats?days=7` - Get production statistics (v1.1)
 - `POST /api/database/configure` - Configure database credentials (if env vars not set)
+
+**Production Stats Endpoint** (v1.1):
+```java
+@GetMapping("/production-stats")
+public ResponseEntity<List<ProductionStat>> getProductionStats(
+        @RequestParam(defaultValue = "7") int days) {
+    List<ProductionStat> stats = databaseService.getProductionStats(days);
+    return ResponseEntity.ok(stats);
+}
+```
+
+**SQL Query** (Time-weighted calculation from Grafana):
+```sql
+WITH samples AS (
+  SELECT updated, production_power,
+    LAG(updated) OVER (ORDER BY updated) AS prev_updated
+  FROM public.loots_inverter
+), per_point AS (
+  SELECT DATE(updated) AS production_date,
+    GREATEST(EXTRACT(EPOCH FROM (updated - prev_updated)) / 3600, 0) 
+      * production_power AS wh
+  FROM samples WHERE prev_updated IS NOT NULL
+)
+SELECT production_date, SUM(wh) AS production_units
+FROM per_point
+GROUP BY production_date
+ORDER BY production_date DESC
+LIMIT ?;
+```
 
 #### 3. Import Controller
 ```java

@@ -1,7 +1,11 @@
 # SolarManExcel2DB - Warp Documentation
 
 ## 🌞 Project Overview
-SolarManExcel2DB is a Java utility for importing solar power generation data from SolarMan Excel exports into a PostgreSQL database. This tool streamlines the process of transferring solar monitoring data from Excel files into a structured database for analysis and reporting.
+SolarManExcel2DB is a comprehensive solution for importing and visualizing solar power generation data. It consists of:
+1. **CLI Tool**: Java utility for batch importing SolarMan Excel exports
+2. **Web UI** (Version 1.1): Angular + Spring Boot application with production visualization
+
+This tool streamlines the process of transferring solar monitoring data from Excel files into a PostgreSQL database for analysis, reporting, and visualization.
 
 ## 🚀 Quick Start
 
@@ -10,6 +14,8 @@ SolarManExcel2DB is a Java utility for importing solar power generation data fro
 - Maven 3.6+
 - PostgreSQL database (running via `/Users/danieloots/LOOTS_PG/loots_pg.sh`)
 - Environment variables: `DB_USER` and `DB_PASSWORD`
+- Node.js 20+ and npm (for Web UI)
+- Docker and Kubernetes (for containerized deployment)
 
 ### Setup Database
 ```bash
@@ -31,12 +37,117 @@ mvn clean package
 ```
 
 ### Run Application
+
+#### CLI Tool
 ```bash
 # Import Excel file to database
 java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /path/to/your/solarman_export.xlsx
 ```
 
-## 📊 Data Processing
+#### Web UI (Version 1.1)
+```bash
+# Development mode
+cd frontend/solarman-ui && ng serve    # Frontend on :4200
+cd backend && mvn spring-boot:run      # Backend on :8080
+
+# Production mode (Kubernetes)
+kubectl get pods -n default            # Check deployment status
+# Access at http://localhost:30080
+```
+
+## 📊 Web UI Features (Version 1.1)
+
+### Overview
+The Web UI provides a modern interface for:
+- **File Upload & Import**: Upload Excel files through a web browser
+- **Data Visualization**: View solar production trends with interactive charts
+- **System Monitoring**: Real-time database and API status
+- **Import Management**: Preview data before import, view results after
+
+### Key Features
+
+#### 1. Home Page (`/`)
+- **Production Chart**: CSS-based bar chart showing last 7 days of production
+  - Time-weighted calculations matching Grafana dashboards
+  - Dynamic Y-axis scaling (0 to max)
+  - Hover tooltips with exact kWh values
+  - Auto-refreshes after data imports
+- **System Status Panel**: Database connectivity and latest import timestamps
+  - Polls every 10 seconds
+  - Color-coded status indicators
+
+#### 2. Upload Page (`/upload`)
+- File selection for SolarMan and Tshwane Excel files
+- Data preview with Material table and pagination
+- Import confirmation workflow
+- Results display with statistics
+- Navigation back to home
+
+#### 3. Navigation
+- Toolbar with Home and Upload buttons
+- Active route highlighting
+- Responsive design for mobile devices
+
+### API Endpoints
+
+#### Database Status
+```bash
+GET /api/database/status
+# Returns: {connected, message, apiStatus, lastChecked}
+```
+
+#### Production Statistics (NEW in v1.1)
+```bash
+GET /api/database/production-stats?days=7
+# Returns: [{date, productionUnits}, ...]
+# Uses time-weighted calculation from Grafana
+```
+
+#### File Upload
+```bash
+POST /api/upload/{fileType}
+# Accepts: multipart/form-data (Excel file)
+# Returns: Preview data array
+```
+
+#### Import Data
+```bash
+POST /api/import/{fileType}
+# Accepts: JSON array of records
+# Returns: {recordsInserted, recordsUpdated, firstRecordDate, lastRecordDate}
+```
+
+### Deployment
+
+#### Kubernetes (Production)
+```bash
+# Build Docker images
+docker build -t solarman-backend:latest -f backend/Dockerfile .
+docker build -t solarman-frontend:latest frontend/
+
+# Deploy to Kubernetes
+kubectl rollout restart deployment/backend -n default
+kubectl rollout restart deployment/frontend -n default
+
+# Access
+# Frontend: http://localhost:30080
+# Backend API: http://localhost:30080/api
+```
+
+#### Development
+```bash
+# Terminal 1: Backend
+cd backend && mvn spring-boot:run
+
+# Terminal 2: Frontend
+cd frontend/solarman-ui && ng serve
+
+# Access
+# Frontend: http://localhost:4200
+# Backend API: http://localhost:8080/api
+```
+
+## 📋 Data Processing
 
 ### Supported Data Types
 The application processes the following solar power metrics:

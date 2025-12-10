@@ -1,0 +1,15 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 10px;
+    gap: 10px;
+  }
+}

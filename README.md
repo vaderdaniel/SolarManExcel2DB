@@ -37,16 +37,21 @@ This prevents connection errors and ensures clean application startup.
 
 ## ✨ Key Features
 
-- 🌐 **Modern Web UI**: Angular 20 with Material Design
-- 📊 **Real-time Status**: Live database connectivity monitoring
+### Web UI (Version 1.1)
+- 🌐 **Modern Web UI**: Angular 20 with Material Design and Routing
+- 📊 **Production Visualization**: Interactive bar chart showing last 7 days of solar production
+- 🔄 **Time-Weighted Calculations**: Accurate energy production metrics matching Grafana dashboards
+- 🧭 **Multi-Page Navigation**: Dedicated Home and Upload pages with toolbar navigation
+- 📊 **Real-time Status**: Live database connectivity monitoring with 10-second polling
+- 🔄 **Auto-Refresh Charts**: Charts automatically update after data imports
 - 📂 **File Upload**: Drag-and-drop Excel file processing
-- 👀 **Data Preview**: Review data before importing
+- 👀 **Data Preview**: Review data before importing with Material tables
 - 🚀 **Full File Import**: Processes thousands of records efficiently
 - 📈 **Import Results**: Detailed statistics and error reporting
 - 🔄 **Dual Support**: SolarMan and Tshwane electricity data formats
 - 🛡️ **Data Validation**: Comprehensive file and data validation
 - ⚡ **High Performance**: Optimized for large Excel files
-- 🎯 **Production Ready**: Complete build and deployment pipeline
+- 🎯 **Production Ready**: Complete Kubernetes deployment with Rancher Desktop
 - 📊 **Grafana Integration**: Optional monitoring and data visualization
 
 ## 🚦 Quick Start
@@ -136,6 +141,81 @@ Open your browser to **http://localhost:4200** and start importing your Excel fi
 
 This project includes comprehensive documentation organized into specialized files:
 
+### 🆕 [WARP.md](WARP.md) - **Main Documentation (v1.1)**
+**Complete Project Documentation**
+
+Primary documentation covering both CLI and Web UI (v1.1), including:
+- Project overview and quick start guide
+- Web UI features (production chart, navigation, file upload)
+- API endpoints with examples
+- Kubernetes and Docker deployment instructions
+- Data processing and database schema
+- Troubleshooting and maintenance
+
+*Start here for a complete understanding of the project.*
+
+### ⚡ [WARP_QUICK.md](WARP_QUICK.md) - **Quick Reference**
+**Essential Commands and Quick Access**
+
+Quick reference guide with:
+- CLI and Web UI quick commands
+- API endpoint curl examples
+- Kubernetes and Docker quick commands
+- Common troubleshooting solutions
+- Database queries and performance tips
+
+*Perfect for day-to-day operations and quick lookups.*
+
+### 🌐 [WARP_API.md](WARP_API.md) - **API Reference**
+**Complete API Documentation**
+
+Comprehensive API documentation covering:
+- Web UI REST API endpoints (v1.1)
+- Request/response formats with examples
+- Production stats endpoint with SQL queries
+- Error responses and status codes
+- CLI application class documentation
+
+*Essential for developers integrating with the API.*
+
+### 🚀 [WARP_DEPLOY.md](WARP_DEPLOY.md) - **Deployment Guide**
+**Development & Deployment Instructions**
+
+Complete deployment guide including:
+- CLI application deployment
+- Web UI development setup
+- Docker multi-stage builds
+- Kubernetes deployment procedures
+- Rolling updates and troubleshooting
+- Monitoring and logging
+
+*Critical for DevOps and production deployments.*
+
+### 📖 [TECH_SPEC_UI.md](TECH_SPEC_UI.md) - **Technical Specifications**
+**Detailed Technical Architecture**
+
+In-depth technical documentation covering:
+- System architecture and components
+- Frontend components (v1.1 with routing)
+- Backend services and controllers
+- Production stats API with time-weighted calculations
+- Database operations and models
+- Build configuration
+
+*For developers working on the codebase.*
+
+### 📝 [CHANGELOG_v1.1.md](CHANGELOG_v1.1.md) - **Version 1.1 Changelog**
+**Release Notes and Migration Guide**
+
+Detailed changelog for v1.1 including:
+- Major features (production chart, routing, navigation)
+- Technical changes (backend and frontend)
+- Deployment updates
+- Bug fixes (chart bar alignment)
+- Migration notes
+
+*Important for understanding what's new in v1.1.*
+
 ### 🐳 [DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)
 **Docker & Kubernetes Deployment Guide**
 
@@ -196,7 +276,16 @@ Detailed technical documentation for the Spring Boot backend system, covering:
 
 ## 🎯 Recent Major Updates
 
-### v2.0 - Full-Stack Web Application (Latest)
+### v1.1 - Production Visualization & Multi-Page UI (Latest)
+- ✅ **Production Chart**: CSS-based bar chart showing 7-day solar production trends
+- ✅ **Multi-Page Routing**: Separated Home and Upload pages with Angular Router
+- ✅ **Time-Weighted Stats**: New API endpoint with Grafana-compatible calculations
+- ✅ **Auto-Refresh**: Charts automatically update after successful imports
+- ✅ **Toolbar Navigation**: Material Design navigation with active route highlighting
+- ✅ **Kubernetes Deployment**: Complete containerization with Rancher Desktop
+- ✅ **Enhanced Architecture**: Service-based chart refresh and event system
+
+### v2.0 - Full-Stack Web Application
 - ✅ **Complete Rewrite**: Transformed from CLI to full web application
 - ✅ **Full File Import**: Fixed critical issue - now imports ALL records (1,988+) instead of just preview data
 - ✅ **Smart File Storage**: Temporary file storage with unique IDs for reliable full imports
@@ -370,6 +459,23 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 2.0 - Full-Stack Web Application  
-**Last Updated**: October 2025  
+**Latest Version**: 1.1 - Production Visualization & Multi-Page UI  
+**Last Updated**: December 2025  
 **Status**: Production Ready ✅
+
+## 📸 Screenshots
+
+### Home Page with Production Chart
+- 7-day production bar chart with time-weighted calculations
+- System status panel with real-time database monitoring
+- Responsive Material Design interface
+
+### Upload Page
+- File selection and preview
+- Import confirmation workflow
+- Detailed import results with statistics
+
+### Navigation
+- Toolbar with Home and Upload buttons
+- Active route highlighting
+- Seamless page transitions

@@ -2,11 +2,13 @@ package com.loots.solarmanui.controller;
 
 import com.loots.solarmanui.model.DatabaseStatus;
 import com.loots.solarmanui.model.LatestRecords;
+import com.loots.solarmanui.model.ProductionStat;
 import com.loots.solarmanui.service.DatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -89,6 +91,18 @@ public class DatabaseController {
                 java.time.LocalDateTime.now()
             );
             return ResponseEntity.internalServerError().body(errorStatus);
+        }
+    }
+
+    @GetMapping("/production-stats")
+    public ResponseEntity<List<ProductionStat>> getProductionStats(
+            @RequestParam(defaultValue = "7") int days) {
+        try {
+            List<ProductionStat> stats = databaseService.getProductionStats(days);
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            // Return empty list on error
+            return ResponseEntity.ok(List.of());
         }
     }
 }

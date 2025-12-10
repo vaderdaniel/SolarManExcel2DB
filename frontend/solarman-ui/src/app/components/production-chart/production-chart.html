@@ -1,0 +1,59 @@
+<mat-card class="chart-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>wb_sunny</mat-icon>
+      Solar Production - Last 7 Days
+    </mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div *ngIf="isLoading" class="loading-state">
+      <p>Loading chart data...</p>
+    </div>
+    
+    <div *ngIf="hasError && !isLoading" class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+    
+    <div *ngIf="!isLoading && !hasError && chartData.length === 0" class="empty-state">
+      <mat-icon>info_outline</mat-icon>
+      <p>No production data available for the last 7 days</p>
+    </div>
+    
+    <div *ngIf="!isLoading && !hasError && chartData.length > 0" class="chart-container">
+      <!-- Y-axis -->
+      <div class="y-axis">
+        <div *ngFor="let label of yAxisLabels" class="y-axis-label">
+          {{ formatYAxisLabel(label) }}
+        </div>
+      </div>
+      
+      <!-- Chart area -->
+      <div class="chart-area">
+        <!-- Grid lines -->
+        <div class="grid-lines">
+          <div *ngFor="let label of yAxisLabels" class="grid-line"></div>
+        </div>
+        
+        <!-- Bars -->
+        <div class="bars-container">
+          <div *ngFor="let bar of chartData" class="bar-wrapper">
+            <div 
+              class="bar" 
+              [style.height.%]="bar.heightPercent"
+              [title]="bar.displayValue"
+            >
+              <div class="bar-tooltip">{{ bar.displayValue }}</div>
+            </div>
+            <div class="x-axis-label">{{ bar.displayDate }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="!isLoading && !hasError && chartData.length > 0" class="chart-info">
+      <small>Energy units in Watt-hours (Wh)</small>
+    </div>
+  </mat-card-content>
+</mat-card>

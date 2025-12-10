@@ -2,7 +2,7 @@
 
 ## ⚡ Quick Commands
 
-### Essential Commands
+### CLI Application
 ```bash
 # Build the application
 mvn clean package
@@ -16,6 +16,24 @@ java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /path/to/file.xl
 
 # Start PostgreSQL database
 /Users/danieloots/LOOTS_PG/loots_pg.sh
+```
+
+### Web UI (Version 1.1)
+```bash
+# Development mode
+cd frontend/solarman-ui && ng serve &
+cd backend && mvn spring-boot:run
+# Access: http://localhost:4200
+
+# Production build
+cd frontend/solarman-ui && npm run build
+cd backend && mvn clean package
+
+# Kubernetes deployment
+docker build -t solarman-backend:latest -f backend/Dockerfile .
+docker build -t solarman-frontend:latest frontend/
+kubectl rollout restart deployment/backend deployment/frontend -n default
+# Access: http://localhost:30080
 ```
 
 ### One-Liner Setup
@@ -48,6 +66,51 @@ Column 9:  Battery Power
 Column 10: Charging Power
 Column 11: Discharging Power
 Column 12: SoC (State of Charge)
+```
+
+---
+
+## 🌐 Web UI API Quick Reference (v1.1)
+
+### API Endpoints
+```bash
+# Check database status
+curl http://localhost:30080/api/database/status
+
+# Get production stats (last 7 days)
+curl 'http://localhost:30080/api/database/production-stats?days=7'
+
+# Get latest import timestamps
+curl http://localhost:30080/api/database/latest-records
+```
+
+### Kubernetes Quick Commands
+```bash
+# Check deployment status
+kubectl get pods | grep -E "(backend|frontend)"
+
+# View logs
+kubectl logs -f deployment/backend
+kubectl logs -f deployment/frontend
+
+# Restart deployments
+kubectl rollout restart deployment/backend deployment/frontend -n default
+
+# Check service
+kubectl get svc frontend-service
+```
+
+### Docker Quick Commands
+```bash
+# Build images
+docker build -t solarman-backend:latest -f backend/Dockerfile .
+docker build -t solarman-frontend:latest frontend/
+
+# View images
+docker images | grep solarman
+
+# Remove old images
+docker image prune -f
 ```
 
 ---

@@ -1,5 +1,14 @@
 # SolarManExcel2DB - Development & Deployment Guide
 
+## 📚 Overview
+
+This guide covers:
+1. **CLI Application**: Java-based Excel importer
+2. **Web UI** (v1.1): Angular + Spring Boot web application
+3. **Kubernetes Deployment**: Containerized deployment with Rancher Desktop
+
+---
+
 ## 🛠️ Development Setup
 
 ### Prerequisites Installation
@@ -188,7 +197,278 @@ echo "Deployment complete!"
 
 ---
 
-## 📊 Monitoring & Logging
+## 🌐 Web UI Development (Version 1.1)
+
+### Prerequisites
+```bash
+# Install Node.js and npm
+brew install node@20
+
+# Verify installation
+node --version  # Should be v20.x
+npm --version   # Should be 10.x
+```
+
+### Frontend Setup
+```bash
+# Navigate to frontend directory
+cd frontend/solarman-ui
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+# Access at http://localhost:4200
+```
+
+### Backend Setup
+```bash
+# Navigate to backend directory
+cd backend
+
+# Set environment variables
+export DB_USER=your_username
+export DB_PASSWORD=your_password
+
+# Run Spring Boot application
+mvn spring-boot:run
+# Backend API at http://localhost:8080/api
+```
+
+### Full Stack Development
+```bash
+# Terminal 1: Backend
+cd backend && mvn spring-boot:run
+
+# Terminal 2: Frontend
+cd frontend/solarman-ui && ng serve
+
+# Access:
+# - Frontend UI: http://localhost:4200
+# - Backend API: http://localhost:8080/api
+# - Frontend proxies API calls to backend
+```
+
+### Build for Production
+```bash
+# Build Angular frontend
+cd frontend/solarman-ui
+npm run build
+# Output: dist/solarman-ui/
+
+# Build Spring Boot with embedded frontend
+cd backend
+mvn clean package
+# Output: target/solarman-ui-backend-1.0.0.jar
+```
+
+---
+
+## 🐳 Docker Deployment
+
+### Build Docker Images
+
+#### Backend Image (with embedded frontend)
+```bash
+# Build from project root
+cd /Users/danieloots/Java/SolarManExcel2DB
+docker build -t solarman-backend:latest -f backend/Dockerfile .
+
+# Verify image
+docker images | grep solarman-backend
+```
+
+**Dockerfile stages**:
+1. Node 20 Alpine - Build Angular frontend
+2. Maven 3.9 + Eclipse Temurin 17 - Build Spring Boot
+3. Amazon Corretto 17 Alpine - Runtime
+
+#### Frontend Image (standalone)
+```bash
+# Build standalone frontend
+cd frontend
+docker build -t solarman-frontend:latest .
+
+# Verify image
+docker images | grep solarman-frontend
+```
+
+**Dockerfile stages**:
+1. Node 20 Alpine - Build Angular app
+2. Nginx Alpine - Serve static files
+
+### Run with Docker Compose
+```bash
+# Start all services
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# Stop services
+docker-compose down
+```
+
+---
+
+## ☸️ Kubernetes Deployment
+
+### Prerequisites
+```bash
+# Install Rancher Desktop (includes kubectl)
+brew install --cask rancher
+
+# Verify Kubernetes cluster
+kubectl cluster-info
+kubectl get nodes
+```
+
+### Deploy to Kubernetes
+
+#### 1. Build and Tag Images
+```bash
+# Build images (see Docker section above)
+docker build -t solarman-backend:latest -f backend/Dockerfile .
+docker build -t solarman-frontend:latest frontend/
+
+# Images are available to Rancher Desktop's Kubernetes
+```
+
+#### 2. Apply Kubernetes Configurations
+```bash
+# Deploy all resources
+kubectl apply -f k8s/
+
+# Or deploy individually
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/postgres-deployment.yaml
+kubectl apply -f k8s/backend-deployment.yaml
+kubectl apply -f k8s/frontend-deployment.yaml
+```
+
+#### 3. Verify Deployment
+```bash
+# Check all resources
+kubectl get all -n default
+
+# Check specific deployments
+kubectl get deployments
+kubectl get pods
+kubectl get services
+
+# Check pod logs
+kubectl logs -f deployment/backend
+kubectl logs -f deployment/frontend
+```
+
+#### 4. Access Application
+```bash
+# Frontend is exposed via NodePort
+open http://localhost:30080
+
+# Or check service details
+kubectl get service frontend-service
+```
+
+### Update Deployment
+
+#### Rolling Update
+```bash
+# After rebuilding Docker images
+docker build -t solarman-backend:latest -f backend/Dockerfile .
+docker build -t solarman-frontend:latest frontend/
+
+# Restart deployments to pick up new images
+kubectl rollout restart deployment/backend -n default
+kubectl rollout restart deployment/frontend -n default
+
+# Monitor rollout status
+kubectl rollout status deployment/backend
+kubectl rollout status deployment/frontend
+```
+
+#### View Rollout History
+```bash
+# View deployment history
+kubectl rollout history deployment/backend
+kubectl rollout history deployment/frontend
+
+# Rollback if needed
+kubectl rollout undo deployment/backend
+```
+
+### Kubernetes Troubleshooting
+
+#### Check Pod Status
+```bash
+# Get pod details
+kubectl describe pod <pod-name>
+
+# Check events
+kubectl get events --sort-by='.lastTimestamp'
+
+# Check resource usage
+kubectl top pods
+kubectl top nodes
+```
+
+#### Debug Failed Pods
+```bash
+# View logs from failed pod
+kubectl logs <pod-name> --previous
+
+# Get shell access to pod
+kubectl exec -it <pod-name> -- /bin/sh
+
+# Check init containers
+kubectl logs <pod-name> -c wait-for-postgres
+```
+
+#### Service Connectivity
+```bash
+# Test backend service from within cluster
+kubectl run -it --rm debug --image=busybox --restart=Never -- sh
+# Then inside pod:
+wget -O- http://backend-service:8080/api/database/status
+
+# Port forward for local testing
+kubectl port-forward service/backend-service 8080:8080
+kubectl port-forward service/frontend-service 8081:80
+```
+
+### Kubernetes Resource Management
+
+#### Scale Deployments
+```bash
+# Scale up/down
+kubectl scale deployment/backend --replicas=2
+kubectl scale deployment/frontend --replicas=3
+
+# Auto-scale (if metrics server installed)
+kubectl autoscale deployment/backend --min=1 --max=5 --cpu-percent=80
+```
+
+#### Resource Cleanup
+```bash
+# Delete specific deployment
+kubectl delete deployment backend
+kubectl delete deployment frontend
+
+# Delete all resources from k8s directory
+kubectl delete -f k8s/
+
+# Delete everything in namespace
+kubectl delete all --all -n default
+```
+
+---
+
+## 🔊 Monitoring & Logging
 
 ### Application Logging
 ```bash
