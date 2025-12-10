@@ -336,11 +336,89 @@ ORDER BY date DESC;
 - Document any configuration changes
 
 ### Testing
+
+#### Backend Tests (Java/Spring Boot)
 ```bash
-# Run unit tests (if available)
+# Run all backend tests
+cd backend
 mvn test
 
-# Integration testing with sample data
+# Run specific test classes
+mvn test -Dtest=DatabaseServiceTest
+mvn test -Dtest=DatabaseControllerTest
+mvn test -Dtest=ImportServiceTest
+```
+
+**Test Coverage:**
+- **DatabaseServiceTest** (10 tests): Time-weighted production calculation, error handling, SQL verification
+- **DatabaseControllerTest** (11 tests): REST API endpoints, response format validation, exception handling
+- **ImportServiceTest** (19 tests): Data import operations, validation, error logging
+- **ExcelProcessingServiceTest** (16 tests): Excel file parsing, data extraction
+
+**Total: 56 backend tests**
+
+#### Frontend Tests (Angular/TypeScript)
+```bash
+# Run all frontend tests
+cd frontend/solarman-ui
+npm test -- --watch=false --browsers=ChromeHeadless
+
+# Run specific test suites
+npm test -- --include='**/production-chart.spec.ts' --watch=false
+npm test -- --include='**/upload.spec.ts' --watch=false
+
+# Run tests in watch mode (development)
+npm test
+```
+
+**Test Coverage:**
+- **ProductionChartComponent** (18 tests):
+  - Time-weighted calculation verification
+  - yAxisMax calculation (rounds to "nice" numbers)
+  - heightPercent calculation for bar charts
+  - Auto-refresh on ChartRefreshService trigger
+  - Empty data, null/undefined handling
+  - Error state management
+  - Subscription lifecycle (ngOnInit/ngOnDestroy)
+  
+- **UploadComponent** (11 tests):
+  - Chart refresh trigger after successful import
+  - Import service interaction (fileId vs data array)
+  - Error handling and state management
+  - Component view transitions
+  - Support for both SolarMan and Tshwane file types
+
+**Total: 29 frontend tests**
+
+#### Key Test Scenarios
+
+**Production Statistics API:**
+1. ✅ `DatabaseService.getProductionStats()` correctly implements time-weighted calculation using SQL window functions (LAG, EXTRACT)
+2. ✅ `/api/database/production-stats` endpoint returns proper JSON format with LocalDate and Double types
+3. ✅ Handles edge cases: empty results, null dates, connection failures
+
+**Chart Visualization:**
+4. ✅ `ProductionChartComponent.processChartData()` correctly calculates yAxisMax (e.g., 45600.5 → 50000)
+5. ✅ Bar heights calculated as percentage of yAxisMax (0-100%)
+6. ✅ Sorts data chronologically (oldest to newest)
+7. ✅ Generates 5 y-axis labels from max to 0
+
+**Chart Auto-Refresh:**
+8. ✅ ProductionChartComponent subscribes to ChartRefreshService.refresh$ on init
+9. ✅ Reloads chart data when refresh is triggered
+10. ✅ Properly unsubscribes on component destroy
+11. ✅ Handles multiple refresh triggers
+12. ✅ Updates yAxisMax when new data arrives
+
+**Import Workflow:**
+13. ✅ UploadComponent triggers ChartRefreshService.triggerRefresh() after successful import
+14. ✅ Does NOT trigger refresh when import fails
+15. ✅ Works for both SolarMan and Tshwane file types
+16. ✅ Supports both fileId-based and data array imports
+
+#### Integration Testing
+```bash
+# Test with sample data
 java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_data/sample.xlsx
 ```
 
