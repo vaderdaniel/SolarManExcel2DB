@@ -201,12 +201,12 @@ echo "Deployment complete!"
 
 ### Prerequisites
 ```bash
-# Install Node.js and npm
-brew install node@20
+# Install Node.js and npm (requires 18+ for Angular 20.3)
+brew install node@20  # Or node@18
 
 # Verify installation
-node --version  # Should be v20.x
-npm --version   # Should be 10.x
+node --version  # Should be v18.x or higher
+npm --version   # Should be 9.x or higher
 ```
 
 ### Frontend Setup

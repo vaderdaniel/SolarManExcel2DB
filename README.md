@@ -1,7 +1,7 @@
 # SolarManExcel2DB - Complete Web Application
 
 [![Java](https://img.shields.io/badge/Java-11+-blue.svg)](https://www.oracle.com/java/)
-[![Angular](https://img.shields.io/badge/Angular-20-red.svg)](https://angular.io/)
+[![Angular](https://img.shields.io/badge/Angular-20.3-red.svg)](https://angular.io/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-green.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://www.postgresql.org/)
 [![Grafana](https://img.shields.io/badge/Grafana-Latest-orange.svg)](https://grafana.com/)
@@ -12,10 +12,10 @@ A modern web application for importing solar power generation data from SolarMan
 
 ```
 ┌─────────────────┌    REST API     ┌──────────────────┌    JDBC     ┌─────────────────┌
-│   Angular 20    │◄──────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
+│  Angular 20.3   │◄────────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
 │     Frontend    │                  │     Backend      │             │    Database     │
 │  (Port: 4200)   │                  │   (Port: 8080)   │             │   (Port: 5432)  │
-└─────────────────┘                  └──────────────────┘             └────────┬────────┘
+└─────────────────┘                  └──────────────────┘             └────────┌────────┌
                                                                                 │
                                                                                 │ Read-Only
                                                                                 │
@@ -23,7 +23,7 @@ A modern web application for importing solar power generation data from SolarMan
                                                                        │     Grafana     │
                                                                        │   Monitoring    │
                                                                        │  (Port: 3000)   │
-                                                                       └─────────────────┘
+                                                                       └─────────────────┌
 ```
 
 ### Kubernetes Startup Sequence
@@ -303,7 +303,7 @@ Detailed technical documentation for the Spring Boot backend system, covering:
 ## 🛠️ Technology Stack
 
 ### Frontend
-- **Angular 20**: Latest framework with standalone components
+- **Angular 20.3**: Latest framework with standalone components
 - **Angular Material**: Modern Material Design components
 - **TypeScript**: Type-safe development environment
 - **RxJS**: Reactive programming for API communication
@@ -460,7 +460,7 @@ For technical support or questions:
 ---
 
 **Latest Version**: 1.1 - Production Visualization & Multi-Page UI  
-**Last Updated**: December 2025  
+**Last Updated**: January 2026  
 **Status**: Production Ready ✅
 
 ## 📸 Screenshots

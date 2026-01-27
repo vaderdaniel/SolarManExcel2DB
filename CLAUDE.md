@@ -69,6 +69,12 @@ Start the database with: `/Users/danieloots/LOOTS_PG/loots_pg.sh`
 - **PostgreSQL Driver 42.7.3** for database connectivity
 - No testing framework currently configured
 
-## Future Development Notes
+## Current Architecture
 
-The TECH_SPEC_UI.md file contains detailed specifications for a planned Spring Boot + Angular 20 web interface. The current command-line utilities are designed to be refactored into service classes for the web application.
+The project now includes a complete full-stack Web UI (v1.1) built with Angular 20.3 and Spring Boot 3.2.2:
+- **Frontend**: Angular application with Material Design, routing, and production charts
+- **Backend**: Spring Boot REST API with Excel processing services
+- **Deployment**: Kubernetes-ready with Docker images and manifests
+- **CLI Tools**: Original command-line utilities still available for batch processing
+
+See TECH_SPEC_UI.md, WARP.md, and README.md for comprehensive documentation.

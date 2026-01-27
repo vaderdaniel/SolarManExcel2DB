@@ -14,7 +14,7 @@ This tool streamlines the process of transferring solar monitoring data from Exc
 - Maven 3.6+
 - PostgreSQL database (running via `/Users/danieloots/LOOTS_PG/loots_pg.sh`)
 - Environment variables: `DB_USER` and `DB_PASSWORD`
-- Node.js 20+ and npm (for Web UI)
+- Node.js 18+ and npm (for Web UI)
 - Docker and Kubernetes (for containerized deployment)
 
 ### Setup Database

@@ -5,7 +5,7 @@
 **Project Name**: SolarManExcel2DB Web UI  
 **Version**: 1.1.0  
 **Architecture**: Separate frontend/backend projects with REST API communication  
-**Frontend**: Angular 20 with Angular Material & Routing  
+**Frontend**: Angular 20.3 with Angular Material & Routing  
 **Backend**: Spring Boot 3.x with embedded Tomcat  
 **Database**: PostgreSQL  
 **Build Tools**: Maven (backend) + Angular CLI (frontend)  
@@ -18,7 +18,7 @@
 ### High-Level Architecture
 ```
 ┌─────────────────┐    HTTP/REST     ┌──────────────────┐    JDBC     ┌─────────────────┐
-│   Angular 20    │◄────────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
+│  Angular 20.3   │◄────────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
 │     Frontend    │                  │     Backend      │             │    Database     │
 │  (Port: 4200)   │                  │   (Port: 8080)   │             │   (Port: 5432)  │
 └─────────────────┘                  └──────────────────┘             └─────────────────┘
@@ -89,7 +89,7 @@ SolarManExcel2DB/
 
 ---
 
-## 🎨 Frontend Specification (Angular 20)
+## 🎨 Frontend Specification (Angular 20.3)
 
 ### Core Technologies
 - **Angular**: 20.x
@@ -128,7 +128,7 @@ export class App {
 </div>
 
 <footer class="footer">
-  <p>SolarManExcel2DB © 2024 | Version 1.1</p>
+  <p>SolarManExcel2DB © 2024-2026 | Version 1.1</p>
 </footer>
 ```
 
@@ -973,7 +973,7 @@ public class GlobalExceptionHandler {
 - [ ] Database credential configuration (when env vars not available)
 
 ### Technical Requirements
-- [ ] Angular 20 with Angular Material UI
+- [ ] Angular 20.3 with Angular Material UI
 - [ ] Spring Boot REST API backend
 - [ ] File size limit enforcement (10MB)
 - [ ] Toast notifications for validation errors

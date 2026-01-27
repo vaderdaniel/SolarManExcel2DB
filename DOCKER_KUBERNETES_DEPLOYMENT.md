@@ -766,4 +766,4 @@ For issues specific to:
 
 ---
 
-**Last Updated**: October 29, 2025
+**Last Updated**: January 2026 (v1.1)

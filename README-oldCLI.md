@@ -1,4 +1,6 @@
-# SolarManExcel2DB
+# SolarManExcel2DB - Legacy CLI Documentation
+
+> **Note**: This document covers the original command-line interface. For the current Web UI (v1.1) with Angular frontend and production visualization, see [README.md](README.md) or [WARP.md](WARP.md).
 
 A Java utility for importing solar power generation data from SolarMan Excel exports into a PostgreSQL database.
 

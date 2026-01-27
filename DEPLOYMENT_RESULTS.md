@@ -255,7 +255,7 @@ kubectl rollout restart deployment/backend
 
 ---
 
-**Deployment Date**: October 29, 2025  
+**Deployment Date**: December 10, 2025 (v1.1)  
 **Kubernetes Context**: rancher-desktop  
 **Container Runtime**: Docker 27.3.1  
 **Kubernetes Version**: v1.29.11+k3s1

@@ -312,5 +312,5 @@ This accounts for varying intervals between measurements to provide accurate ene
 
 ---
 
-**Last Updated**: 2025-12-06  
+**Last Updated**: January 2026  
 **Maintained By**: Daniel Oots
