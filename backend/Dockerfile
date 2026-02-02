@@ -62,5 +62,5 @@ ENV SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-service:5432/LOOTS
 ENV DB_USER=danieloots
 ENV DB_PASSWORD=SeweEen0528
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the application with Java module access flags
+ENTRYPOINT ["java", "--add-opens=java.base/java.io=ALL-UNNAMED", "-jar", "app.jar"]

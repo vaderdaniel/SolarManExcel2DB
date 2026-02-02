@@ -62,6 +62,6 @@ data:
         password: 'grafana123'
       jsonData:
         sslmode: 'disable'
-        postgresVersion: 1400
+        postgresVersion: 1600
       isDefault: true
       editable: true

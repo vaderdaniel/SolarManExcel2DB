@@ -1,0 +1,12 @@
+solarman-ui/node_modules
+solarman-ui/dist
+solarman-ui/.angular
+node_modules
+dist
+.angular
+.git
+.gitignore
+*.md
+.vscode
+.idea
+*.log

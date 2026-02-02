@@ -160,13 +160,58 @@ Displays seasonal patterns by aggregating data across all years for each ISO wee
 
 ---
 
+## 🔌 PostgreSQL Datasource Configuration
+
+**File**: `datasource-postgresql.json`  
+**UID**: `P7D58F15E2B4BC203`  
+**Name**: PostgreSQL-LOOTS
+
+### Configuration Details
+- **Type**: grafana-postgresql-datasource
+- **URL**: postgres-service:5432
+- **Database**: LOOTS
+- **User**: grafana
+- **Password**: grafana123 (stored in secureJsonData)
+- **SSL Mode**: disable
+- **PostgreSQL Version**: 1600 (16.0)
+- **Connection Pool**:
+  - Max Open Connections: 100
+  - Max Idle Connections: 100
+  - Connection Max Lifetime: 14400 seconds (4 hours)
+
+### Restoring the Datasource
+The datasource is automatically provisioned when deploying Grafana via Kubernetes using the ConfigMap in `k8s/grafana-deployment.yaml`. However, if you need to restore it manually:
+
+```bash
+# Update the datasource via API (requires password in secureJsonData)
+curl -X PUT \
+  -H "Content-Type: application/json" \
+  -u admin:admin123 \
+  -d @grafana/datasource-postgresql.json \
+  'http://localhost:3000/api/datasources/1'
+```
+
+**Note**: When restoring via API, you'll need to add the password to secureJsonData:
+```json
+{
+  ...,
+  "secureJsonData": {
+    "password": "grafana123"
+  }
+}
+```
+
+---
+
 ## 🗄️ Data Source
 
-Both dashboards query the PostgreSQL database:
+All dashboards query the PostgreSQL database:
 - **Database**: LOOTS
 - **Table**: `public.loots_inverter`
 - **Datasource UID**: `P7D58F15E2B4BC203`
 - **Datasource Type**: `grafana-postgresql-datasource`
+- **PostgreSQL Version**: 16.11
+- **Datasource Backup**: `datasource-postgresql.json`
 
 ### Database Schema
 The dashboards expect the following columns in the `loots_inverter` table:
@@ -190,6 +235,7 @@ Dashboard configuration files are stored in JSON format in the `dashboards/` dir
 ```
 grafana/
 ├── README.md (this file)
+├── datasource-postgresql.json
 └── dashboards/
     ├── by-week.json
     ├── daily-stats.json
@@ -199,9 +245,11 @@ grafana/
 
 ### Backup Information
 - **Created**: 2025-11-08
-- **Last Updated**: 2025-12-06
-- **Grafana Version**: 12.3.0
+- **Last Updated**: 2026-02-02
+- **Grafana Version**: Latest (running in Kubernetes)
+- **PostgreSQL Version**: 16.11
 - **Format**: JSON (Grafana dashboard export format)
+- **Datasource UID**: P7D58F15E2B4BC203
 
 ---
 
@@ -209,13 +257,27 @@ grafana/
 
 To restore these dashboards to a Grafana instance:
 
-### Method 1: Using Grafana UI
+### Method 1: Using the Automated Restore Script (Recommended)
+The project includes a script that automatically fixes datasource UIDs and imports all dashboards:
+
+```bash
+# From the project root directory
+./restore-dashboards-fixed.sh
+```
+
+This script will:
+- Automatically detect the correct datasource UID
+- Update all dashboard datasource references
+- Import all four dashboards
+- Provide success/failure feedback for each dashboard
+
+### Method 2: Using Grafana UI
 1. Navigate to Dashboards → New → Import
 2. Upload the JSON file or paste its contents
 3. Select the PostgreSQL datasource
 4. Click "Import"
 
-### Method 2: Using Grafana API
+### Method 3: Using Grafana API
 ```bash
 # Restore Daily Stats dashboard
 curl -X POST \
@@ -247,25 +309,32 @@ curl -X POST \
 To create new backups of the current dashboards:
 
 ```bash
-# Export Daily Stats dashboard
-curl -s -u admin \
+# Export all four dashboards
+curl -s -u admin:admin123 \
   'http://localhost:3000/api/dashboards/uid/feab8f79-92e8-412e-83a6-99d262725b68' \
   | jq '.dashboard' > grafana/dashboards/daily-stats.json
 
-# Export Monthly Stats dashboard
-curl -s -u admin \
+curl -s -u admin:admin123 \
   'http://localhost:3000/api/dashboards/uid/208863de-7e71-4c6d-b5f7-ede14cb35b61' \
   | jq '.dashboard' > grafana/dashboards/monthly-stats.json
 
-# Export Weekly Stats dashboard
-curl -s -u admin \
+curl -s -u admin:admin123 \
   'http://localhost:3000/api/dashboards/uid/weekly-stats-iso-week' \
   | jq '.dashboard' > grafana/dashboards/weekly-stats.json
 
-# Export By ISO week number dashboard
-curl -s -u admin \
+curl -s -u admin:admin123 \
   'http://localhost:3000/api/dashboards/uid/by-week-dashboard' \
   | jq '.dashboard' > grafana/dashboards/by-week.json
+
+# Export PostgreSQL datasource configuration
+curl -s -u admin:admin123 \
+  'http://localhost:3000/api/datasources/uid/P7D58F15E2B4BC203' \
+  | jq 'del(.version)' > grafana/datasource-postgresql.json
+```
+
+**Note**: Requires port-forward to be active:
+```bash
+kubectl port-forward svc/grafana-service 3000:3000 -n default
 ```
 
 ---
@@ -312,5 +381,36 @@ This accounts for varying intervals between measurements to provide accurate ene
 
 ---
 
-**Last Updated**: January 2026  
+**Last Updated**: February 2, 2026  
 **Maintained By**: Daniel Oots
+
+## 🔧 Troubleshooting
+
+### Database User Permissions
+If dashboards show "No data", ensure the `grafana` user has proper permissions:
+
+```bash
+# Connect to PostgreSQL pod
+kubectl exec -n default deployment/postgres -- psql -U danieloots -d LOOTS
+
+# Set password for grafana user
+ALTER USER grafana WITH PASSWORD 'grafana123';
+
+# Grant SELECT permissions
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana;
+```
+
+### Datasource Connection Issues
+Test the datasource connection:
+
+```bash
+# Via Grafana API
+curl -s -X POST -u admin:admin123 \
+  'http://localhost:3000/api/datasources/uid/P7D58F15E2B4BC203/health' | jq .
+```
+
+### Browser Cache Issues
+If dashboards show "No data" after successful restore:
+1. Hard refresh your browser (Cmd+Shift+R on Mac)
+2. Clear browser cache for localhost:3000
+3. Close and reopen your browser

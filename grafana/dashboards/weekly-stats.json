@@ -19,13 +19,13 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 6,
+  "id": 4,
   "links": [],
   "panels": [
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Average daily units produced and purchased per ISO week",
       "fieldConfig": {
@@ -116,7 +116,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "table",
@@ -149,7 +149,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Average daily units consumed, charging, and fed in per ISO week",
       "fieldConfig": {
@@ -240,7 +240,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "table",
@@ -273,7 +273,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Average solar production per day by hour for each ISO week",
       "fieldConfig": {
@@ -340,7 +340,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "time_series",
@@ -373,7 +373,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Average energy consumption per day by hour for each ISO week",
       "fieldConfig": {
@@ -440,7 +440,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "time_series",
@@ -492,6 +492,6 @@
   "timezone": "",
   "title": "Weekly Stats",
   "uid": "weekly-stats-iso-week",
-  "version": 6,
+  "version": 2,
   "weekStart": ""
 }

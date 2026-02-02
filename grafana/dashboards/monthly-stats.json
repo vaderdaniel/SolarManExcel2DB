@@ -25,7 +25,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Units produced and purchased",
       "fieldConfig": {
@@ -205,7 +205,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "table",
@@ -238,7 +238,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Units used",
       "fieldConfig": {
@@ -418,7 +418,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "table",
@@ -451,7 +451,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Average solar production per day by hour for each month",
       "fieldConfig": {
@@ -518,7 +518,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "time_series",
@@ -551,7 +551,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Average energy consumption per day by hour for each month",
       "fieldConfig": {
@@ -618,7 +618,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "time_series",
@@ -670,6 +670,6 @@
   "timezone": "",
   "title": "Monthly Stats",
   "uid": "208863de-7e71-4c6d-b5f7-ede14cb35b61",
-  "version": 8,
+  "version": 2,
   "weekStart": ""
 }

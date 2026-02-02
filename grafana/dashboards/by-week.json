@@ -19,13 +19,13 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 7,
+  "id": 1,
   "links": [],
   "panels": [
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Average daily units produced and purchased per ISO week",
       "fieldConfig": {
@@ -109,7 +109,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "table",
@@ -142,7 +142,7 @@
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
-        "uid": "cf5afpmxgogzkc"
+        "uid": "P7D58F15E2B4BC203"
       },
       "description": "Average daily units consumed, charging, and fed in per ISO week",
       "fieldConfig": {
@@ -226,7 +226,7 @@
           "dataset": "LOOTS",
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "cf5afpmxgogzkc"
+            "uid": "P7D58F15E2B4BC203"
           },
           "editorMode": "code",
           "format": "table",
@@ -278,6 +278,6 @@
   "timezone": "",
   "title": "By ISO week number",
   "uid": "by-week-dashboard",
-  "version": 11,
+  "version": 2,
   "weekStart": ""
 }

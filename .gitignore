@@ -80,3 +80,6 @@ replay_pid*
 *.xls
 import.log
 *.backup
+
+# Security scan reports
+backend/reports/
