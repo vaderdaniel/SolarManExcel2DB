@@ -35,7 +35,18 @@ COPY --from=frontend-build /app/frontend/dist/solarman-ui ./src/main/resources/s
 # Build Spring Boot application
 RUN mvn clean package -DskipTests
 
-# Stage 3: Runtime
+# Stage 3: Security Scanning
+FROM aquasec/trivy:latest AS security-scan
+
+# Copy the built JAR for scanning
+COPY --from=backend-build /app/backend/target/*.jar /scan/app.jar
+
+# Run Trivy scan on the JAR file
+# Note: This stage documents the scan but doesn't fail the build
+# For CI/CD, consider adding --exit-code 1 --severity CRITICAL
+RUN trivy rootfs --severity CRITICAL,HIGH --format json --output /scan/trivy-report.json /scan/ || true
+
+# Stage 4: Runtime
 FROM amazoncorretto:17-alpine
 
 WORKDIR /app
