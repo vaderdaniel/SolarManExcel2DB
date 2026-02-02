@@ -16,6 +16,7 @@ This tool streamlines the process of transferring solar monitoring data from Exc
 - Environment variables: `DB_USER` and `DB_PASSWORD`
 - Node.js 18+ and npm (for Web UI)
 - Docker and Kubernetes (for containerized deployment)
+- Trivy (for security scanning)
 
 ### Setup Database
 ```bash
@@ -32,8 +33,11 @@ export DB_PASSWORD=your_database_password
 
 ### Build Project
 ```bash
-# Clean and package the application
+# Clean and package the application (includes security scanning)
 mvn clean package
+
+# Build with security verification
+mvn clean verify
 ```
 
 ### Run Application
@@ -221,7 +225,9 @@ src/main/java/loots/jd/
 ### Key Dependencies
 - **Apache POI 4.1.1**: Excel file processing
 - **PostgreSQL JDBC 42.7.3**: Database connectivity
+- **Apache Tomcat 10.1.35**: Embedded web server (security-patched)
 - **Java 11**: Runtime environment
+- **Trivy**: Security vulnerability scanning
 
 ### Build Configuration
 ```xml
@@ -290,6 +296,37 @@ The application provides detailed logging for each row processed:
 
 ## 🔐 Security
 
+### Security Scanning
+The application includes automated vulnerability scanning using Trivy:
+
+```bash
+# Integrated with Maven build
+mvn verify
+
+# Standalone security scan
+cd backend && ./security-scan.sh
+```
+
+**Scans:**
+- Maven dependencies (pom.xml)
+- JAR artifacts (target/*.jar)
+- Docker images (solarman-backend:latest)
+
+**Reports Location:** `backend/reports/`
+
+**Build Behavior:**
+- Fails on CRITICAL vulnerabilities
+- Logs HIGH, MEDIUM, LOW vulnerabilities
+
+**Security Updates:**
+- ✅ Tomcat upgraded to 10.1.35 (CVE-2025-24813 fixed)
+- ✅ Regular dependency scanning
+- ✅ Container image hardening
+
+For detailed security documentation:
+- **[backend/SECURITY.md](backend/SECURITY.md)** - Complete guide
+- **[backend/SECURITY-QUICKSTART.md](backend/SECURITY-QUICKSTART.md)** - Quick reference
+
 ### Credential Management
 - Uses environment variables for database credentials
 - Passwords are cleared from memory after use
@@ -300,6 +337,47 @@ The application provides detailed logging for each row processed:
 - Numeric validation for power measurements
 - SQL injection protection via PreparedStatements
 
+## 📊 Grafana Dashboards
+
+### Overview
+The application integrates with Grafana for comprehensive data visualization:
+
+**Available Dashboards:**
+1. **Daily Stats** - Last 2 days with hourly heatmaps
+2. **Weekly Stats** - ISO week aggregations with hourly patterns
+3. **Monthly Stats** - Long-term trends with monthly patterns
+4. **By Week Number** - Seasonal patterns across all years
+
+### Access Grafana
+```bash
+# Port-forward to Grafana service
+kubectl port-forward svc/grafana-service 3000:3000 -n default
+
+# Open in browser
+open http://localhost:3000
+
+# Login credentials
+# Username: admin
+# Password: admin123
+```
+
+### Backup & Restore
+```bash
+# Restore all dashboards (automated)
+./restore-dashboards-fixed.sh
+
+# Manual backup of specific dashboard
+curl -s -u admin:admin123 \
+  'http://localhost:3000/api/dashboards/uid/feab8f79-92e8-412e-83a6-99d262725b68' \
+  | jq '.dashboard' > grafana/dashboards/daily-stats.json
+```
+
+**Documentation:**
+- **[grafana/README.md](grafana/README.md)** - Complete dashboard documentation
+- **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** - Backup procedures
+- **Dashboard Backups:** `grafana/dashboards/`
+- **Datasource Config:** `grafana/datasource-postgresql.json`
+
 ## 📋 Maintenance
 
 ### Regular Tasks
@@ -307,6 +385,8 @@ The application provides detailed logging for each row processed:
 2. **Log Rotation**: Archive import logs regularly
 3. **Backup**: Ensure database backups include solar data
 4. **Updates**: Keep dependencies updated for security
+5. **Security Scanning**: Run Trivy scans before deployments
+6. **Grafana Backups**: Backup dashboards after modifications
 
 ### Monitoring
 ```sql
@@ -424,4 +504,23 @@ java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_data/sample
 
 ---
 
+## 📝 Recent Updates
+
+### February 2, 2026
+- Added Trivy security scanning integration
+- Upgraded Apache Tomcat to 10.1.35 (CVE-2025-24813 fixed)
+- Added comprehensive Grafana backup/restore system
+- Created Dockerfile.simple for runtime-only builds
+- Enhanced security documentation
+- Updated Grafana dashboard backups
+
+### Version History
+- **v1.1** - Production visualization & multi-page UI
+- **v2.0** - Full-stack web application transformation
+- **Latest** - Security & infrastructure enhancements
+
+---
+
 **Note**: This utility is designed for local development and small-scale data imports. For production environments, consider implementing additional monitoring, error recovery, and scalability features.
+
+**Last Updated**: February 2, 2026

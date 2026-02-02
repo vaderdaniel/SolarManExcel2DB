@@ -4,8 +4,11 @@
 
 ### CLI Application
 ```bash
-# Build the application
+# Build the application (includes security scanning)
 mvn clean package
+
+# Build with security verification
+mvn clean verify
 
 # Set environment variables
 export DB_USER=your_username
@@ -34,6 +37,18 @@ docker build -t solarman-backend:latest -f backend/Dockerfile .
 docker build -t solarman-frontend:latest frontend/
 kubectl rollout restart deployment/backend deployment/frontend -n default
 # Access: http://localhost:30080
+```
+
+### Security Scanning
+```bash
+# Run security scan (integrated with build)
+mvn verify
+
+# Standalone security scan
+cd backend && ./security-scan.sh
+
+# View security reports
+ls -la backend/reports/
 ```
 
 ### One-Liner Setup
@@ -102,15 +117,34 @@ kubectl get svc frontend-service
 
 ### Docker Quick Commands
 ```bash
-# Build images
+# Build images (backend includes security scanning)
 docker build -t solarman-backend:latest -f backend/Dockerfile .
 docker build -t solarman-frontend:latest frontend/
+
+# Build backend (runtime-only, for pre-built JAR)
+docker build -t solarman-backend:latest -f backend/Dockerfile.simple backend/
 
 # View images
 docker images | grep solarman
 
 # Remove old images
 docker image prune -f
+```
+
+### Grafana Quick Commands
+```bash
+# Access Grafana
+kubectl port-forward svc/grafana-service 3000:3000 -n default &
+open http://localhost:3000
+# Login: admin / admin123
+
+# Restore all dashboards
+./restore-dashboards-fixed.sh
+
+# Backup specific dashboard
+curl -s -u admin:admin123 \
+  'http://localhost:3000/api/dashboards/uid/feab8f79-92e8-412e-83a6-99d262725b68' \
+  | jq '.dashboard' > grafana/dashboards/daily-stats.json
 ```
 
 ---

@@ -198,8 +198,63 @@
 
 ---
 
+## 🔄 Post-v1.1 Updates
+
+### February 2, 2026 - Security & Infrastructure
+
+#### Security Enhancements
+- **Trivy Integration**: Added automated vulnerability scanning
+  - Scans Maven dependencies, JAR artifacts, and Docker images
+  - Integrated into Maven build process (`mvn verify`)
+  - Reports generated in `backend/reports/`
+  - Build fails on CRITICAL vulnerabilities
+- **Tomcat Security Update**: Upgraded to version 10.1.35
+  - Fixed CVE-2025-24813
+  - Updated via `<tomcat.version>` property in `pom.xml`
+- **Security Documentation**: Added comprehensive guides
+  - `backend/SECURITY.md` - Complete security scanning documentation
+  - `backend/SECURITY-QUICKSTART.md` - Quick reference guide
+  - `backend/security-scan.sh` - Standalone security scan script
+
+#### Grafana Backup/Restore System
+- **Backup System**: Comprehensive dashboard and datasource backups
+  - All 4 dashboards backed up in `grafana/dashboards/`
+  - PostgreSQL datasource configuration in `grafana/datasource-postgresql.json`
+- **Restore Scripts**: Automated restoration
+  - `restore-dashboards-fixed.sh` - Auto-detects and fixes datasource UIDs
+  - `restore-dashboards.sh` - Original restore script
+- **Documentation**: Complete Grafana documentation
+  - `grafana/README.md` - Dashboard descriptions and usage
+  - `grafana/BACKUP_RESTORE_GUIDE.md` - Quick reference for backup/restore
+
+#### Docker Improvements
+- **Dockerfile.simple**: New runtime-only Dockerfile
+  - Located at `backend/Dockerfile.simple`
+  - For pre-built JARs without full build process
+  - Faster deployment with Amazon Corretto 17 Alpine
+- **.dockerignore**: Added for frontend
+  - Excludes `node_modules/`, `.git/`, build artifacts
+  - Reduces Docker build context size
+
+#### Deployment Updates
+- **Java Runtime**: Backend Dockerfile updated
+  - Added `--add-opens` flag for Java reflection compatibility
+  - Resolves `java.io` package access warnings
+- **.gitignore**: Enhanced with security report exclusions
+  - `backend/reports/` excluded from version control
+  - Security scan outputs not committed
+
+### Impact
+- **Security**: Automated vulnerability detection in CI/CD pipeline
+- **Reliability**: Grafana dashboards can be restored easily
+- **Deployment**: More flexible Docker build options
+- **Maintenance**: Clear documentation for backup/restore procedures
+
+---
+
 **Next Steps**:
 - Consider adding date range selector for chart
 - Add export functionality for chart data
 - Implement user authentication (future enhancement)
 - Add more chart types (line, area) for different metrics
+- Set up automated Grafana dashboard backups in CI/CD

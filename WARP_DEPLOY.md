@@ -65,13 +65,40 @@ echo "Database URL: jdbc:postgresql://localhost:5432/LOOTS"
 # Clean previous builds
 mvn clean
 
-# Compile and package
+# Compile and package (includes security scanning)
 mvn clean package
+
+# Build with security verification
+mvn clean verify
 
 # Verify build artifacts
 ls -la target/
 # Should show: SolarManExcel2DB-1.0-jar-with-dependencies.jar
 ```
+
+#### Security Scanning
+```bash
+# Run security scan before deployment
+cd backend
+mvn verify  # Integrated scan
+
+# Or run standalone
+./security-scan.sh
+
+# View reports
+ls -la reports/
+cat reports/maven-dependencies.json
+```
+
+**Security Checklist:**
+- ✅ No CRITICAL vulnerabilities in dependencies
+- ✅ JAR artifact scanned
+- ✅ Docker image scanned (if deploying to containers)
+- ✅ Review security reports in `backend/reports/`
+
+For detailed security documentation:
+- **[backend/SECURITY.md](backend/SECURITY.md)** - Complete guide
+- **[backend/SECURITY-QUICKSTART.md](backend/SECURITY-QUICKSTART.md)** - Quick reference
 
 ---
 
@@ -257,10 +284,14 @@ cd frontend/solarman-ui
 npm run build
 # Output: dist/solarman-ui/
 
-# Build Spring Boot with embedded frontend
+# Build Spring Boot with embedded frontend (includes security scanning)
 cd backend
-mvn clean package
+mvn clean verify
 # Output: target/solarman-ui-backend-1.0.0.jar
+# Security reports: backend/reports/
+
+# Review security scan results before deployment
+ls -la backend/reports/
 ```
 
 ---
@@ -271,18 +302,26 @@ mvn clean package
 
 #### Backend Image (with embedded frontend)
 ```bash
-# Build from project root
+# Build from project root (includes security scanning)
 cd /Users/danieloots/Java/SolarManExcel2DB
 docker build -t solarman-backend:latest -f backend/Dockerfile .
+
+# Or use runtime-only Dockerfile (for pre-built JAR)
+docker build -t solarman-backend:latest -f backend/Dockerfile.simple backend/
 
 # Verify image
 docker images | grep solarman-backend
 ```
 
-**Dockerfile stages**:
+**Dockerfile stages** (multi-stage):
 1. Node 20 Alpine - Build Angular frontend
-2. Maven 3.9 + Eclipse Temurin 17 - Build Spring Boot
+2. Maven 3.9 + Eclipse Temurin 17 - Build Spring Boot + Trivy security scanning
 3. Amazon Corretto 17 Alpine - Runtime
+
+**Dockerfile.simple** (runtime-only):
+- Single stage with Amazon Corretto 17 Alpine
+- For pre-built JARs (faster deployment)
+- No build tools included
 
 #### Frontend Image (standalone)
 ```bash

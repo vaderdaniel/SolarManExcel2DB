@@ -95,12 +95,12 @@ docker-compose down
 #### 💻 **Option 3: Local Development (Native)**
 
 Run components natively for active development:
-
-**Prerequisites:**
+### Prerequisites
 - Java 11 or higher
 - Node.js 18+ and npm
 - PostgreSQL database
 - Maven 3.6+
+- Trivy (for security scanning)
 
 **1. Database Setup**
 ```bash
@@ -268,6 +268,7 @@ Detailed technical documentation for the Spring Boot backend system, covering:
 - Excel file processing and validation logic
 - Error handling and logging strategies
 - Security and CORS configuration
+- Security scanning with Trivy
 - Maven build configuration and dependencies
 - Production deployment considerations
 - Integration with existing legacy code
@@ -276,7 +277,14 @@ Detailed technical documentation for the Spring Boot backend system, covering:
 
 ## 🎯 Recent Major Updates
 
-### v1.1 - Production Visualization & Multi-Page UI (Latest)
+### Latest - Security & Infrastructure Enhancements (February 2026)
+- ✅ **Security Scanning**: Integrated Trivy vulnerability scanning for dependencies and Docker images
+- ✅ **Grafana Backup/Restore**: Comprehensive backup and restore system for dashboards and datasources
+- ✅ **Tomcat Security Update**: Upgraded to version 10.1.35 (CVE-2025-24813 fixed)
+- ✅ **Simplified Dockerfile**: Added `Dockerfile.simple` for runtime-only builds
+- ✅ **Enhanced Documentation**: New security guides and Grafana backup procedures
+
+### v1.1 - Production Visualization & Multi-Page UI
 - ✅ **Production Chart**: CSS-based bar chart showing 7-day solar production trends
 - ✅ **Multi-Page Routing**: Separated Home and Upload pages with Angular Router
 - ✅ **Time-Weighted Stats**: New API endpoint with Grafana-compatible calculations
@@ -313,8 +321,10 @@ Detailed technical documentation for the Spring Boot backend system, covering:
 - **Spring Boot 3.2.2**: Enterprise-grade Java framework
 - **Spring Data JPA**: Powerful ORM with PostgreSQL integration
 - **Apache POI 4.1.1**: Excel file processing and validation
+- **Apache Tomcat 10.1.35**: Embedded web server (security-patched)
 - **Maven**: Dependency management and build automation
 - **Hibernate**: Advanced database operations and caching
+- **Trivy**: Security vulnerability scanning
 
 ### Database & Infrastructure
 - **PostgreSQL**: Robust relational database with persistent storage
@@ -460,8 +470,55 @@ For technical support or questions:
 ---
 
 **Latest Version**: 1.1 - Production Visualization & Multi-Page UI  
-**Last Updated**: January 2026  
+**Last Updated**: February 2, 2026  
 **Status**: Production Ready ✅
+
+## 🔒 Security
+
+The application includes automated security scanning using Trivy:
+
+```bash
+# Run security scan (integrated with Maven build)
+mvn verify
+
+# Run security scan standalone
+cd backend && ./security-scan.sh
+```
+
+Security reports are generated in `backend/reports/`:
+- Maven dependencies scan
+- JAR artifact scan
+- Docker image scan
+
+For detailed security documentation, see:
+- **[backend/SECURITY.md](backend/SECURITY.md)** - Comprehensive security scanning guide
+- **[backend/SECURITY-QUICKSTART.md](backend/SECURITY-QUICKSTART.md)** - Quick reference
+
+## 📊 Grafana Dashboards
+
+The application integrates with Grafana for data visualization:
+
+**Dashboards:**
+- Daily Stats - Last 2 days with hourly heatmaps
+- Weekly Stats - ISO week aggregations
+- Monthly Stats - Long-term trends
+- By Week Number - Seasonal patterns
+
+**Access:**
+```bash
+kubectl port-forward svc/grafana-service 3000:3000 -n default
+open http://localhost:3000
+```
+
+**Backup & Restore:**
+```bash
+# Restore all dashboards
+./restore-dashboards-fixed.sh
+```
+
+For detailed Grafana documentation, see:
+- **[grafana/README.md](grafana/README.md)** - Complete dashboard documentation
+- **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** - Backup procedures
 
 ## 📸 Screenshots
 

@@ -80,8 +80,10 @@ backend/
 - **Spring Boot 3.2.2** - Web framework and dependency injection
 - **Spring Data JPA** - Database abstraction layer
 - **Apache POI 4.1.1** - Excel file processing
+- **Apache Tomcat 10.1.35** - Embedded web server (security-patched, CVE-2025-24813 fixed)
 - **PostgreSQL Driver 42.7.3** - Database connectivity
 - **Maven** - Build and dependency management
+- **Trivy** - Security vulnerability scanning
 
 ## Development Commands
 
@@ -90,7 +92,30 @@ backend/
 cd backend
 mvn clean compile          # Compile only
 mvn clean package          # Build JAR with dependencies
+mvn clean verify           # Build with security scanning
 ```
+
+### Security Scanning
+```bash
+# Run security scan (integrated with build)
+mvn verify
+
+# Standalone security scan
+./security-scan.sh
+
+# View security reports
+ls -la reports/
+```
+
+**Security Features:**
+- Automated Trivy vulnerability scanning
+- Scans Maven dependencies, JAR artifacts, and Docker images
+- Build fails on CRITICAL vulnerabilities
+- Reports generated in `backend/reports/`
+
+For detailed security documentation:
+- **[backend/SECURITY.md](SECURITY.md)** - Complete guide
+- **[backend/SECURITY-QUICKSTART.md](SECURITY-QUICKSTART.md)** - Quick reference
 
 ### Run Development Server
 ```bash
@@ -118,5 +143,8 @@ The Spring Boot backend successfully refactors and preserves all core functional
 2. **Testing**: ✅ Complete - 56 backend tests and 29 frontend tests all passing
 3. **Production Deployment**: ✅ Complete - Kubernetes deployment with Rancher Desktop configured
 4. **Frontend Integration**: ✅ Complete - Angular app builds and serves from Spring Boot static resources
+5. **Security**: ✅ Complete - Trivy scanning integrated, Tomcat 10.1.35 (CVE-2025-24813 fixed)
 
 The backend is fully integrated with the Angular 20.3 frontend and provides all REST endpoints for the complete SolarManExcel2DB UI application v1.1.
+
+**Last Updated**: February 2, 2026

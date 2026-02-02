@@ -95,8 +95,10 @@ This script builds:
 
 **Build times:**
 - PostgreSQL: ~30 seconds
-- Backend: ~5-10 minutes (includes Maven dependencies and Angular build)
+- Backend: ~5-10 minutes (includes Maven dependencies, Angular build, and security scanning)
 - Frontend: ~3-5 minutes (includes npm dependencies)
+
+**Note:** Backend builds include automatic Trivy security scanning. Build will fail if CRITICAL vulnerabilities are detected.
 
 ### Manual Build Commands
 
@@ -106,12 +108,37 @@ If you need to build images individually:
 # PostgreSQL
 docker build -t solarman-postgres:latest -f docker/postgresql/Dockerfile docker/postgresql/
 
-# Backend (includes frontend build)
+# Backend (includes frontend build and security scanning)
 docker build -t solarman-backend:latest -f backend/Dockerfile .
+
+# Backend (runtime-only, for pre-built JAR)
+docker build -t solarman-backend:latest -f backend/Dockerfile.simple backend/
 
 # Frontend
 docker build -t solarman-frontend:latest -f frontend/Dockerfile frontend/
 ```
+
+### Security Scanning
+
+The backend build includes automated security scanning:
+
+```bash
+# Run security scan before building Docker image
+cd backend
+mvn verify  # Includes Trivy scanning
+
+# Or run standalone security scan
+./security-scan.sh
+```
+
+Security reports are generated in `backend/reports/`:
+- `maven-dependencies.json/sarif` - Maven dependency vulnerabilities
+- `jar-artifact.json/sarif` - JAR file vulnerabilities
+- `docker-image.json/sarif` - Docker image vulnerabilities
+
+For detailed security documentation:
+- **[backend/SECURITY.md](backend/SECURITY.md)** - Complete security guide
+- **[backend/SECURITY-QUICKSTART.md](backend/SECURITY-QUICKSTART.md)** - Quick reference
 
 ## ☸️ Kubernetes Deployment
 
@@ -136,6 +163,7 @@ This script performs the following steps:
 - **Frontend URL**: http://localhost:30080
 - **Backend API**: Not exposed externally (ClusterIP only)
 - **PostgreSQL**: Not exposed externally (ClusterIP only)
+- **Grafana**: Access via port-forward (see Grafana section below)
 
 ### View Deployment Status
 
@@ -547,6 +575,12 @@ kubectl get nodes
 - Simple NodePort exposure
 - No TLS/SSL
 
+**Security Features Implemented:**
+- ✅ Automated Trivy vulnerability scanning
+- ✅ Security-patched Tomcat 10.1.35 (CVE-2025-24813 fixed)
+- ✅ Regular dependency scanning in CI/CD
+- ✅ Security reports generated on every build
+
 **Production Recommendations**:
 - Use Kubernetes Secrets instead of ConfigMap
 - Implement TLS/SSL certificates
@@ -554,6 +588,7 @@ kubectl get nodes
 - Enable PostgreSQL SSL connections
 - Use network policies to restrict traffic
 - Regular security updates for base images
+- Review and act on Trivy security reports
 
 ## 📊 Monitoring
 
@@ -579,6 +614,44 @@ kubectl exec -it $(kubectl get pod -l app=postgres -o jsonpath='{.items[0].metad
 # Check recent data
 SELECT COUNT(*), MAX(updated), MIN(updated) FROM public.loots_inverter;
 ```
+
+### Grafana Dashboards
+
+The application includes Grafana for advanced data visualization:
+
+**Access Grafana:**
+```bash
+# Port-forward Grafana service
+kubectl port-forward svc/grafana-service 3000:3000 -n default
+
+# Open in browser
+open http://localhost:3000
+
+# Login credentials
+# Username: admin
+# Password: admin123
+```
+
+**Available Dashboards:**
+- Daily Stats - Last 2 days with hourly heatmaps
+- Weekly Stats - ISO week aggregations
+- Monthly Stats - Long-term trends
+- By Week Number - Seasonal patterns
+
+**Backup and Restore:**
+```bash
+# Restore all dashboards (automated)
+./restore-dashboards-fixed.sh
+
+# Manual backup of specific dashboard
+curl -s -u admin:admin123 \
+  'http://localhost:3000/api/dashboards/uid/feab8f79-92e8-412e-83a6-99d262725b68' \
+  | jq '.dashboard' > grafana/dashboards/daily-stats.json
+```
+
+For detailed Grafana documentation:
+- **[grafana/README.md](grafana/README.md)** - Complete dashboard documentation
+- **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** - Backup procedures
 
 ## 🔄 Updating the Application
 
@@ -766,4 +839,4 @@ For issues specific to:
 
 ---
 
-**Last Updated**: January 2026 (v1.1)
+**Last Updated**: February 2, 2026
