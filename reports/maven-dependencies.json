@@ -1,0 +1,226 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.69.1"
+  },
+  "ReportID": "019c7fb6-e222-77a5-99b2-b5049a6ec4e8",
+  "CreatedAt": "2026-02-21T12:20:17.826502+02:00",
+  "ArtifactName": "pom.xml",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "pom.xml",
+      "Class": "lang-pkgs",
+      "Type": "pom",
+      "Packages": [
+        {
+          "ID": "loots.jd:SolarManExcel2DB:1.0::a7f4396c",
+          "Name": "loots.jd:SolarManExcel2DB",
+          "Identifier": {
+            "PURL": "pkg:maven/loots.jd/SolarManExcel2DB@1.0",
+            "UID": "11e98866cb422589"
+          },
+          "Version": "1.0",
+          "Relationship": "root",
+          "DependsOn": [
+            "org.apache.poi:poi-ooxml:4.1.1::d2c09cd3",
+            "org.postgresql:postgresql:42.7.3::9bebec27"
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.apache.poi:poi-ooxml:4.1.1::d2c09cd3",
+          "Name": "org.apache.poi:poi-ooxml",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.poi/poi-ooxml@4.1.1",
+            "UID": "42b550de775fc6fa"
+          },
+          "Version": "4.1.1",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "com.github.virtuald:curvesapi:1.06::e41a1641",
+            "org.apache.commons:commons-compress:1.19::9dc293bb",
+            "org.apache.poi:poi-ooxml-schemas:4.1.1::98b66b76",
+            "org.apache.poi:poi:4.1.1::7a950f7a"
+          ],
+          "Locations": [
+            {
+              "StartLine": 22,
+              "EndLine": 26
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.postgresql:postgresql:42.7.3::9bebec27",
+          "Name": "org.postgresql:postgresql",
+          "Identifier": {
+            "PURL": "pkg:maven/org.postgresql/postgresql@42.7.3",
+            "UID": "aa8a77c264df62ca"
+          },
+          "Version": "42.7.3",
+          "Licenses": [
+            "BSD-2-Clause"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "org.checkerframework:checker-qual:3.42.0::6785f705"
+          ],
+          "Locations": [
+            {
+              "StartLine": 29,
+              "EndLine": 33
+            }
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "com.github.virtuald:curvesapi:1.06::e41a1641",
+          "Name": "com.github.virtuald:curvesapi",
+          "Identifier": {
+            "PURL": "pkg:maven/com.github.virtuald/curvesapi@1.06",
+            "UID": "4353a8bd9eff3473"
+          },
+          "Version": "1.06",
+          "Licenses": [
+            "BSD-3-Clause"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "commons-codec:commons-codec:1.13::2f16b505",
+          "Name": "commons-codec:commons-codec",
+          "Identifier": {
+            "PURL": "pkg:maven/commons-codec/commons-codec@1.13",
+            "UID": "5dc240d44adfa38c"
+          },
+          "Version": "1.13",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.apache.commons:commons-collections4:4.4::13845aa8",
+          "Name": "org.apache.commons:commons-collections4",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-collections4@4.4",
+            "UID": "405f6ba337fbbab2"
+          },
+          "Version": "4.4",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.apache.commons:commons-compress:1.19::9dc293bb",
+          "Name": "org.apache.commons:commons-compress",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-compress@1.19",
+            "UID": "18e898cf46f2b1b8"
+          },
+          "Version": "1.19",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.apache.commons:commons-math3:3.6.1::5ea3329c",
+          "Name": "org.apache.commons:commons-math3",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-math3@3.6.1",
+            "UID": "c5670524e3f7bef2"
+          },
+          "Version": "3.6.1",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.apache.poi:poi:4.1.1::7a950f7a",
+          "Name": "org.apache.poi:poi",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.poi/poi@4.1.1",
+            "UID": "94527a74b7333eeb"
+          },
+          "Version": "4.1.1",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "commons-codec:commons-codec:1.13::2f16b505",
+            "org.apache.commons:commons-collections4:4.4::13845aa8",
+            "org.apache.commons:commons-math3:3.6.1::5ea3329c"
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.apache.poi:poi-ooxml-schemas:4.1.1::98b66b76",
+          "Name": "org.apache.poi:poi-ooxml-schemas",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.poi/poi-ooxml-schemas@4.1.1",
+            "UID": "bad9386ef7f04a81"
+          },
+          "Version": "4.1.1",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "org.apache.xmlbeans:xmlbeans:3.1.0::fd7d0283"
+          ],
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.apache.xmlbeans:xmlbeans:3.1.0::fd7d0283",
+          "Name": "org.apache.xmlbeans:xmlbeans",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.xmlbeans/xmlbeans@3.1.0",
+            "UID": "681e29187479ee2"
+          },
+          "Version": "3.1.0",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "AnalyzedBy": "pom"
+        },
+        {
+          "ID": "org.checkerframework:checker-qual:3.42.0::6785f705",
+          "Name": "org.checkerframework:checker-qual",
+          "Identifier": {
+            "PURL": "pkg:maven/org.checkerframework/checker-qual@3.42.0",
+            "UID": "cb93980fc31afc6f"
+          },
+          "Version": "3.42.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "AnalyzedBy": "pom"
+        }
+      ]
+    }
+  ]
+}

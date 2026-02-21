@@ -1,0 +1,10 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.69.1"
+  },
+  "ReportID": "019c7fb6-e304-75df-b4fd-96c60d780342",
+  "CreatedAt": "2026-02-21T12:20:18.052385+02:00",
+  "ArtifactName": "target/SolarManExcel2DB-1.0-jar-with-dependencies.jar",
+  "ArtifactType": "filesystem"
+}
