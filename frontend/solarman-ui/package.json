@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build --configuration production --output-path=dist/solarman-ui",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix"
   },
   "prettier": {
     "printWidth": 100,
