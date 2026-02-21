@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
+        <version>3.5.10</version>
         <relativePath/>
     </parent>
 
@@ -19,11 +19,11 @@
     <description>Spring Boot backend for SolarMan Excel import UI</description>
 
     <properties>
-        <java.version>11</java.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tomcat.version>10.1.35</tomcat.version>
+        <tomcat.version>10.1.52</tomcat.version>
     </properties>
 
     <dependencies>
@@ -42,14 +42,14 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.3</version>
+            <version>42.7.10</version>
         </dependency>
 
         <!-- Apache POI for Excel processing -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>4.1.1</version>
+            <version>5.5.1</version>
         </dependency>
 
         <!-- Spring Boot Test (for testing) -->

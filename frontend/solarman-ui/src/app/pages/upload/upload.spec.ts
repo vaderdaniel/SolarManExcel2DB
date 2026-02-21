@@ -1,5 +1,6 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { UploadComponent } from './upload';
 import { ImportService } from '../../services/import.service';
 import { ChartRefreshService } from '../../services/chart-refresh.service';
@@ -7,30 +8,31 @@ import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 import { ImportResult } from '../../models/import-result.model';
+import { vi } from 'vitest';
 
 describe('UploadComponent', () => {
   let component: UploadComponent;
   let fixture: ComponentFixture<UploadComponent>;
-  let mockImportService: jasmine.SpyObj<ImportService>;
-  let mockChartRefreshService: jasmine.SpyObj<ChartRefreshService>;
-  let mockRouter: jasmine.SpyObj<Router>;
-  let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
+  let mockImportService: { importData: ReturnType<typeof vi.fn>; importDataByFileId: ReturnType<typeof vi.fn> };
+  let mockChartRefreshService: { triggerRefresh: ReturnType<typeof vi.fn> };
+  let mockRouter: { navigate: ReturnType<typeof vi.fn> };
+  let mockSnackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     // Create mock services
-    mockImportService = jasmine.createSpyObj('ImportService', [
-      'importData',
-      'importDataByFileId'
-    ]);
-    mockChartRefreshService = jasmine.createSpyObj('ChartRefreshService', ['triggerRefresh']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-    mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
-    // Make MatSnackBar.open return a mock SnackBarRef
-    mockSnackBar.open.and.returnValue({} as any);
+    mockImportService = {
+      importData: vi.fn(),
+      importDataByFileId: vi.fn()
+    };
+    mockChartRefreshService = { triggerRefresh: vi.fn() };
+    mockRouter = { navigate: vi.fn() };
+    mockSnackBar = { open: vi.fn().mockReturnValue({} as any) };
 
     await TestBed.configureTestingModule({
-      imports: [UploadComponent, HttpClientTestingModule],
+      imports: [UploadComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: ImportService, useValue: mockImportService },
         { provide: ChartRefreshService, useValue: mockChartRefreshService },
         { provide: Router, useValue: mockRouter },
@@ -46,7 +48,7 @@ describe('UploadComponent', () => {
   // ==================== Chart Refresh Trigger Tests ====================
 
   describe('Chart Refresh after Import', () => {
-    it('should trigger chart refresh after successful import using fileId', fakeAsync(() => {
+    it('should trigger chart refresh after successful import using fileId', () => {
       const mockImportResult: ImportResult = {
         recordsInserted: 10,
         recordsUpdated: 5,
@@ -57,7 +59,7 @@ describe('UploadComponent', () => {
         success: true
       };
 
-      mockImportService.importDataByFileId.and.returnValue(of(mockImportResult));
+      mockImportService.importDataByFileId.mockReturnValue(of(mockImportResult));
 
       // Setup component state
       component.fileId = 'test-file-id';
@@ -71,15 +73,14 @@ describe('UploadComponent', () => {
       });
 
       // Wait for async operations
-      tick();
 
       // Verify chart refresh was triggered
       expect(mockChartRefreshService.triggerRefresh).toHaveBeenCalledTimes(1);
       expect(component.currentView).toBe('result');
       expect(component.importResult).toEqual(mockImportResult);
-    }));
+    });
 
-    it('should trigger chart refresh after successful import using data array', fakeAsync(() => {
+    it('should trigger chart refresh after successful import using data array', () => {
       const mockImportResult: ImportResult = {
         recordsInserted: 8,
         recordsUpdated: 2,
@@ -90,7 +91,7 @@ describe('UploadComponent', () => {
         success: true
       };
 
-      mockImportService.importData.and.returnValue(of(mockImportResult));
+      mockImportService.importData.mockReturnValue(of(mockImportResult));
 
       // Setup component state without fileId (fallback path)
       component.fileId = null;
@@ -104,15 +105,14 @@ describe('UploadComponent', () => {
       });
 
       // Wait for async operations
-      tick();
 
       // Verify chart refresh was triggered
       expect(mockChartRefreshService.triggerRefresh).toHaveBeenCalledTimes(1);
       expect(component.currentView).toBe('result');
-    }));
+    });
 
-    it('should NOT trigger chart refresh when import fails', fakeAsync(() => {
-      mockImportService.importDataByFileId.and.returnValue(
+    it('should NOT trigger chart refresh when import fails', () => {
+      mockImportService.importDataByFileId.mockReturnValue(
         throwError(() => new Error('Import failed'))
       );
 
@@ -128,14 +128,13 @@ describe('UploadComponent', () => {
       });
 
       // Wait for async operations
-      tick();
 
       // Verify chart refresh was NOT triggered
       expect(mockChartRefreshService.triggerRefresh).not.toHaveBeenCalled();
       expect(component.currentView).not.toBe('result');
-    }));
+    });
 
-    it('should trigger chart refresh for Tshwane file type', fakeAsync(() => {
+    it('should trigger chart refresh for Tshwane file type', () => {
       const mockImportResult: ImportResult = {
         recordsInserted: 5,
         recordsUpdated: 3,
@@ -146,7 +145,7 @@ describe('UploadComponent', () => {
         success: true
       };
 
-      mockImportService.importDataByFileId.and.returnValue(of(mockImportResult));
+      mockImportService.importDataByFileId.mockReturnValue(of(mockImportResult));
 
       // Setup component state with Tshwane file type
       component.fileId = 'test-file-id';
@@ -160,13 +159,12 @@ describe('UploadComponent', () => {
       });
 
       // Wait for async operations
-      tick();
 
       // Verify chart refresh was triggered
       expect(mockChartRefreshService.triggerRefresh).toHaveBeenCalledTimes(1);
-    }));
+    });
 
-    it('should trigger chart refresh exactly once per successful import', fakeAsync(() => {
+    it('should trigger chart refresh exactly once per successful import', () => {
       const mockImportResult: ImportResult = {
         recordsInserted: 10,
         recordsUpdated: 5,
@@ -177,7 +175,7 @@ describe('UploadComponent', () => {
         success: true
       };
 
-      mockImportService.importDataByFileId.and.returnValue(of(mockImportResult));
+      mockImportService.importDataByFileId.mockReturnValue(of(mockImportResult));
 
       // Setup and trigger first import
       component.fileId = 'test-file-id';
@@ -190,7 +188,6 @@ describe('UploadComponent', () => {
       });
 
       // Wait for async operations
-      tick();
 
       expect(mockChartRefreshService.triggerRefresh).toHaveBeenCalledTimes(1);
 
@@ -206,15 +203,14 @@ describe('UploadComponent', () => {
         fileType: 'solarman'
       });
 
-      tick();
 
       // Should have been called twice total
       expect(mockChartRefreshService.triggerRefresh).toHaveBeenCalledTimes(2);
-    }));
+    });
 
 
 
-    it('should clear isImporting flag after successful import', fakeAsync(() => {
+    it('should clear isImporting flag after successful import', () => {
       const mockImportResult: ImportResult = {
         recordsInserted: 10,
         recordsUpdated: 5,
@@ -225,7 +221,7 @@ describe('UploadComponent', () => {
         success: true
       };
 
-      mockImportService.importDataByFileId.and.returnValue(of(mockImportResult));
+      mockImportService.importDataByFileId.mockReturnValue(of(mockImportResult));
 
       // Setup component state
       component.fileId = 'test-file-id';
@@ -239,13 +235,12 @@ describe('UploadComponent', () => {
       });
 
       // Wait for async operations
-      tick();
 
       expect(component.isImporting).toBe(false);
-    }));
+    });
 
-    it('should clear isImporting flag after failed import', fakeAsync(() => {
-      mockImportService.importDataByFileId.and.returnValue(
+    it('should clear isImporting flag after failed import', () => {
+      mockImportService.importDataByFileId.mockReturnValue(
         throwError(() => new Error('Import failed'))
       );
 
@@ -261,16 +256,15 @@ describe('UploadComponent', () => {
       });
 
       // Wait for async operations
-      tick();
 
       expect(component.isImporting).toBe(false);
-    }));
+    });
   });
 
   // ==================== Import Service Call Tests ====================
 
   describe('Import Service Interaction', () => {
-    it('should call importDataByFileId when fileId is available', fakeAsync(() => {
+    it('should call importDataByFileId when fileId is available', () => {
       const mockImportResult: ImportResult = {
         recordsInserted: 10,
         recordsUpdated: 5,
@@ -281,7 +275,7 @@ describe('UploadComponent', () => {
         success: true
       };
 
-      mockImportService.importDataByFileId.and.returnValue(of(mockImportResult));
+      mockImportService.importDataByFileId.mockReturnValue(of(mockImportResult));
 
       // Setup component state with fileId
       component.fileId = 'test-file-id';
@@ -295,16 +289,15 @@ describe('UploadComponent', () => {
       });
 
       // Wait for async operations
-      tick();
 
       expect(mockImportService.importDataByFileId).toHaveBeenCalledWith(
         'solarman',
         'test-file-id'
       );
       expect(mockImportService.importData).not.toHaveBeenCalled();
-    }));
+    });
 
-    it('should call importData when fileId is null', fakeAsync(() => {
+    it('should call importData when fileId is null', () => {
       const mockImportResult: ImportResult = {
         recordsInserted: 8,
         recordsUpdated: 2,
@@ -315,7 +308,7 @@ describe('UploadComponent', () => {
         success: true
       };
 
-      mockImportService.importData.and.returnValue(of(mockImportResult));
+      mockImportService.importData.mockReturnValue(of(mockImportResult));
 
       // Setup component state without fileId
       component.fileId = null;
@@ -329,20 +322,19 @@ describe('UploadComponent', () => {
       });
 
       // Wait for async operations
-      tick();
 
       expect(mockImportService.importData).toHaveBeenCalledWith(
         'solarman',
         component.previewData
       );
       expect(mockImportService.importDataByFileId).not.toHaveBeenCalled();
-    }));
+    });
   });
 
   // ==================== Navigation and State Tests ====================
 
   describe('Component State Management', () => {
-    it('should update component view to result after successful import', fakeAsync(() => {
+    it('should update component view to result after successful import', () => {
       const mockImportResult: ImportResult = {
         recordsInserted: 10,
         recordsUpdated: 5,
@@ -353,7 +345,7 @@ describe('UploadComponent', () => {
         success: true
       };
 
-      mockImportService.importDataByFileId.and.returnValue(of(mockImportResult));
+      mockImportService.importDataByFileId.mockReturnValue(of(mockImportResult));
 
       component.fileId = 'test-file-id';
       component.fileType = 'solarman';
@@ -365,14 +357,13 @@ describe('UploadComponent', () => {
         fileType: 'solarman'
       });
 
-      tick();
 
       expect(component.currentView).toBe('result');
       expect(component.importResult).toEqual(mockImportResult);
-    }));
+    });
 
-    it('should NOT change view when import fails', fakeAsync(() => {
-      mockImportService.importDataByFileId.and.returnValue(
+    it('should NOT change view when import fails', () => {
+      mockImportService.importDataByFileId.mockReturnValue(
         throwError(() => new Error('Import failed'))
       );
 
@@ -386,10 +377,9 @@ describe('UploadComponent', () => {
         fileType: 'solarman'
       });
 
-      tick();
 
       expect(component.currentView).toBe('preview');
       expect(component.importResult).toBeNull();
-    }));
+    });
   });
 });

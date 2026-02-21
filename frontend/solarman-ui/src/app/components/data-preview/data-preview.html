@@ -6,28 +6,32 @@
     </mat-card-title>
     <mat-card-subtitle>Review data before importing to database</mat-card-subtitle>
   </mat-card-header>
-  
+
   <mat-card-content>
     <div class="preview-info">
       <p><strong>Total records to import:</strong> {{ totalRecords > 0 ? totalRecords : dataSource.data.length }}</p>
-      <p *ngIf="totalRecords > dataSource.data.length"><em>Showing first {{ dataSource.data.length }} records for preview</em></p>
+      @if (totalRecords > dataSource.data.length) {
+        <p><em>Showing first {{ dataSource.data.length }} records for preview</em></p>
+      }
     </div>
-    
+
     <div class="table-container">
       <table mat-table [dataSource]="dataSource" class="preview-table">
         <!-- Dynamic columns -->
-        <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
-          <th mat-header-cell *matHeaderCellDef class="table-header">{{ column }}</th>
-          <td mat-cell *matCellDef="let element" class="table-cell">
-            {{ formatCellValue(element[column]) }}
-          </td>
-        </ng-container>
-        
+        @for (column of displayedColumns; track column) {
+          <ng-container [matColumnDef]="column">
+            <th mat-header-cell *matHeaderCellDef class="table-header">{{ column }}</th>
+            <td mat-cell *matCellDef="let element" class="table-cell">
+              {{ formatCellValue(element[column]) }}
+            </td>
+          </ng-container>
+        }
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
-      
-      <mat-paginator 
+
+      <mat-paginator
         #paginator
         [length]="dataSource.data.length"
         [pageSizeOptions]="pageSizeOptions"
@@ -37,23 +41,23 @@
       </mat-paginator>
     </div>
   </mat-card-content>
-  
+
   <mat-card-actions class="preview-actions">
-    <button 
-      mat-raised-button 
-      color="primary" 
+    <button
+      mat-raised-button
+      color="primary"
       (click)="onConfirmImport()"
       class="confirm-btn"
-    >
+      >
       <mat-icon>check_circle</mat-icon>
       Confirm Import
     </button>
-    
-    <button 
-      mat-button 
+
+    <button
+      mat-button
       (click)="onCancelImport()"
       class="cancel-btn"
-    >
+      >
       <mat-icon>cancel</mat-icon>
       Cancel
     </button>

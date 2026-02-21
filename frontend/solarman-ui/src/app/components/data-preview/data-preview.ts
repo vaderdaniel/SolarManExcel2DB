@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, ViewChild, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,7 +9,7 @@ import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 @Component({
   selector: 'app-data-preview',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatTableModule, MatPaginatorModule],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatTableModule, MatPaginatorModule],
   templateUrl: './data-preview.html',
   styleUrl: './data-preview.scss'
 })

@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,7 +9,7 @@ import { FileUploadService } from '../../services/file-upload.service';
 @Component({
   selector: 'app-file-upload',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule],
   templateUrl: './file-upload.html',
   styleUrl: './file-upload.scss'
 })

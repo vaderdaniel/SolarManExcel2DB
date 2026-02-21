@@ -4,20 +4,21 @@ import { DatabaseService } from '../../services/database.service';
 import { ChartRefreshService } from '../../services/chart-refresh.service';
 import { of, throwError, Subject } from 'rxjs';
 import { ProductionStat } from '../../models/production-stat.model';
+import { vi } from 'vitest';
 
 describe('ProductionChartComponent', () => {
   let component: ProductionChartComponent;
   let fixture: ComponentFixture<ProductionChartComponent>;
-  let mockDatabaseService: jasmine.SpyObj<DatabaseService>;
-  let mockChartRefreshService: jasmine.SpyObj<ChartRefreshService>;
+  let mockDatabaseService: { getProductionStats: ReturnType<typeof vi.fn> };
+  let mockChartRefreshService: { triggerRefresh: ReturnType<typeof vi.fn> };
   let refreshSubject: Subject<void>;
 
   beforeEach(async () => {
     refreshSubject = new Subject<void>();
 
     // Create mock services
-    mockDatabaseService = jasmine.createSpyObj('DatabaseService', ['getProductionStats']);
-    mockChartRefreshService = jasmine.createSpyObj('ChartRefreshService', ['triggerRefresh']);
+    mockDatabaseService = { getProductionStats: vi.fn() };
+    mockChartRefreshService = { triggerRefresh: vi.fn() };
 
     // Setup refresh$ observable
     Object.defineProperty(mockChartRefreshService, 'refresh$', {
@@ -47,7 +48,7 @@ describe('ProductionChartComponent', () => {
         { date: '2024-12-06', productionUnits: 41000.25 }
       ];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(stats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
 
       // Trigger data load
       fixture.detectChanges();
@@ -64,7 +65,7 @@ describe('ProductionChartComponent', () => {
         { date: '2024-12-06', productionUnits: 0 }      // Should be 0%
       ];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(stats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
       // yAxisMax should be 50000 (already at nice number)
@@ -79,7 +80,7 @@ describe('ProductionChartComponent', () => {
     it('should handle empty data array', () => {
       const stats: ProductionStat[] = [];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(stats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
       expect(component.chartData).toEqual([]);
@@ -88,7 +89,7 @@ describe('ProductionChartComponent', () => {
     });
 
     it('should handle null or undefined stats', () => {
-      mockDatabaseService.getProductionStats.and.returnValue(of(null as any));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(null as any));
       fixture.detectChanges();
 
       expect(component.chartData).toEqual([]);
@@ -102,7 +103,7 @@ describe('ProductionChartComponent', () => {
         { date: '2024-12-07', productionUnits: 0 }
       ];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(stats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
       expect(component.yAxisMax).toBe(10);
@@ -115,7 +116,7 @@ describe('ProductionChartComponent', () => {
         { date: '2024-12-07', productionUnits: 43200.0 }
       ];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(stats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
       // Should be sorted oldest to newest
@@ -129,7 +130,7 @@ describe('ProductionChartComponent', () => {
         { date: '2024-12-08', productionUnits: 0 }
       ];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(stats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
       // When yAxisMax is calculated as 10 and production is 0
@@ -142,7 +143,7 @@ describe('ProductionChartComponent', () => {
       const smallStats: ProductionStat[] = [
         { date: '2024-12-08', productionUnits: 15 }
       ];
-      mockDatabaseService.getProductionStats.and.returnValue(of(smallStats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(smallStats));
       fixture.detectChanges();
       expect(component.yAxisMax).toBe(20); // Should round to 20
 
@@ -150,7 +151,7 @@ describe('ProductionChartComponent', () => {
       const mediumStats: ProductionStat[] = [
         { date: '2024-12-08', productionUnits: 3500 }
       ];
-      mockDatabaseService.getProductionStats.and.returnValue(of(mediumStats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(mediumStats));
       (component as any).loadChartData();
       fixture.detectChanges();
       expect(component.yAxisMax).toBe(5000); // Should round to 5000
@@ -159,7 +160,7 @@ describe('ProductionChartComponent', () => {
       const largeStats: ProductionStat[] = [
         { date: '2024-12-08', productionUnits: 87000 }
       ];
-      mockDatabaseService.getProductionStats.and.returnValue(of(largeStats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(largeStats));
       (component as any).loadChartData();
       fixture.detectChanges();
       expect(component.yAxisMax).toBe(100000); // Should round to 100000
@@ -170,7 +171,7 @@ describe('ProductionChartComponent', () => {
         { date: '2024-12-08', productionUnits: 50000 }
       ];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(stats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
       expect(component.yAxisMax).toBe(50000);
@@ -194,7 +195,7 @@ describe('ProductionChartComponent', () => {
         { date: '2024-12-09', productionUnits: 50000.0 }
       ];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(initialStats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(initialStats));
       fixture.detectChanges();
 
       // Verify initial data
@@ -202,7 +203,7 @@ describe('ProductionChartComponent', () => {
       expect(mockDatabaseService.getProductionStats).toHaveBeenCalledTimes(1);
 
       // Update mock to return new data
-      mockDatabaseService.getProductionStats.and.returnValue(of(updatedStats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(updatedStats));
 
       // Trigger refresh
       refreshSubject.next();
@@ -214,7 +215,7 @@ describe('ProductionChartComponent', () => {
     });
 
     it('should subscribe to refresh$ on component init', () => {
-      mockDatabaseService.getProductionStats.and.returnValue(of([]));
+      mockDatabaseService.getProductionStats.mockReturnValue(of([]));
       
       // Component is created in beforeEach, so subscription should exist
       fixture.detectChanges();
@@ -227,11 +228,11 @@ describe('ProductionChartComponent', () => {
     });
 
     it('should unsubscribe from refresh$ on component destroy', () => {
-      mockDatabaseService.getProductionStats.and.returnValue(of([]));
+      mockDatabaseService.getProductionStats.mockReturnValue(of([]));
       fixture.detectChanges();
 
       // Spy on subscription unsubscribe
-      const unsubscribeSpy = spyOn((component as any).refreshSubscription, 'unsubscribe');
+      const unsubscribeSpy = vi.spyOn((component as any).refreshSubscription, 'unsubscribe');
 
       // Destroy component
       fixture.destroy();
@@ -241,7 +242,7 @@ describe('ProductionChartComponent', () => {
     });
 
     it('should handle multiple refresh triggers', () => {
-      mockDatabaseService.getProductionStats.and.returnValue(of([]));
+      mockDatabaseService.getProductionStats.mockReturnValue(of([]));
       fixture.detectChanges();
 
       // Initial call
@@ -265,14 +266,14 @@ describe('ProductionChartComponent', () => {
         { date: '2024-12-08', productionUnits: 50000 }
       ];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(initialStats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(initialStats));
       fixture.detectChanges();
 
       const initialYAxisMax = component.yAxisMax;
       expect(initialYAxisMax).toBe(1000);
 
       // Update mock and trigger refresh
-      mockDatabaseService.getProductionStats.and.returnValue(of(updatedStats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(updatedStats));
       refreshSubject.next();
       fixture.detectChanges();
 
@@ -286,14 +287,14 @@ describe('ProductionChartComponent', () => {
         { date: '2024-12-08', productionUnits: 45600.5 }
       ];
 
-      mockDatabaseService.getProductionStats.and.returnValue(of(initialStats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of(initialStats));
       fixture.detectChanges();
 
       expect(component.chartData.length).toBe(1);
       expect(component.hasError).toBe(false);
 
       // Mock error on next call
-      mockDatabaseService.getProductionStats.and.returnValue(
+      mockDatabaseService.getProductionStats.mockReturnValue(
         throwError(() => new Error('Network error'))
       );
 
@@ -311,7 +312,7 @@ describe('ProductionChartComponent', () => {
 
   describe('Loading and Error States', () => {
     it('should set loading state during data fetch', () => {
-      mockDatabaseService.getProductionStats.and.returnValue(of([]));
+      mockDatabaseService.getProductionStats.mockReturnValue(of([]));
       
       expect(component.isLoading).toBe(false);
       
@@ -322,7 +323,7 @@ describe('ProductionChartComponent', () => {
     });
 
     it('should handle error state when data fetch fails', () => {
-      mockDatabaseService.getProductionStats.and.returnValue(
+      mockDatabaseService.getProductionStats.mockReturnValue(
         throwError(() => new Error('Database error'))
       );
 
@@ -335,7 +336,7 @@ describe('ProductionChartComponent', () => {
 
     it('should clear error state on successful refresh', () => {
       // First call fails
-      mockDatabaseService.getProductionStats.and.returnValue(
+      mockDatabaseService.getProductionStats.mockReturnValue(
         throwError(() => new Error('Database error'))
       );
       fixture.detectChanges();
@@ -343,7 +344,7 @@ describe('ProductionChartComponent', () => {
       expect(component.hasError).toBe(true);
 
       // Next call succeeds
-      mockDatabaseService.getProductionStats.and.returnValue(of([
+      mockDatabaseService.getProductionStats.mockReturnValue(of([
         { date: '2024-12-08', productionUnits: 45600.5 }
       ]));
 

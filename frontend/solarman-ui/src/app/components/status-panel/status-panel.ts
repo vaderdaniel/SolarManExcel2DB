@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { interval, Subscription } from 'rxjs';
@@ -9,7 +9,7 @@ import { DatabaseStatus, LatestRecords } from '../../models/database-status.mode
 @Component({
   selector: 'app-status-panel',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule],
+  imports: [MatCardModule, MatIconModule],
   templateUrl: './status-panel.html',
   styleUrl: './status-panel.scss'
 })
