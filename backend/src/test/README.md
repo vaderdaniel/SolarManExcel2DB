@@ -41,6 +41,8 @@ mvn test jacoco:report
 
 ## Test Coverage Summary
 
+**Total: 56 backend tests** (DatabaseServiceTest: 10, DatabaseControllerTest: 11, ImportServiceTest: 19, ExcelProcessingServiceTest: 16)
+
 ### DatabaseServiceTest (10 tests)
 Tests the core database service layer, focusing on production statistics calculation.
 
@@ -114,11 +116,14 @@ Tests data import functionality for both SolarMan and Tshwane data sources.
 Tests Excel file parsing and data extraction.
 
 **Key Tests:**
-- ✅ Valid Excel file processing
+- ✅ Valid SolarMan and Tshwane file processing
 - ✅ Column validation (12 expected columns)
 - ✅ Date filtering (after January 1, 2020)
-- ✅ Invalid file format handling
-- ✅ Empty/corrupted file handling
+- ✅ Multiple date format parsing (yyyy/MM/dd, MM/dd/yyyy, SQL format)
+- ✅ Excel date serial number conversion
+- ✅ Empty rows and null value handling
+- ✅ Invalid file format / missing sheet handling
+- ✅ File format validation (.xlsx, .xls, .csv rejection)
 
 ## Testing Patterns
 

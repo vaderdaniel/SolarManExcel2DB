@@ -141,139 +141,19 @@ Open your browser to **http://localhost:4200** and start importing your Excel fi
 
 This project includes comprehensive documentation organized into specialized files:
 
-### 🆕 [WARP.md](WARP.md) - **Main Documentation (v1.1)**
-**Complete Project Documentation**
-
-Primary documentation covering both CLI and Web UI (v1.1), including:
-- Project overview and quick start guide
-- Web UI features (production chart, navigation, file upload)
-- API endpoints with examples
-- Kubernetes and Docker deployment instructions
-- Data processing and database schema
-- Troubleshooting and maintenance
-
-*Start here for a complete understanding of the project.*
-
-### ⚡ [WARP_QUICK.md](WARP_QUICK.md) - **Quick Reference**
-**Essential Commands and Quick Access**
-
-Quick reference guide with:
-- CLI and Web UI quick commands
-- API endpoint curl examples
-- Kubernetes and Docker quick commands
-- Common troubleshooting solutions
-- Database queries and performance tips
-
-*Perfect for day-to-day operations and quick lookups.*
-
-### 🌐 [WARP_API.md](WARP_API.md) - **API Reference**
-**Complete API Documentation**
-
-Comprehensive API documentation covering:
-- Web UI REST API endpoints (v1.1)
-- Request/response formats with examples
-- Production stats endpoint with SQL queries
-- Error responses and status codes
-- CLI application class documentation
-
-*Essential for developers integrating with the API.*
-
-### 🚀 [WARP_DEPLOY.md](WARP_DEPLOY.md) - **Deployment Guide**
-**Development & Deployment Instructions**
-
-Complete deployment guide including:
-- CLI application deployment
-- Web UI development setup
-- Docker multi-stage builds
-- Kubernetes deployment procedures
-- Rolling updates and troubleshooting
-- Monitoring and logging
-
-*Critical for DevOps and production deployments.*
-
-### 📖 [TECH_SPEC_UI.md](TECH_SPEC_UI.md) - **Technical Specifications**
-**Detailed Technical Architecture**
-
-In-depth technical documentation covering:
-- System architecture and components
-- Frontend components (v1.1 with routing)
-- Backend services and controllers
-- Production stats API with time-weighted calculations
-- Database operations and models
-- Build configuration
-
-*For developers working on the codebase.*
-
-### 📝 [CHANGELOG_v1.1.md](CHANGELOG_v1.1.md) - **Version 1.1 Changelog**
-**Release Notes and Migration Guide**
-
-Detailed changelog for v1.1 including:
-- Major features (production chart, routing, navigation)
-- Technical changes (backend and frontend)
-- Deployment updates
-- Bug fixes (chart bar alignment)
-- Migration notes
-
-*Important for understanding what's new in v1.1.*
-
-### 🐳 [DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)
-**Docker & Kubernetes Deployment Guide**
-
-Complete guide for containerized deployment with Docker and Kubernetes (Rancher Desktop), including:
-- Docker image building from source (multi-stage builds)
-- Kubernetes manifests and configuration
-- PostgreSQL with persistent volume mounting
-- Service networking and exposure strategies
-- Deployment scripts and automation
-- Troubleshooting and monitoring
-- Production deployment considerations
-- Docker Compose for local testing
-
-*Essential for DevOps engineers and production deployments. Start here for containerized environments.*
-
-### 📖 [README-oldCLI.md](README-oldCLI.md)
-**Original Command-Line Interface Documentation**
-
-Contains documentation for the legacy command-line version of SolarManExcel2DB. This covers:
-- Original Java CLI utility usage
-- Command-line parameters and options
-- Direct JAR file execution
-- Legacy build and deployment instructions
-- Historical project evolution context
-
-*Use this if you need to understand the original CLI tool or want to run the application in command-line mode.*
-
-### 🎨 [FRONTEND_README.md](FRONTEND_README.md)
-**Angular Frontend Implementation Guide**
-
-Comprehensive documentation for the Angular 20 frontend application, including:
-- Complete Angular project structure and organization
-- Component architecture (Status Panel, File Upload, Data Preview, Import Results)
-- Angular Material UI implementation and theming
-- Service layer design and API integration
-- TypeScript models and interfaces
-- Development workflow and build processes
-- Responsive design and user experience features
-- Production build configuration and deployment
-
-*Essential reading for frontend developers or anyone working on the UI components.*
-
-### 🔧 [BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md)
-**Spring Boot Backend Technical Documentation**
-
-Detailed technical documentation for the Spring Boot backend system, covering:
-- REST API endpoint specifications and usage
-- Service layer architecture and business logic
-- Database integration and ORM configuration
-- Excel file processing and validation logic
-- Error handling and logging strategies
-- Security and CORS configuration
-- Security scanning with Trivy
-- Maven build configuration and dependencies
-- Production deployment considerations
-- Integration with existing legacy code
-
-*Critical documentation for backend developers and system administrators.*
+- **[WARP.md](WARP.md)** — Main project documentation (overview, features, setup, troubleshooting)
+- **[WARP_QUICK.md](WARP_QUICK.md)** — Quick reference for common commands and queries
+- **[WARP_API.md](WARP_API.md)** — REST API and CLI class reference
+- **[WARP_DEPLOY.md](WARP_DEPLOY.md)** — Development & deployment guide (local, Docker, Kubernetes)
+- **[TECH_SPEC_UI.md](TECH_SPEC_UI.md)** — Technical architecture and component specifications
+- **[DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)** — Docker & Kubernetes deployment with Rancher Desktop
+- **[BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md)** — Spring Boot backend technical documentation
+- **[CHANGELOG_v1.1.md](CHANGELOG_v1.1.md)** — Version 1.1 release notes and migration guide
+- **[README-oldCLI.md](README-oldCLI.md)** — Legacy command-line interface documentation
+- **[grafana/README.md](grafana/README.md)** — Grafana dashboard documentation
+- **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** — Grafana backup & restore procedures
+- **[backend/SECURITY.md](backend/SECURITY.md)** — Security scanning with Trivy
+- **[backend/SECURITY-QUICKSTART.md](backend/SECURITY-QUICKSTART.md)** — Security quick reference
 
 ## 🎯 Recent Major Updates
 
@@ -470,7 +350,7 @@ For technical support or questions:
 ---
 
 **Latest Version**: 1.1 - Production Visualization & Multi-Page UI  
-**Last Updated**: February 2, 2026  
+**Last Updated**: February 21, 2026  
 **Status**: Production Ready ✅
 
 ## 🔒 Security

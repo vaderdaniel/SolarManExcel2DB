@@ -67,7 +67,8 @@ Start the database with: `/Users/danieloots/LOOTS_PG/loots_pg.sh`
 - **Maven** for build management
 - **Apache POI 4.1.1** for Excel file processing
 - **PostgreSQL Driver 42.7.3** for database connectivity
-- No testing framework currently configured
+- **JUnit 5 + Mockito** for backend testing (56 tests)
+- **Jasmine/Karma** for frontend testing (31 tests)
 
 ## Current Architecture
 
