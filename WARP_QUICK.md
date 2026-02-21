@@ -21,7 +21,7 @@ java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /path/to/file.xl
 /Users/danieloots/LOOTS_PG/loots_pg.sh
 ```
 
-### Web UI (Version 1.1)
+### Web UI (Version 1.5)
 ```bash
 # Development mode
 cd frontend/solarman-ui && ng serve &
@@ -85,7 +85,7 @@ Column 12: SoC (State of Charge)
 
 ---
 
-## 🌐 Web UI API Quick Reference (v1.1)
+## 🌐 Web UI API Quick Reference (v1.5)
 
 ### API Endpoints
 ```bash

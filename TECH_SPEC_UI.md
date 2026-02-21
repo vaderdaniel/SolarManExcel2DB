@@ -3,10 +3,10 @@
 ## 📋 Project Overview
 
 **Project Name**: SolarManExcel2DB Web UI  
-**Version**: 1.1.0  
+**Version**: 1.5.0  
 **Architecture**: Separate frontend/backend projects with REST API communication  
-**Frontend**: Angular 20.3 with Angular Material & Routing  
-**Backend**: Spring Boot 3.x with embedded Tomcat  
+**Frontend**: Angular 21 with Angular Material & Routing  
+**Backend**: Spring Boot 3.5.x with embedded Tomcat  
 **Database**: PostgreSQL  
 **Build Tools**: Maven (backend) + Angular CLI (frontend)  
 **Deployment**: Kubernetes (Rancher Desktop)
@@ -18,7 +18,7 @@
 ### High-Level Architecture
 ```
 ┌─────────────────┐    HTTP/REST     ┌──────────────────┐    JDBC     ┌─────────────────┐
-│  Angular 20.3   │◄────────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
+│    Angular 21   │◄────────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
 │     Frontend    │                  │     Backend      │             │    Database     │
 │  (Port: 4200)   │                  │   (Port: 8080)   │             │   (Port: 5432)  │
 └─────────────────┘                  └──────────────────┘             └─────────────────┘
@@ -89,14 +89,15 @@ SolarManExcel2DB/
 
 ---
 
-## 🎨 Frontend Specification (Angular 20.3)
+## 🎨 Frontend Specification (Angular 21)
 
 ### Core Technologies
-- **Angular**: 20.x
+- **Angular**: 21.x
 - **Angular Material**: Latest compatible version
-- **TypeScript**: 5.x
-- **Angular CLI**: 20.x
-- **RxJS**: 8.x
+- **TypeScript**: 5.9.x
+- **Angular CLI**: 21.x
+- **RxJS**: 7.x
+- **Test Runner**: Vitest
 
 ### UI Components
 
@@ -128,7 +129,7 @@ export class App {
 </div>
 
 <footer class="footer">
-  <p>SolarManExcel2DB © 2024-2026 | Version 1.1</p>
+  <p>SolarManExcel2DB © 2024-2026 | Version 1.5</p>
 </footer>
 ```
 
@@ -394,11 +395,12 @@ export interface TshwaneRecord {
 ## ⚙️ Backend Specification (Spring Boot)
 
 ### Core Technologies
-- **Spring Boot**: 3.2.x
+- **Spring Boot**: 3.5.x
 - **Spring Web**: REST API endpoints
 - **Spring Data JPA**: Database operations
-- **Apache POI**: Excel file processing
-- **PostgreSQL Driver**: 42.7.x
+- **Apache POI**: 5.5.1 - Excel file processing
+- **PostgreSQL Driver**: 42.7.10
+- **Java**: 17
 - **Maven**: 3.9.x
 
 ### REST API Endpoints
@@ -695,7 +697,7 @@ public class WebConfig {
     
     <groupId>com.loots</groupId>
     <artifactId>solarman-ui-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.5.0</version>
     <packaging>pom</packaging>
     
     <modules>
@@ -703,8 +705,8 @@ public class WebConfig {
     </modules>
     
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     
@@ -764,13 +766,13 @@ public class WebConfig {
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
+        <version>3.5.10</version>
         <relativePath/>
     </parent>
     
     <groupId>com.loots</groupId>
     <artifactId>solarman-ui-backend</artifactId>
-    <version>1.0.0</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
     
     <dependencies>
@@ -789,7 +791,7 @@ public class WebConfig {
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>4.1.1</version>
+            <version>5.5.1</version>
         </dependency>
     </dependencies>
     
@@ -833,7 +835,7 @@ public class WebConfig {
 ```json
 {
   "name": "solarman-ui",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -842,25 +844,26 @@ public class WebConfig {
     "lint": "ng lint"
   },
   "dependencies": {
-    "@angular/animations": "^20.0.0",
-    "@angular/cdk": "^20.0.0",
-    "@angular/common": "^20.0.0",
-    "@angular/compiler": "^20.0.0",
-    "@angular/core": "^20.0.0",
-    "@angular/forms": "^20.0.0",
-    "@angular/material": "^20.0.0",
-    "@angular/platform-browser": "^20.0.0",
-    "@angular/platform-browser-dynamic": "^20.0.0",
-    "@angular/router": "^20.0.0",
-    "rxjs": "~8.0.0",
-    "tslib": "^2.6.0",
+    "@angular/animations": "^21.0.0",
+    "@angular/cdk": "^21.0.0",
+    "@angular/common": "^21.0.0",
+    "@angular/compiler": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/forms": "^21.0.0",
+    "@angular/material": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
+    "@angular/router": "^21.0.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^20.0.0",
-    "@angular/cli": "^20.0.0",
-    "@angular/compiler-cli": "^20.0.0",
-    "typescript": "~5.6.0"
+    "@angular/build": "^21.0.0",
+    "@angular/cli": "^21.0.0",
+    "@angular/compiler-cli": "^21.0.0",
+    "typescript": "~5.9.0",
+    "vitest": "^4.0.0",
+    "jsdom": "^28.0.0"
   }
 }
 ```
@@ -916,7 +919,7 @@ mvn clean package
 ## 🧪 Testing Strategy
 
 ### Frontend Testing
-- **Unit Tests**: Angular components and services using Jasmine/Karma
+- **Unit Tests**: Angular components and services using Vitest
 - **Integration Tests**: HTTP service communication with backend APIs
 - **Manual Testing**: UI functionality and file upload workflows
 
@@ -973,7 +976,7 @@ public class GlobalExceptionHandler {
 - [ ] Database credential configuration (when env vars not available)
 
 ### Technical Requirements
-- [ ] Angular 20.3 with Angular Material UI
+- [ ] Angular 21 with Angular Material UI
 - [ ] Spring Boot REST API backend
 - [ ] File size limit enforcement (10MB)
 - [ ] Toast notifications for validation errors

@@ -1,8 +1,8 @@
 # SolarManExcel2DB - Complete Web Application
 
-[![Java](https://img.shields.io/badge/Java-11+-blue.svg)](https://www.oracle.com/java/)
-[![Angular](https://img.shields.io/badge/Angular-20.3-red.svg)](https://angular.io/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-green.svg)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.oracle.com/java/)
+[![Angular](https://img.shields.io/badge/Angular-21-red.svg)](https://angular.dev/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-green.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://www.postgresql.org/)
 [![Grafana](https://img.shields.io/badge/Grafana-Latest-orange.svg)](https://grafana.com/)
 
@@ -12,7 +12,7 @@ A modern web application for importing solar power generation data from SolarMan
 
 ```
 ┌─────────────────┌    REST API     ┌──────────────────┌    JDBC     ┌─────────────────┌
-│  Angular 20.3   │◄────────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
+│    Angular 21   │◄────────────────►│   Spring Boot    │◄───────────►│   PostgreSQL    │
 │     Frontend    │                  │     Backend      │             │    Database     │
 │  (Port: 4200)   │                  │   (Port: 8080)   │             │   (Port: 5432)  │
 └─────────────────┘                  └──────────────────┘             └────────┌────────┌
@@ -37,8 +37,8 @@ This prevents connection errors and ensures clean application startup.
 
 ## ✨ Key Features
 
-### Web UI (Version 1.1)
-- 🌐 **Modern Web UI**: Angular 20 with Material Design and Routing
+### Web UI (Version 1.5)
+- 🌐 **Modern Web UI**: Angular 21 with Material Design and Routing
 - 📊 **Production Visualization**: Interactive bar chart showing last 7 days of solar production
 - 🔄 **Time-Weighted Calculations**: Accurate energy production metrics matching Grafana dashboards
 - 🧭 **Multi-Page Navigation**: Dedicated Home and Upload pages with toolbar navigation
@@ -96,7 +96,7 @@ docker-compose down
 
 Run components natively for active development:
 ### Prerequisites
-- Java 11 or higher
+- Java 17 or higher
 - Node.js 18+ and npm
 - PostgreSQL database
 - Maven 3.6+
@@ -157,7 +157,16 @@ This project includes comprehensive documentation organized into specialized fil
 
 ## 🎯 Recent Major Updates
 
-### Latest - Security & Infrastructure Enhancements (February 2026)
+### v1.5 - Dependency Upgrades & Vitest Migration (February 21, 2026)
+- ✅ **Java 17**: Upgraded from Java 11 to Java 17
+- ✅ **Angular 21**: Upgraded from Angular 20.3 to Angular 21
+- ✅ **Vitest Migration**: Migrated frontend tests from Karma/Jasmine to Vitest
+- ✅ **Spring Boot 3.5.10**: Upgraded from 3.2.2
+- ✅ **Apache POI 5.5.1**: Upgraded from 4.1.1
+- ✅ **PostgreSQL JDBC 42.7.10**: Upgraded from 42.7.3
+- ✅ **Tomcat 10.1.52**: Upgraded from 10.1.35
+
+### Security & Infrastructure Enhancements (February 2, 2026)
 - ✅ **Security Scanning**: Integrated Trivy vulnerability scanning for dependencies and Docker images
 - ✅ **Grafana Backup/Restore**: Comprehensive backup and restore system for dashboards and datasources
 - ✅ **Tomcat Security Update**: Upgraded to version 10.1.35 (CVE-2025-24813 fixed)
@@ -191,17 +200,19 @@ This project includes comprehensive documentation organized into specialized fil
 ## 🛠️ Technology Stack
 
 ### Frontend
-- **Angular 20.3**: Latest framework with standalone components
+- **Angular 21**: Latest framework with standalone components
 - **Angular Material**: Modern Material Design components
-- **TypeScript**: Type-safe development environment
+- **TypeScript 5.9**: Type-safe development environment
 - **RxJS**: Reactive programming for API communication
+- **Vitest**: Fast unit test runner (migrated from Karma/Jasmine)
 - **SCSS**: Advanced styling with component encapsulation
 
 ### Backend
-- **Spring Boot 3.2.2**: Enterprise-grade Java framework
+- **Spring Boot 3.5.10**: Enterprise-grade Java framework
 - **Spring Data JPA**: Powerful ORM with PostgreSQL integration
-- **Apache POI 4.1.1**: Excel file processing and validation
-- **Apache Tomcat 10.1.35**: Embedded web server (security-patched)
+- **Apache POI 5.5.1**: Excel file processing and validation
+- **Apache Tomcat 10.1.52**: Embedded web server (security-patched)
+- **Java 17**: Runtime environment
 - **Maven**: Dependency management and build automation
 - **Hibernate**: Advanced database operations and caching
 - **Trivy**: Security vulnerability scanning
@@ -316,7 +327,7 @@ cd frontend/solarman-ui && npm run build
 cd ../../backend && mvn clean package
 
 # Deploy single JAR
-java -jar target/solarman-ui-1.0.jar
+java -jar target/solarman-ui-1.5.jar
 
 # Access application at http://localhost:8080
 ```
@@ -349,7 +360,7 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 1.1 - Production Visualization & Multi-Page UI  
+**Latest Version**: 1.5 - Dependency Upgrades & Vitest Migration  
 **Last Updated**: February 21, 2026  
 **Status**: Production Ready ✅
 

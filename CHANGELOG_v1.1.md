@@ -252,6 +252,40 @@
 
 ---
 
+### February 21, 2026 - Dependency Upgrades & Vitest Migration
+
+#### Core Dependency Upgrades
+- **Java**: 11 → 17 (both CLI and backend)
+- **Spring Boot**: 3.2.2 → 3.5.10
+- **Angular**: 20.3 → 21
+- **Apache POI**: 4.1.1 → 5.5.1 (both CLI and backend)
+- **PostgreSQL JDBC**: 42.7.3 → 42.7.10 (both CLI and backend)
+- **Apache Tomcat**: 10.1.35 → 10.1.52
+- **TypeScript**: ~5.6 → ~5.9.2
+
+#### Test Framework Migration
+- **Karma/Jasmine → Vitest**: Complete migration of frontend test runner
+  - Replaced `jasmine.createSpyObj` with `vi.fn()` mocks
+  - Replaced `spyOn` with `vi.spyOn`
+  - Replaced `HttpClientTestingModule` with `provideHttpClient()` + `provideHttpClientTesting()`
+  - Updated `angular.json` test builder from `@angular/build:karma` to `@angular/build:unit-test`
+  - Updated `tsconfig.spec.json` types to `vitest/globals`
+  - Removed all Karma/Jasmine packages
+  - Removed `fakeAsync`/`tick` from upload tests (unnecessary with synchronous `of()` mocks)
+  - Added `testing` build configuration with `zone.js/testing` polyfill
+
+#### Test Results
+- **56 backend tests**: All passing
+- **31 frontend tests**: All passing (18 production-chart + 11 upload + 2 app)
+
+#### Impact
+- **Performance**: Vitest runs significantly faster than Karma
+- **Compatibility**: Java 17 enables modern language features
+- **Security**: Latest dependency versions include security patches
+- **No Breaking Changes**: API contracts and database schema unchanged
+
+---
+
 **Next Steps**:
 - Consider adding date range selector for chart
 - Add export functionality for chart data

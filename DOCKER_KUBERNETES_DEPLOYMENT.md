@@ -577,7 +577,7 @@ kubectl get nodes
 
 **Security Features Implemented:**
 - ✅ Automated Trivy vulnerability scanning
-- ✅ Security-patched Tomcat 10.1.35 (CVE-2025-24813 fixed)
+- ✅ Security-patched Tomcat 10.1.52 (latest security patches)
 - ✅ Regular dependency scanning in CI/CD
 - ✅ Security reports generated on every build
 

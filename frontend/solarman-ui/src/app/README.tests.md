@@ -1,7 +1,7 @@
 # Frontend Unit Tests
 
 ## Overview
-This directory contains comprehensive unit tests for the SolarManExcel2DB frontend application, built with Angular 20 and Jasmine/Karma.
+This directory contains comprehensive unit tests for the SolarManExcel2DB frontend application, built with Angular 21 and Vitest.
 
 ## Test Structure
 
@@ -25,30 +25,13 @@ src/app/
 
 ### Run All Tests
 ```bash
-npm test
-```
-
-### Run Specific Test Files
-```bash
-# Run production chart tests only
-npm test -- --include='**/production-chart.spec.ts' --watch=false
-
-# Run upload component tests only
-npm test -- --include='**/upload.spec.ts' --watch=false
-
-# Run multiple test files
-npm test -- --include='**/{production-chart,upload}.spec.ts' --watch=false
+npx ng test --no-watch
 ```
 
 ### Run Tests in Watch Mode (Development)
 ```bash
-npm test
+npx ng test
 # Tests will re-run automatically when files change
-```
-
-### Run Tests in Headless Mode (CI/CD)
-```bash
-npm test -- --watch=false --browsers=ChromeHeadless
 ```
 
 ## Test Coverage Summary
@@ -181,10 +164,12 @@ beforeEach(async () => {
 });
 ```
 
-### Mocking Services with Jasmine
+### Mocking Services with Vitest
 ```typescript
-mockDatabaseService = jasmine.createSpyObj('DatabaseService', ['getProductionStats']);
-mockChartRefreshService = jasmine.createSpyObj('ChartRefreshService', ['triggerRefresh']);
+import { vi } from 'vitest';
+
+const mockDatabaseService = { getProductionStats: vi.fn() };
+const mockChartRefreshService = { triggerRefresh: vi.fn() };
 
 // Setup observable properties
 Object.defineProperty(mockChartRefreshService, 'refresh$', {
@@ -192,25 +177,25 @@ Object.defineProperty(mockChartRefreshService, 'refresh$', {
 });
 ```
 
-### Testing Async Operations with fakeAsync/tick
+### Testing with Synchronous Observables
 ```typescript
-it('should handle async operations', fakeAsync(() => {
-  mockService.someMethod.and.returnValue(of(data));
+it('should handle operations', () => {
+  mockService.someMethod.mockReturnValue(of(data));
   
   component.doSomething();
-  tick(); // Advance virtual time to complete async operations
+  // No fakeAsync/tick needed - of() emits synchronously
   
   expect(component.result).toBe(expectedValue);
-}));
+});
 ```
 
 ### Testing Observables with RxJS
 ```typescript
 // Success case
-mockService.getData.and.returnValue(of(testData));
+mockService.getData.mockReturnValue(of(testData));
 
 // Error case
-mockService.getData.and.returnValue(
+mockService.getData.mockReturnValue(
   throwError(() => new Error('Test error'))
 );
 ```
@@ -307,34 +292,32 @@ it('should call service with correct parameters', fakeAsync(() => {
 ### Common Issues
 
 #### "No provider for HttpClient"
-Add `HttpClientTestingModule` to imports:
+Use `provideHttpClient()` and `provideHttpClientTesting()`:
 ```typescript
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
 await TestBed.configureTestingModule({
-  imports: [MyComponent, HttpClientTestingModule]
+  imports: [MyComponent],
+  providers: [provideHttpClient(), provideHttpClientTesting()]
 });
 ```
 
 #### "Cannot read property 'subscribe' of undefined"
 Ensure mocked services return observables:
 ```typescript
-mockService.getData.and.returnValue(of(mockData));
+mockService.getData.mockReturnValue(of(mockData));
 ```
 
-#### "Expected spy to have been called but it was not"
-Check if async operations completed:
+#### "Expected to be running in 'ProxyZone'"
+This occurs when using `fakeAsync`/`tick`. Since `of()` emits synchronously, remove `fakeAsync`/`tick` wrappers:
 ```typescript
-it('test name', fakeAsync(() => {
-  // ... test code ...
-  tick(); // Add this to complete async operations
+// Instead of fakeAsync(() => { ... tick(); });
+// Just use a plain callback:
+it('test name', () => {
+  mockService.getData.mockReturnValue(of(data));
+  component.doSomething();
   expect(spy).toHaveBeenCalled();
-}));
-```
-
-#### Tests Timing Out
-Reduce default timeout or check for infinite loops:
-```typescript
-beforeEach(() => {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000; // 10 seconds
 });
 ```
 
@@ -342,8 +325,7 @@ beforeEach(() => {
 
 ### Running Tests with Console Output
 ```bash
-npm test -- --watch=false --browsers=Chrome
-# Opens Chrome DevTools for debugging
+npx ng test --no-watch
 ```
 
 ### Adding Debug Breakpoints
@@ -379,18 +361,18 @@ When adding new tests:
 ## Resources
 
 - [Angular Testing Guide](https://angular.dev/guide/testing)
-- [Jasmine Documentation](https://jasmine.github.io/)
-- [Karma Configuration](https://karma-runner.github.io/latest/config/configuration-file.html)
+- [Vitest Documentation](https://vitest.dev/)
 - [RxJS Testing](https://rxjs.dev/guide/testing/marble-testing)
 - [Angular Material Testing](https://material.angular.io/guide/using-component-harnesses)
 
 ## Test Configuration
 
-### karma.conf.js
-The project uses Karma with Jasmine and ChromeHeadless for CI/CD compatibility.
+### Vitest
+The project uses Vitest via the `@angular/build:unit-test` builder. Tests run in a jsdom environment.
 
 ### tsconfig.spec.json
-TypeScript configuration for test files, includes `node_modules/@angular/*/testing`.
+TypeScript configuration for test files, with `vitest/globals` types.
 
 ### Angular.json
-Test configuration in `projects.solarman-ui.architect.test`.
+Test configuration in `projects.solarman-ui.architect.test` using the `@angular/build:unit-test` builder
+with a `testing` build configuration that includes `zone.js/testing` polyfill.

@@ -73,15 +73,16 @@ backend/
 - ✅ CORS enabled for Angular frontend (localhost:4200)
 - ✅ File upload limits (10MB)
 - ✅ PostgreSQL connection configuration
-- ✅ Spring Boot 3.2.x with Java 11
+- ✅ Spring Boot 3.5.x with Java 17
 
 ## Technology Stack
 
-- **Spring Boot 3.2.2** - Web framework and dependency injection
+- **Spring Boot 3.5.10** - Web framework and dependency injection
 - **Spring Data JPA** - Database abstraction layer
-- **Apache POI 4.1.1** - Excel file processing
-- **Apache Tomcat 10.1.35** - Embedded web server (security-patched, CVE-2025-24813 fixed)
-- **PostgreSQL Driver 42.7.3** - Database connectivity
+- **Apache POI 5.5.1** - Excel file processing
+- **Apache Tomcat 10.1.52** - Embedded web server (security-patched)
+- **PostgreSQL Driver 42.7.10** - Database connectivity
+- **Java 17** - Runtime environment
 - **Maven** - Build and dependency management
 - **Trivy** - Security vulnerability scanning
 
@@ -139,12 +140,12 @@ The Spring Boot backend successfully refactors and preserves all core functional
 
 ## ✅ Current Status
 
-1. **Frontend Development**: ✅ Complete - Angular 20.3 frontend fully implemented with routing, production charts, and auto-refresh
-2. **Testing**: ✅ Complete - 56 backend tests and 29 frontend tests all passing
+1. **Frontend Development**: ✅ Complete - Angular 21 frontend fully implemented with routing, production charts, and auto-refresh
+2. **Testing**: ✅ Complete - 56 backend tests and 31 frontend tests all passing (Vitest)
 3. **Production Deployment**: ✅ Complete - Kubernetes deployment with Rancher Desktop configured
 4. **Frontend Integration**: ✅ Complete - Angular app builds and serves from Spring Boot static resources
-5. **Security**: ✅ Complete - Trivy scanning integrated, Tomcat 10.1.35 (CVE-2025-24813 fixed)
+5. **Security**: ✅ Complete - Trivy scanning integrated, Tomcat 10.1.52 (latest patches)
 
-The backend is fully integrated with the Angular 20.3 frontend and provides all REST endpoints for the complete SolarManExcel2DB UI application v1.1.
+The backend is fully integrated with the Angular 21 frontend and provides all REST endpoints for the complete SolarManExcel2DB UI application v1.5.
 
 **Last Updated**: February 21, 2026

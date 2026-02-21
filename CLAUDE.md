@@ -63,16 +63,16 @@ Start the database with: `/Users/danieloots/LOOTS_PG/loots_pg.sh`
 
 ## Technology Stack
 
-- **Java 11+** (configured in pom.xml)
+- **Java 17** (configured in pom.xml)
 - **Maven** for build management
-- **Apache POI 4.1.1** for Excel file processing
-- **PostgreSQL Driver 42.7.3** for database connectivity
+- **Apache POI 5.5.1** for Excel file processing
+- **PostgreSQL Driver 42.7.10** for database connectivity
 - **JUnit 5 + Mockito** for backend testing (56 tests)
-- **Jasmine/Karma** for frontend testing (31 tests)
+- **Vitest** for frontend testing (31 tests)
 
 ## Current Architecture
 
-The project now includes a complete full-stack Web UI (v1.1) built with Angular 20.3 and Spring Boot 3.2.2:
+The project now includes a complete full-stack Web UI (v1.5) built with Angular 21 and Spring Boot 3.5.10:
 - **Frontend**: Angular application with Material Design, routing, and production charts
 - **Backend**: Spring Boot REST API with Excel processing services
 - **Deployment**: Kubernetes-ready with Docker images and manifests

@@ -1,6 +1,6 @@
 # SolarManExcel2DB - Legacy CLI Documentation
 
-> **Note**: This document covers the original command-line interface. For the current Web UI (v1.1) with Angular frontend and production visualization, see [README.md](README.md) or [WARP.md](WARP.md).
+> **Note**: This document covers the original command-line interface. For the current Web UI (v1.5) with Angular frontend and production visualization, see [README.md](README.md) or [WARP.md](WARP.md).
 
 A Java utility for importing solar power generation data from SolarMan Excel exports into a PostgreSQL database.
 
@@ -22,7 +22,7 @@ The application validates the Excel file format and only processes data with tim
 
 ## Prerequisites
 
-- Java 11 or higher
+- Java 17 or higher
 - Maven
 - PostgreSQL database (already set up with `/Users/danieloots/LOOTS_PG/loots_pg.sh`)
 - Environment variables for database credentials:

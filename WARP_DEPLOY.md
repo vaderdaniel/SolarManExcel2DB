@@ -4,7 +4,7 @@
 
 This guide covers:
 1. **CLI Application**: Java-based Excel importer
-2. **Web UI** (v1.1): Angular + Spring Boot web application
+2. **Web UI** (v1.5): Angular + Spring Boot web application
 3. **Kubernetes Deployment**: Containerized deployment with Rancher Desktop
 
 ---
@@ -18,11 +18,11 @@ This guide covers:
 # Check current Java version
 java -version
 
-# Install Java 11+ using Homebrew (macOS)
-brew install openjdk@11
+# Install Java 17+ using Homebrew (macOS)
+brew install openjdk@17
 
 # Set JAVA_HOME environment variable
-export JAVA_HOME=/opt/homebrew/Cellar/openjdk@11/11.0.21/libexec/openjdk.jdk/Contents/Home
+export JAVA_HOME=/opt/homebrew/Cellar/openjdk@17/17.0.x/libexec/openjdk.jdk/Contents/Home
 ```
 
 #### Maven Build Tool
@@ -117,7 +117,7 @@ SolarManExcel2DB/
 
 ### Key Build Features
 - **Executable JAR**: Creates self-contained JAR with dependencies
-- **Java 11 Target**: Compiled for Java 11 compatibility
+- **Java 17 Target**: Compiled for Java 17 compatibility
 - **Maven Assembly**: Packages all dependencies into single JAR
 
 ### Dependency Analysis
@@ -224,11 +224,11 @@ echo "Deployment complete!"
 
 ---
 
-## 🌐 Web UI Development (Version 1.1)
+## 🌐 Web UI Development (Version 1.5)
 
 ### Prerequisites
 ```bash
-# Install Node.js and npm (requires 18+ for Angular 20.3)
+# Install Node.js and npm (requires 18+ for Angular 21)
 brew install node@20  # Or node@18
 
 # Verify installation
@@ -287,7 +287,7 @@ npm run build
 # Build Spring Boot with embedded frontend (includes security scanning)
 cd backend
 mvn clean verify
-# Output: target/solarman-ui-backend-1.0.0.jar
+# Output: target/solarman-ui-backend-1.5.0.jar
 # Security reports: backend/reports/
 
 # Review security scan results before deployment
@@ -744,7 +744,7 @@ java -version
 javac -version
 
 # Fix path issues
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 export PATH=$JAVA_HOME/bin:$PATH
 ```
 
@@ -769,7 +769,7 @@ java -XX:+PrintGC -XX:+PrintGCDetails -jar application.jar input.xlsx
 
 ### Deployment Verification Checklist
 
-- [ ] Java 11+ installed and configured
+- [ ] Java 17+ installed and configured
 - [ ] Maven build successful
 - [ ] Database connectivity verified
 - [ ] Environment variables set

@@ -4,18 +4,18 @@
 
 This document covers:
 1. **CLI Application API**: Java class methods for command-line usage
-2. **Web UI REST API** (v1.1): HTTP endpoints for the Angular frontend
+2. **Web UI REST API** (v1.5): HTTP endpoints for the Angular frontend
 
 ---
 
-## 🌐 Web UI REST API (Version 1.1)
+## 🌐 Web UI REST API (Version 1.5)
 
 ### Base URL
 - **Development**: `http://localhost:8080/api`
 - **Production** (Kubernetes): `http://localhost:30080/api`
 
 ### Authentication
-No authentication required (v1.1)
+No authentication required (v1.5)
 
 ### Endpoints
 

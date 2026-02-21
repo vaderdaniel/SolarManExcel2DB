@@ -48,6 +48,7 @@ See [SECURITY.md](./SECURITY.md) for complete documentation.
 
 **Security Status:** All CRITICAL vulnerabilities resolved!
 
-- ✅ Tomcat upgraded to version 10.1.35
-- ✅ CVE-2025-24813 fixed
+- ✅ Tomcat upgraded to version 10.1.52
+- ✅ Spring Boot upgraded to 3.5.10
+- ✅ All dependencies at latest versions
 - ✅ No CRITICAL vulnerabilities detected

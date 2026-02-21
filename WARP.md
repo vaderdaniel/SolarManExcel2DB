@@ -3,14 +3,14 @@
 ## 🌞 Project Overview
 SolarManExcel2DB is a comprehensive solution for importing and visualizing solar power generation data. It consists of:
 1. **CLI Tool**: Java utility for batch importing SolarMan Excel exports
-2. **Web UI** (Version 1.1): Angular + Spring Boot application with production visualization
+2. **Web UI** (Version 1.5): Angular + Spring Boot application with production visualization
 
 This tool streamlines the process of transferring solar monitoring data from Excel files into a PostgreSQL database for analysis, reporting, and visualization.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Java 11 or higher
+- Java 17 or higher
 - Maven 3.6+
 - PostgreSQL database (running via `/Users/danieloots/LOOTS_PG/loots_pg.sh`)
 - Environment variables: `DB_USER` and `DB_PASSWORD`
@@ -48,7 +48,7 @@ mvn clean verify
 java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /path/to/your/solarman_export.xlsx
 ```
 
-#### Web UI (Version 1.1)
+#### Web UI (Version 1.5)
 ```bash
 # Development mode
 cd frontend/solarman-ui && ng serve    # Frontend on :4200
@@ -59,7 +59,7 @@ kubectl get pods -n default            # Check deployment status
 # Access at http://localhost:30080
 ```
 
-## 📊 Web UI Features (Version 1.1)
+## 📊 Web UI Features (Version 1.5)
 
 ### Overview
 The Web UI provides a modern interface for:
@@ -223,10 +223,13 @@ src/main/java/loots/jd/
 ```
 
 ### Key Dependencies
-- **Apache POI 4.1.1**: Excel file processing
-- **PostgreSQL JDBC 42.7.3**: Database connectivity
-- **Apache Tomcat 10.1.35**: Embedded web server (security-patched)
-- **Java 11**: Runtime environment
+- **Apache POI 5.5.1**: Excel file processing
+- **PostgreSQL JDBC 42.7.10**: Database connectivity
+- **Apache Tomcat 10.1.52**: Embedded web server (security-patched)
+- **Java 17**: Runtime environment
+- **Spring Boot 3.5.10**: Web framework (backend)
+- **Angular 21**: Frontend framework
+- **Vitest**: Frontend test runner
 - **Trivy**: Security vulnerability scanning
 
 ### Build Configuration
@@ -319,7 +322,7 @@ cd backend && ./security-scan.sh
 - Logs HIGH, MEDIUM, LOW vulnerabilities
 
 **Security Updates:**
-- ✅ Tomcat upgraded to 10.1.35 (CVE-2025-24813 fixed)
+- ✅ Tomcat upgraded to 10.1.52 (latest security patches)
 - ✅ Regular dependency scanning
 - ✅ Container image hardening
 
@@ -437,18 +440,14 @@ mvn test -Dtest=ImportServiceTest
 
 **Total: 56 backend tests**
 
-#### Frontend Tests (Angular/TypeScript)
+#### Frontend Tests (Angular/Vitest)
 ```bash
 # Run all frontend tests
 cd frontend/solarman-ui
-npm test -- --watch=false --browsers=ChromeHeadless
-
-# Run specific test suites
-npm test -- --include='**/production-chart.spec.ts' --watch=false
-npm test -- --include='**/upload.spec.ts' --watch=false
+npx ng test --no-watch
 
 # Run tests in watch mode (development)
-npm test
+npx ng test
 ```
 
 **Test Coverage:**
@@ -468,7 +467,10 @@ npm test
   - Component view transitions
   - Support for both SolarMan and Tshwane file types
 
-**Total: 29 frontend tests**
+- **AppComponent** (2 tests):
+  - Application creation and title rendering
+
+**Total: 31 frontend tests**
 
 #### Key Test Scenarios
 
@@ -506,7 +508,17 @@ java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_data/sample
 
 ## 📝 Recent Updates
 
-### February 2, 2026
+### February 21, 2026 - Dependency Upgrades & Vitest Migration
+- Upgraded Java from 11 to 17 (both CLI and backend)
+- Upgraded Angular from 20.3 to 21
+- Migrated frontend tests from Karma/Jasmine to Vitest
+- Upgraded Spring Boot from 3.2.2 to 3.5.10
+- Upgraded Apache POI from 4.1.1 to 5.5.1
+- Upgraded PostgreSQL JDBC from 42.7.3 to 42.7.10
+- Upgraded Apache Tomcat from 10.1.35 to 10.1.52
+- All 56 backend tests and 31 frontend tests passing
+
+### February 2, 2026 - Security & Infrastructure
 - Added Trivy security scanning integration
 - Upgraded Apache Tomcat to 10.1.35 (CVE-2025-24813 fixed)
 - Added comprehensive Grafana backup/restore system
@@ -517,10 +529,10 @@ java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_data/sample
 ### Version History
 - **v1.1** - Production visualization & multi-page UI
 - **v2.0** - Full-stack web application transformation
-- **Latest** - Security & infrastructure enhancements
+- **v1.5** - Dependency upgrades, Angular 21, Java 17, Vitest migration
 
 ---
 
 **Note**: This utility is designed for local development and small-scale data imports. For production environments, consider implementing additional monitoring, error recovery, and scalability features.
 
-**Last Updated**: February 2, 2026
+**Last Updated**: February 21, 2026
