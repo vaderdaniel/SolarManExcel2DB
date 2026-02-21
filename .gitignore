@@ -83,3 +83,8 @@ import.log
 
 # Security scan reports
 backend/reports/
+frontend/reports/
+
+# Playwright
+frontend/solarman-ui/playwright-report/
+frontend/solarman-ui/test-results/
