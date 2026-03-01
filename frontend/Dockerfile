@@ -1,5 +1,5 @@
 # Stage 1: Build Angular application
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY solarman-ui/package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY solarman-ui/ ./
@@ -18,8 +18,11 @@ RUN npm run build
 # Stage 2: Serve with nginx
 FROM nginx:alpine
 
+# Remove default nginx content (prevents default index.html from taking precedence)
+RUN rm -rf /usr/share/nginx/html/*
+
 # Copy built Angular app to nginx html directory
-# Angular 17+ outputs to dist/solarman-ui/browser
+# Angular 21 application builder outputs browser files to dist/solarman-ui/browser
 COPY --from=build /app/dist/solarman-ui/browser /usr/share/nginx/html
 
 # Copy nginx configuration
