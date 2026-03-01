@@ -45,7 +45,7 @@ mvn clean verify
 #### CLI Tool
 ```bash
 # Import Excel file to database
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /path/to/your/solarman_export.xlsx
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /path/to/your/solarman_export.xlsx
 ```
 
 #### Web UI (Version 1.5)
@@ -237,7 +237,7 @@ src/main/java/loots/jd/
 <!-- Maven configuration -->
 <groupId>loots.jd</groupId>
 <artifactId>SolarManExcel2DB</artifactId>
-<version>1.0</version>
+<version>1.5</version>
 ```
 
 ## 📈 Usage Examples
@@ -245,21 +245,21 @@ src/main/java/loots/jd/
 ### Basic Import
 ```bash
 # Import a standard SolarMan export file
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar ~/Downloads/solarman_export_2024.xlsx
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar ~/Downloads/solarman_export_2024.xlsx
 ```
 
 ### Batch Processing
 ```bash
 # Process multiple files
 for file in ~/Downloads/solar_data/*.xlsx; do
-    java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar "$file"
+    java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar "$file"
 done
 ```
 
 ### Debug Mode
 ```bash
 # Run with verbose output (application provides detailed logging)
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /path/to/file.xlsx 2>&1 | tee import.log
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /path/to/file.xlsx 2>&1 | tee import.log
 ```
 
 ## 🚨 Troubleshooting
@@ -287,7 +287,7 @@ psql -h localhost -p 5432 -d LOOTS -U $DB_USER
 #### Memory Issues
 ```bash
 # Increase JVM heap size for large files
-java -Xmx2G -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar file.xlsx
+java -Xmx2G -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx
 ```
 
 ### Log Analysis
@@ -501,12 +501,18 @@ npx ng test
 #### Integration Testing
 ```bash
 # Test with sample data
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_data/sample.xlsx
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar test_data/sample.xlsx
 ```
 
 ---
 
 ## 📝 Recent Updates
+
+### March 1, 2026 - Documentation Housekeeping & Node 22 Upgrade
+- Fixed CLI JAR references from version 1.0 to 1.5 across all documentation
+- Upgraded Node.js from 20 to 22 in both frontend and backend Dockerfiles
+- Fixed build configuration version references
+- Updated all documentation to reflect current software versions
 
 ### February 21, 2026 - Dependency Upgrades & Vitest Migration
 - Upgraded Java from 11 to 17 (both CLI and backend)
@@ -535,4 +541,4 @@ java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_data/sample
 
 **Note**: This utility is designed for local development and small-scale data imports. For production environments, consider implementing additional monitoring, error recovery, and scalability features.
 
-**Last Updated**: February 21, 2026
+**Last Updated**: March 1, 2026

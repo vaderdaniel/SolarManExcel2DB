@@ -73,7 +73,7 @@ mvn clean verify
 
 # Verify build artifacts
 ls -la target/
-# Should show: SolarManExcel2DB-1.0-jar-with-dependencies.jar
+# Should show: SolarManExcel2DB-1.5-jar-with-dependencies.jar
 ```
 
 #### Security Scanning
@@ -143,7 +143,7 @@ export DB_USER=loots_user
 export DB_PASSWORD=your_secure_password
 
 # Run with test data
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_data/sample.xlsx
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar test_data/sample.xlsx
 ```
 
 ### Production-Ready Deployment
@@ -185,7 +185,7 @@ SELECT has_table_privilege('public.loots_inverter', 'UPDATE');
 set -e  # Exit on any error
 
 # Configuration
-JAR_PATH="/opt/solarman/SolarManExcel2DB-1.0-jar-with-dependencies.jar"
+JAR_PATH="/opt/solarman/SolarManExcel2DB-1.5-jar-with-dependencies.jar"
 LOG_DIR="/var/log/solarman"
 DATA_DIR="/data/solar_imports"
 
@@ -194,7 +194,7 @@ mkdir -p $LOG_DIR
 mkdir -p $DATA_DIR
 
 # Deploy JAR
-cp target/SolarManExcel2DB-1.0-jar-with-dependencies.jar $JAR_PATH
+cp target/SolarManExcel2DB-1.5-jar-with-dependencies.jar $JAR_PATH
 
 # Set permissions
 chmod +x $JAR_PATH
@@ -314,7 +314,7 @@ docker images | grep solarman-backend
 ```
 
 **Dockerfile stages** (multi-stage):
-1. Node 20 Alpine - Build Angular frontend
+1. Node 22 Alpine - Build Angular frontend
 2. Maven 3.9 + Eclipse Temurin 17 - Build Spring Boot + Trivy security scanning
 3. Amazon Corretto 17 Alpine - Runtime
 
@@ -334,7 +334,7 @@ docker images | grep solarman-frontend
 ```
 
 **Dockerfile stages**:
-1. Node 20 Alpine - Build Angular app
+1. Node 22 Alpine - Build Angular app
 2. Nginx Alpine - Serve static files
 
 ### Run with Docker Compose
@@ -512,7 +512,7 @@ kubectl delete all --all -n default
 ### Application Logging
 ```bash
 # Run with detailed logging
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar \
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar \
   /path/to/file.xlsx 2>&1 | tee /var/log/solarman/import-$(date +%Y%m%d-%H%M%S).log
 
 # Log rotation setup
@@ -569,7 +569,7 @@ echo "Starting resource monitoring..."
 # Monitor Java process
 java -XX:+PrintGCDetails -XX:+PrintGCTimeStamps \
      -Xloggc:/var/log/solarman/gc.log \
-     -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar $1 &
+     -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar $1 &
 
 JAVA_PID=$!
 
@@ -621,7 +621,7 @@ for file in $DATA_DIR/*.xlsx; do
         log "Processing file: $filename"
         
         # Run the import
-        if java -jar /opt/solarman/SolarManExcel2DB-1.0-jar-with-dependencies.jar "$file" >> $LOG_FILE 2>&1; then
+        if java -jar /opt/solarman/SolarManExcel2DB-1.5-jar-with-dependencies.jar "$file" >> $LOG_FILE 2>&1; then
             log "Successfully processed: $filename"
             
             # Move to processed directory
@@ -712,7 +712,7 @@ psql test_loots -c "CREATE TABLE public.loots_inverter (
 # Test with sample data
 export DB_USER=test_user
 export DB_PASSWORD=test_password
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_data/sample.xlsx
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar test_data/sample.xlsx
 
 # Verify results
 psql test_loots -c "SELECT COUNT(*) FROM public.loots_inverter;"
@@ -724,11 +724,11 @@ dropdb test_loots
 ### Performance Testing
 ```bash
 # Test with large dataset
-time java -Xmx4G -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar large_dataset.xlsx
+time java -Xmx4G -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar large_dataset.xlsx
 
 # Memory profiling
 java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/ \
-     -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_file.xlsx
+     -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar test_file.xlsx
 ```
 
 ---
@@ -761,7 +761,7 @@ psql -d LOOTS -c "GRANT ALL PRIVILEGES ON TABLE loots_inverter TO your_user;"
 #### Memory Issues
 ```bash
 # Increase heap size
-java -Xmx8G -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar large_file.xlsx
+java -Xmx8G -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar large_file.xlsx
 
 # Enable garbage collection logging
 java -XX:+PrintGC -XX:+PrintGCDetails -jar application.jar input.xlsx
@@ -807,16 +807,16 @@ java -XX:+PrintGC -XX:+PrintGCDetails -jar application.jar input.xlsx
 ### Version Upgrade Process
 ```bash
 # Backup current version
-cp target/SolarManExcel2DB-1.0-jar-with-dependencies.jar backup/
+cp target/SolarManExcel2DB-1.5-jar-with-dependencies.jar backup/
 
 # Build new version
 mvn clean package
 
 # Test new version with sample data
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar test_data/sample.xlsx
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar test_data/sample.xlsx
 
 # Deploy new version
 sudo systemctl stop solarman-import
-cp target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /opt/solarman/
+cp target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /opt/solarman/
 sudo systemctl start solarman-import
 ```

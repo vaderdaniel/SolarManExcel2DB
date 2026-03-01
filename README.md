@@ -148,7 +148,7 @@ This project includes comprehensive documentation organized into specialized fil
 - **[TECH_SPEC_UI.md](TECH_SPEC_UI.md)** — Technical architecture and component specifications
 - **[DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)** — Docker & Kubernetes deployment with Rancher Desktop
 - **[BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md)** — Spring Boot backend technical documentation
-- **[CHANGELOG_v1.1.md](CHANGELOG_v1.1.md)** — Version 1.1 release notes and migration guide
+- **[CHANGELOG_v1.5.md](CHANGELOG_v1.5.md)** — Version history, release notes and migration guide
 - **[README-oldCLI.md](README-oldCLI.md)** — Legacy command-line interface documentation
 - **[grafana/README.md](grafana/README.md)** — Grafana dashboard documentation
 - **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** — Grafana backup & restore procedures
@@ -327,7 +327,7 @@ cd frontend/solarman-ui && npm run build
 cd ../../backend && mvn clean package
 
 # Deploy single JAR
-java -jar target/solarman-ui-1.5.jar
+java -jar target/solarman-ui-backend-1.5.0.jar
 
 # Access application at http://localhost:8080
 ```
@@ -361,7 +361,7 @@ For technical support or questions:
 ---
 
 **Latest Version**: 1.5 - Dependency Upgrades & Vitest Migration  
-**Last Updated**: February 21, 2026  
+**Last Updated**: March 1, 2026  
 **Status**: Production Ready ✅
 
 ## 🔒 Security

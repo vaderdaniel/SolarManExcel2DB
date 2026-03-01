@@ -18,12 +18,12 @@ mvn clean package
 
 **Run the main SolarMan import utility:**
 ```bash
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /path/to/solarman_export.xlsx
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /path/to/solarman_export.xlsx
 ```
 
 **Run the Tshwane electricity reader:**
 ```bash
-java -cp target/SolarManExcel2DB-1.0-jar-with-dependencies.jar loots.jd.TshwaneElectricityReader [/path/to/tshwane_file.xlsx]
+java -cp target/SolarManExcel2DB-1.5-jar-with-dependencies.jar loots.jd.TshwaneElectricityReader [/path/to/tshwane_file.xlsx]
 ```
 
 **Compile only:**

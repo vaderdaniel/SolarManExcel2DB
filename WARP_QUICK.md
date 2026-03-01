@@ -15,7 +15,7 @@ export DB_USER=your_username
 export DB_PASSWORD=your_password
 
 # Run the application
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /path/to/file.xlsx
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /path/to/file.xlsx
 
 # Start PostgreSQL database
 /Users/danieloots/LOOTS_PG/loots_pg.sh
@@ -54,7 +54,7 @@ ls -la backend/reports/
 ### One-Liner Setup
 ```bash
 # Complete setup and run
-export DB_USER=your_user DB_PASSWORD=your_pass && mvn clean package && java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar ~/Downloads/solar_data.xlsx
+export DB_USER=your_user DB_PASSWORD=your_pass && mvn clean package && java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar ~/Downloads/solar_data.xlsx
 ```
 
 ---
@@ -62,7 +62,7 @@ export DB_USER=your_user DB_PASSWORD=your_pass && mvn clean package && java -jar
 ## 🗂️ File Locations
 
 ### Key Files
-- **JAR**: `target/SolarManExcel2DB-1.0-jar-with-dependencies.jar`
+- **JAR**: `target/SolarManExcel2DB-1.5-jar-with-dependencies.jar`
 - **Source**: `src/main/java/loots/jd/SolarManExcel2DB.java`
 - **Config**: `pom.xml`
 - **Database Script**: `/Users/danieloots/LOOTS_PG/loots_pg.sh`
@@ -218,10 +218,10 @@ SELECT pg_size_pretty(pg_total_relation_size('public.loots_inverter'));
 ### Memory Optimization
 ```bash
 # Small files (< 10MB)
-java -Xmx1G -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar file.xlsx
+java -Xmx1G -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx
 
 # Large files (> 100MB)
-java -Xmx8G -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar file.xlsx
+java -Xmx8G -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx
 
 # Enable GC logging for performance analysis
 java -XX:+PrintGC -XX:+PrintGCDetails -jar application.jar file.xlsx
@@ -232,7 +232,7 @@ java -XX:+PrintGC -XX:+PrintGCDetails -jar application.jar file.xlsx
 # Process multiple files
 for file in ~/Downloads/solar_data/*.xlsx; do
     echo "Processing: $file"
-    java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar "$file"
+    java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar "$file"
 done
 
 # Process with error logging
@@ -248,7 +248,7 @@ done
 ### Quick Logging
 ```bash
 # Log to file with timestamp
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar file.xlsx 2>&1 | \
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx 2>&1 | \
     while IFS= read -r line; do echo "$(date '+%Y-%m-%d %H:%M:%S') $line"; done | \
     tee import.log
 
@@ -357,7 +357,7 @@ psql -c "SELECT MIN(updated), MAX(updated), COUNT(*) FROM public.loots_inverter;
 # Enable maximum verbosity
 java -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps \
      -Djava.util.logging.config.file=logging.properties \
-     -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar file.xlsx
+     -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx
 
 # Debug with heap dump on error
 java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/ \
@@ -382,7 +382,7 @@ psql -c "SELECT * FROM pg_stat_activity WHERE datname = 'LOOTS';"
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
 alias solar-build='mvn clean package -DskipTests'
-alias solar-run='java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar'
+alias solar-run='java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar'
 alias solar-db='psql -h localhost -p 5432 -d LOOTS -U $DB_USER'
 alias solar-logs='tail -f /var/log/solarman/*.log'
 
@@ -393,7 +393,7 @@ solar-import() {
         return 1
     fi
     echo "Processing $1..."
-    java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar "$1"
+    java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar "$1"
     echo "Import completed"
 }
 ```

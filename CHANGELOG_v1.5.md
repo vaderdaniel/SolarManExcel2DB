@@ -146,7 +146,7 @@
 ### Updated Files
 - **TECH_SPEC_UI.md**: Added v1.1 features, routing, new components
 - **WARP.md**: Added Web UI section with deployment instructions
-- **CHANGELOG_v1.1.md**: This file
+- **CHANGELOG_v1.5.md**: This file
 
 ### Key Documentation Sections
 - Project structure updated with new directories
@@ -283,6 +283,26 @@
 - **Compatibility**: Java 17 enables modern language features
 - **Security**: Latest dependency versions include security patches
 - **No Breaking Changes**: API contracts and database schema unchanged
+
+---
+
+### March 1, 2026 - Documentation Housekeeping & Node 22 Upgrade
+
+#### Documentation Fixes
+- **CLI JAR Version**: Fixed all references from `SolarManExcel2DB-1.0` to `SolarManExcel2DB-1.5` across 5 documentation files
+- **Build Config**: Fixed Maven version reference in WARP.md from 1.0 to 1.5
+- **Backend JAR Name**: Fixed README.md to use correct artifact name `solarman-ui-backend-1.5.0.jar`
+- **Dockerfile References**: Updated Node.js version references in deployment docs
+
+#### Node.js Upgrade
+- **Backend Dockerfile**: Upgraded frontend-build stage from `node:20-alpine` to `node:22-alpine`
+- **Frontend Dockerfile**: Already upgraded to `node:22-alpine` (previous commit)
+- Both Dockerfiles now consistently use Node.js 22
+
+#### Impact
+- **Documentation**: All version references now match actual project configuration
+- **Consistency**: Frontend and backend Dockerfiles use the same Node.js version
+- **No Breaking Changes**: No API or database schema changes
 
 ---
 

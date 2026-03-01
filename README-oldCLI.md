@@ -63,7 +63,7 @@ export DB_PASSWORD=your_database_password
 2. Run the application with the path to your Excel file:
 
 ```bash
-java -jar target/SolarManExcel2DB-1.0-jar-with-dependencies.jar /path/to/your/solarman_export.xlsx
+java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /path/to/your/solarman_export.xlsx
 ```
 
 ## Configuration
