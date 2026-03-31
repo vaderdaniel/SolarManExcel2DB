@@ -2,25 +2,6 @@
 
 ## ⚡ Quick Commands
 
-### CLI Application
-```bash
-# Build the application (includes security scanning)
-mvn clean package
-
-# Build with security verification
-mvn clean verify
-
-# Set environment variables
-export DB_USER=your_username
-export DB_PASSWORD=your_password
-
-# Run the application
-java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /path/to/file.xlsx
-
-# Start PostgreSQL database
-/Users/danieloots/LOOTS_PG/loots_pg.sh
-```
-
 ### Web UI (Version 1.5)
 ```bash
 # Development mode
@@ -42,7 +23,7 @@ kubectl rollout restart deployment/backend deployment/frontend -n default
 ### Security Scanning
 ```bash
 # Run security scan (integrated with build)
-mvn verify
+cd backend && mvn verify
 
 # Standalone security scan
 cd backend && ./security-scan.sh
@@ -51,20 +32,13 @@ cd backend && ./security-scan.sh
 ls -la backend/reports/
 ```
 
-### One-Liner Setup
-```bash
-# Complete setup and run
-export DB_USER=your_user DB_PASSWORD=your_pass && mvn clean package && java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar ~/Downloads/solar_data.xlsx
-```
-
 ---
 
 ## 🗂️ File Locations
 
 ### Key Files
-- **JAR**: `target/SolarManExcel2DB-1.5-jar-with-dependencies.jar`
-- **Source**: `src/main/java/loots/jd/SolarManExcel2DB.java`
-- **Config**: `pom.xml`
+- **Backend JAR**: `backend/target/solarman-ui-backend-1.5.0.jar`
+- **Backend Config**: `backend/pom.xml`
 - **Database Script**: `/Users/danieloots/LOOTS_PG/loots_pg.sh`
 
 ### Expected Excel Format
@@ -158,7 +132,7 @@ curl -s -u admin:admin123 \
 | `File does not exist` | Check file path: `ls -la /path/to/file.xlsx` |
 | `Wrong number of columns` | Verify Excel file has exactly 12 columns |
 | `Database error` | Check if PostgreSQL is running: `pg_ctl status` |
-| `Out of memory` | Increase heap: `java -Xmx4G -jar ...` |
+| `Out of memory` | Increase backend heap: set `-Xmx4G` in `JAVA_OPTS` |
 
 ### Quick Checks
 ```bash
@@ -171,8 +145,8 @@ mvn -version
 # Check if PostgreSQL is running
 pg_ctl status
 
-# Check if JAR was built
-ls -la target/*.jar
+# Check if backend JAR was built
+ls -la backend/target/*.jar
 
 # Test database connection
 psql -h localhost -p 5432 -d LOOTS -U $DB_USER -c "SELECT 1;"
@@ -213,75 +187,21 @@ SELECT pg_size_pretty(pg_total_relation_size('public.loots_inverter'));
 
 ---
 
-## 🚀 Performance Tips
-
-### Memory Optimization
-```bash
-# Small files (< 10MB)
-java -Xmx1G -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx
-
-# Large files (> 100MB)
-java -Xmx8G -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx
-
-# Enable GC logging for performance analysis
-java -XX:+PrintGC -XX:+PrintGCDetails -jar application.jar file.xlsx
-```
-
-### Batch Processing
-```bash
-# Process multiple files
-for file in ~/Downloads/solar_data/*.xlsx; do
-    echo "Processing: $file"
-    java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar "$file"
-done
-
-# Process with error logging
-for file in *.xlsx; do
-    java -jar app.jar "$file" >> success.log 2>> error.log
-done
-```
-
----
-
-## 📝 Logging & Monitoring
-
-### Quick Logging
-```bash
-# Log to file with timestamp
-java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx 2>&1 | \
-    while IFS= read -r line; do echo "$(date '+%Y-%m-%d %H:%M:%S') $line"; done | \
-    tee import.log
-
-# Simple log redirection
-java -jar application.jar file.xlsx > output.log 2>&1
-```
-
-### Monitor Progress
-```bash
-# Real-time monitoring of log file
-tail -f import.log
-
-# Count processed records in real-time
-watch -n 5 'psql -t -c "SELECT COUNT(*) FROM public.loots_inverter WHERE updated >= CURRENT_DATE;"'
-```
-
----
-
 ## 🔄 Development Shortcuts
 
-### Maven Shortcuts
+### Maven Shortcuts (Backend)
 ```bash
 # Quick build without tests
-mvn clean package -DskipTests
+cd backend && mvn clean package -DskipTests
 
 # Build with verbose output
-mvn clean package -X
+cd backend && mvn clean package -X
 
 # Show dependency tree
-mvn dependency:tree
+cd backend && mvn dependency:tree
 
 # Update dependencies
-mvn versions:display-dependency-updates
+cd backend && mvn versions:display-dependency-updates
 ```
 
 ### IDE Integration
@@ -301,11 +221,13 @@ mvn idea:clean
 
 ### Quick Tests
 ```bash
-# Test with small sample file
-echo "Creating test file..."
-java -jar application.jar test_data/small_sample.xlsx
+# Run backend tests
+cd backend && mvn test
 
-# Verify import count
+# Run frontend tests
+cd frontend/solarman-ui && npx ng test --no-watch
+
+# Verify import count after uploading via Web UI
 psql -t -c "SELECT COUNT(*) FROM public.loots_inverter WHERE updated >= CURRENT_DATE - INTERVAL '1 hour';"
 ```
 
@@ -328,8 +250,8 @@ WHERE updated >= CURRENT_DATE;
 
 ### Quick Recovery
 ```bash
-# If application hangs, find and kill process
-ps aux | grep SolarManExcel2DB
+# If backend hangs, find and kill process
+ps aux | grep solarman-ui-backend
 kill -9 <PID>
 
 # If database locks, check for long-running queries
@@ -350,52 +272,15 @@ psql -c "SELECT MIN(updated), MAX(updated), COUNT(*) FROM public.loots_inverter;
 
 ---
 
-## 🔍 Debug Mode
-
-### Enhanced Debugging
-```bash
-# Enable maximum verbosity
-java -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps \
-     -Djava.util.logging.config.file=logging.properties \
-     -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx
-
-# Debug with heap dump on error
-java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/ \
-     -jar application.jar file.xlsx
-```
-
-### SQL Debugging
-```bash
-# Enable PostgreSQL query logging (in postgresql.conf)
-# log_statement = 'all'
-# log_min_duration_statement = 0
-
-# Monitor database activity
-psql -c "SELECT * FROM pg_stat_activity WHERE datname = 'LOOTS';"
-```
-
----
-
 ## 📱 Aliases & Functions
 
 ### Useful Bash Aliases
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
-alias solar-build='mvn clean package -DskipTests'
-alias solar-run='java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar'
+alias solar-build='cd backend && mvn clean package -DskipTests'
 alias solar-db='psql -h localhost -p 5432 -d LOOTS -U $DB_USER'
-alias solar-logs='tail -f /var/log/solarman/*.log'
-
-# Function for quick processing
-solar-import() {
-    if [ -z "$1" ]; then
-        echo "Usage: solar-import /path/to/file.xlsx"
-        return 1
-    fi
-    echo "Processing $1..."
-    java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar "$1"
-    echo "Import completed"
-}
+alias solar-backend='cd backend && mvn spring-boot:run'
+alias solar-frontend='cd frontend/solarman-ui && npm start'
 ```
 
 ---

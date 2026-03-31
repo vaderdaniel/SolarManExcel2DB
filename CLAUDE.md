@@ -4,78 +4,68 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SolarManExcel2DB is a Java utility for importing solar power generation data from SolarMan Excel exports into a PostgreSQL database. The project includes two main Java classes:
-
-- **SolarManExcel2DB**: Imports SolarMan solar monitoring system data into the `loots_inverter` table
-- **TshwaneElectricityReader**: Imports electricity meter readings from Tshwane Excel files into the `tshwane_electricity` table
+SolarManExcel2DB is a full-stack web application for importing and visualizing solar power generation data:
+- **Backend** (`backend/`): Spring Boot 3.5.10 REST API with Excel processing and PostgreSQL integration
+- **Frontend** (`frontend/solarman-ui/`): Angular 21 application with Material Design and production charts
+- **Infrastructure**: Kubernetes manifests (`k8s/`), Docker configs (`docker/`), Grafana dashboards (`grafana/`)
 
 ## Build Commands
 
-**Build the application:**
+**Backend (Spring Boot):**
 ```bash
-mvn clean package
+cd backend
+mvn clean package          # Build application JAR
+mvn spring-boot:run        # Run in development mode (port 8080)
+mvn test                   # Run all 56 backend tests
+mvn clean verify           # Build + security scan (Trivy)
 ```
 
-**Run the main SolarMan import utility:**
+**Frontend (Angular):**
 ```bash
-java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /path/to/solarman_export.xlsx
-```
-
-**Run the Tshwane electricity reader:**
-```bash
-java -cp target/SolarManExcel2DB-1.5-jar-with-dependencies.jar loots.jd.TshwaneElectricityReader [/path/to/tshwane_file.xlsx]
-```
-
-**Compile only:**
-```bash
-mvn compile
+cd frontend/solarman-ui
+npm install                # Install dependencies
+npm start                  # Development server on :4200
+npm run build              # Production build
+npx ng test --no-watch     # Run all 31 frontend tests
 ```
 
 ## Database Configuration
 
-The application connects to PostgreSQL at `jdbc:postgresql://localhost:5432/LOOTS` using environment variables:
+The backend connects to PostgreSQL at `jdbc:postgresql://localhost:5432/LOOTS` via environment variables:
 - `DB_USER`: PostgreSQL username
 - `DB_PASSWORD`: PostgreSQL password
 
 Start the database with: `/Users/danieloots/LOOTS_PG/loots_pg.sh`
 
+Configure in `backend/src/main/resources/application.properties`.
+
 ## Architecture
 
-**Core Processing Flow:**
-1. Excel file validation (column headers and format)
-2. Row-by-row processing with data type conversion
-3. Timestamp parsing with multiple format support
-4. Database upsert operations with conflict resolution
-5. Progress tracking and error reporting
+**Backend Services:**
+- `ExcelProcessingService`: Parses SolarMan and Tshwane Excel files using Apache POI
+- `ImportService`: Handles data validation and UPSERT operations to PostgreSQL
+- `DatabaseService`: Production statistics using time-weighted SQL calculations (LAG window functions)
+- `DatabaseController`: REST endpoints for upload (`/api/upload`), import (`/api/import`), and status (`/api/database`)
 
-**Key Utilities:**
-- `parseTimestamp()`: Handles multiple date formats (yyyy/MM/dd, MM/dd/yyyy, SQL format)
-- `getCellValueAsString()` / `getCellValueAsDouble()`: Safe Excel cell data extraction
-- `upsertRow()`: Database insert/update with ON CONFLICT handling
+**Frontend Components:**
+- `ProductionChartComponent`: CSS bar chart with time-weighted 7-day solar production data
+- `UploadComponent`: File upload, preview, and import workflow
+- `ChartRefreshService`: Event bus for triggering chart refresh after imports
 
 **Database Tables:**
-- `loots_inverter`: Solar power metrics with timestamp as primary key
-- `tshwane_electricity`: Electricity readings with reading_date as primary key
-
-**Data Filtering:**
-- SolarManExcel2DB only processes records after 2020-01-01
-- Both utilities use UPSERT patterns to handle duplicate timestamps
+- `loots_inverter`: Solar power metrics with `updated` timestamp as primary key
+- `tshwane_electricity`: Electricity readings with `reading_date` as primary key
 
 ## Technology Stack
 
-- **Java 17** (configured in pom.xml)
-- **Maven** for build management
+- **Java 17** / **Spring Boot 3.5.10** (backend — `backend/pom.xml`)
+- **Angular 21** / **TypeScript** (frontend)
+- **Maven** for backend build management
 - **Apache POI 5.5.1** for Excel file processing
 - **PostgreSQL Driver 42.7.10** for database connectivity
 - **JUnit 5 + Mockito** for backend testing (56 tests)
 - **Vitest** for frontend testing (31 tests)
-
-## Current Architecture
-
-The project now includes a complete full-stack Web UI (v1.5) built with Angular 21 and Spring Boot 3.5.10:
-- **Frontend**: Angular application with Material Design, routing, and production charts
-- **Backend**: Spring Boot REST API with Excel processing services
-- **Deployment**: Kubernetes-ready with Docker images and manifests
-- **CLI Tools**: Original command-line utilities still available for batch processing
+- **Docker** / **Kubernetes** for deployment
+- **Trivy** for security scanning
 
 See TECH_SPEC_UI.md, WARP.md, and README.md for comprehensive documentation.

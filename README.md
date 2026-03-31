@@ -149,7 +149,6 @@ This project includes comprehensive documentation organized into specialized fil
 - **[DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)** — Docker & Kubernetes deployment with Rancher Desktop
 - **[BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md)** — Spring Boot backend technical documentation
 - **[CHANGELOG_v1.5.md](CHANGELOG_v1.5.md)** — Version history, release notes and migration guide
-- **[README-oldCLI.md](README-oldCLI.md)** — Legacy command-line interface documentation
 - **[grafana/README.md](grafana/README.md)** — Grafana dashboard documentation
 - **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** — Grafana backup & restore procedures
 - **[backend/SECURITY.md](backend/SECURITY.md)** — Security scanning with Trivy

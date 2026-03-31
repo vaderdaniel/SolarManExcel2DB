@@ -1,9 +1,8 @@
 # SolarManExcel2DB - Warp Documentation
 
 ## 🌞 Project Overview
-SolarManExcel2DB is a comprehensive solution for importing and visualizing solar power generation data. It consists of:
-1. **CLI Tool**: Java utility for batch importing SolarMan Excel exports
-2. **Web UI** (Version 1.5): Angular + Spring Boot application with production visualization
+SolarManExcel2DB is a comprehensive full-stack web application for importing and visualizing solar power generation data:
+- **Web UI** (Version 1.5): Angular + Spring Boot application with production visualization
 
 This tool streamlines the process of transferring solar monitoring data from Excel files into a PostgreSQL database for analysis, reporting, and visualization.
 
@@ -33,20 +32,14 @@ export DB_PASSWORD=your_database_password
 
 ### Build Project
 ```bash
-# Clean and package the application (includes security scanning)
-mvn clean package
+# Build the backend application
+cd backend && mvn clean package
 
-# Build with security verification
-mvn clean verify
+# Build with security verification (includes Trivy scan)
+cd backend && mvn clean verify
 ```
 
 ### Run Application
-
-#### CLI Tool
-```bash
-# Import Excel file to database
-java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /path/to/your/solarman_export.xlsx
-```
 
 #### Web UI (Version 1.5)
 ```bash
@@ -217,9 +210,12 @@ Expected column order:
 
 ### Project Structure
 ```
-src/main/java/loots/jd/
-├── SolarManExcel2DB.java       # Main application
-└── TshwaneElectricityReader.java # Utility reader
+├── backend/          # Spring Boot REST API (Java 17)
+├── frontend/         # Angular 21 UI application
+├── k8s/              # Kubernetes manifests
+├── grafana/          # Grafana dashboard configs
+├── docker/           # Docker configurations
+└── scripts/          # Build and deploy scripts
 ```
 
 ### Key Dependencies
@@ -234,32 +230,31 @@ src/main/java/loots/jd/
 
 ### Build Configuration
 ```xml
-<!-- Maven configuration -->
-<groupId>loots.jd</groupId>
-<artifactId>SolarManExcel2DB</artifactId>
-<version>1.5</version>
+<!-- Backend Maven configuration (backend/pom.xml) -->
+<groupId>com.loots</groupId>
+<artifactId>solarman-ui-backend</artifactId>
+<version>1.5.0</version>
 ```
 
 ## 📈 Usage Examples
 
-### Basic Import
-```bash
-# Import a standard SolarMan export file
-java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar ~/Downloads/solarman_export_2024.xlsx
-```
+### Import via Web UI
+1. Open the application at http://localhost:30080 (Kubernetes) or http://localhost:4200 (development)
+2. Navigate to the **Upload** page
+3. Select your SolarMan or Tshwane Excel file
+4. Preview the data and confirm the import
+5. View updated production charts on the Home page
 
-### Batch Processing
+### Import via API
 ```bash
-# Process multiple files
-for file in ~/Downloads/solar_data/*.xlsx; do
-    java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar "$file"
-done
-```
+# Upload a SolarMan file and get preview data
+curl -X POST http://localhost:8080/api/upload/solarman \
+  -F "file=@/path/to/solarman_export.xlsx"
 
-### Debug Mode
-```bash
-# Run with verbose output (application provides detailed logging)
-java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar /path/to/file.xlsx 2>&1 | tee import.log
+# Import by file type (returns inserted/updated counts)
+curl -X POST http://localhost:8080/api/import/solarman \
+  -H "Content-Type: application/json" \
+  -d '[{...preview records...}]'
 ```
 
 ## 🚨 Troubleshooting
@@ -283,12 +278,6 @@ psql -h localhost -p 5432 -d LOOTS -U $DB_USER
 - Ensure the Excel file has exactly 12 columns
 - Verify column headers match expected format
 - Check that timestamps are in recognized format
-
-#### Memory Issues
-```bash
-# Increase JVM heap size for large files
-java -Xmx2G -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar file.xlsx
-```
 
 ### Log Analysis
 The application provides detailed logging for each row processed:
@@ -499,23 +488,18 @@ npx ng test
 16. ✅ Supports both fileId-based and data array imports
 
 #### Integration Testing
-```bash
-# Test with sample data
-java -jar target/SolarManExcel2DB-1.5-jar-with-dependencies.jar test_data/sample.xlsx
-```
+Upload a sample Excel file through the Web UI and verify the import results and production chart updates.
 
 ---
 
 ## 📝 Recent Updates
 
 ### March 1, 2026 - Documentation Housekeeping & Node 22 Upgrade
-- Fixed CLI JAR references from version 1.0 to 1.5 across all documentation
 - Upgraded Node.js from 20 to 22 in both frontend and backend Dockerfiles
-- Fixed build configuration version references
 - Updated all documentation to reflect current software versions
 
 ### February 21, 2026 - Dependency Upgrades & Vitest Migration
-- Upgraded Java from 11 to 17 (both CLI and backend)
+- Upgraded Java from 11 to 17 (backend)
 - Upgraded Angular from 20.3 to 21
 - Migrated frontend tests from Karma/Jasmine to Vitest
 - Upgraded Spring Boot from 3.2.2 to 3.5.10
