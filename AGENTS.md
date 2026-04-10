@@ -1,4 +1,8 @@
-# SolarManExcel2DB - Warp Documentation
+# AGENTS.md
+
+This file provides comprehensive guidance to AI assistants (Claude Code, Warp, etc.) when working with code in this repository.
+
+# SolarManExcel2DB - Project Documentation
 
 ## 🌞 Project Overview
 SolarManExcel2DB is a comprehensive full-stack web application for importing and visualizing solar power generation data:
