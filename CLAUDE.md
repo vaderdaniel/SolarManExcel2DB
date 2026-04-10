@@ -68,4 +68,4 @@ Configure in `backend/src/main/resources/application.properties`.
 - **Docker** / **Kubernetes** for deployment
 - **Trivy** for security scanning
 
-See TECH_SPEC_UI.md, WARP.md, and README.md for comprehensive documentation.
+See TECH_SPEC_UI.md, AGENTS.md, and README.md for comprehensive documentation.

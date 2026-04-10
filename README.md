@@ -141,7 +141,7 @@ Open your browser to **http://localhost:4200** and start importing your Excel fi
 
 This project includes comprehensive documentation organized into specialized files:
 
-- **[WARP.md](WARP.md)** — Main project documentation (overview, features, setup, troubleshooting)
+- **[AGENTS.md](AGENTS.md)** — Main project documentation (overview, features, setup, troubleshooting)
 - **[WARP_QUICK.md](WARP_QUICK.md)** — Quick reference for common commands and queries
 - **[WARP_API.md](WARP_API.md)** — REST API and CLI class reference
 - **[WARP_DEPLOY.md](WARP_DEPLOY.md)** — Development & deployment guide (local, Docker, Kubernetes)
