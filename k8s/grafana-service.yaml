@@ -4,10 +4,11 @@ metadata:
   name: grafana-service
   namespace: default
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: grafana
   ports:
   - port: 3000
     targetPort: 3000
+    nodePort: 30000
     protocol: TCP
