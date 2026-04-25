@@ -35,6 +35,11 @@ if ! docker images | grep -q "solarman-frontend"; then
 fi
 echo "✅ All Docker images found"
 
+# Apply Secret (credentials)
+echo ""
+echo "🔐 Applying Secret..."
+kubectl apply -f k8s/secret.yaml
+
 # Apply ConfigMap
 echo ""
 echo "📝 Applying ConfigMap..."

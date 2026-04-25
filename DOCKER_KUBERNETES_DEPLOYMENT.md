@@ -149,8 +149,9 @@ For detailed security documentation:
 ```
 
 This script performs the following steps:
-1. Applies ConfigMap with database credentials
-2. Creates PersistentVolume and PersistentVolumeClaim for PostgreSQL
+1. Applies Secret with database credentials
+2. Applies ConfigMap with non-sensitive configuration
+3. Creates PersistentVolume and PersistentVolumeClaim for PostgreSQL
 3. Deploys PostgreSQL and waits for readiness
 4. Deploys Backend (init container waits for PostgreSQL) and waits for readiness
 5. Deploys Frontend (init container waits for Backend) and waits for readiness
@@ -177,8 +178,9 @@ kubectl get pods
 # Services
 kubectl get svc
 
-# ConfigMaps
+# ConfigMaps and Secrets
 kubectl get configmap
+kubectl get secret
 
 # PersistentVolumes
 kubectl get pv,pvc
@@ -253,7 +255,8 @@ SolarManExcel2DB/
 │   └── postgresql/
 │       └── Dockerfile             # PostgreSQL with existing data
 ├── k8s/
-│   ├── configmap.yaml             # Database credentials
+│   ├── secret.yaml                # Database credentials (⚠️ gitignored — never commit)
+│   ├── configmap.yaml             # Non-sensitive configuration
 │   ├── postgres-pv.yaml           # PersistentVolume with hostPath
 │   ├── postgres-deployment.yaml   # PostgreSQL Deployment & Service
 │   ├── backend-deployment.yaml    # Backend Deployment & Service (with init container)
@@ -273,26 +276,34 @@ SolarManExcel2DB/
 
 ### Database Credentials
 
-Stored in `k8s/configmap.yaml`:
+Stored in `k8s/secret.yaml` (⚠️ gitignored — never commit this file):
 ```yaml
-DB_USER: danieloots
-DB_PASSWORD: *****
+DB_USER: <base64-encoded>
+DB_PASSWORD: <base64-encoded>
+POSTGRES_USER: <base64-encoded>
+POSTGRES_PASSWORD: <base64-encoded>
+```
+To regenerate: `echo -n "value" | base64`
+
+Non-sensitive config remains in `k8s/configmap.yaml`:
+```yaml
 POSTGRES_DB: LOOTS
+SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-service:5432/LOOTS
 ```
 
 ### Environment Variables
 
-**Backend** (from ConfigMap):
+**Backend** (URL from ConfigMap, credentials from Secret):
 - `SPRING_DATASOURCE_URL`: jdbc:postgresql://postgres-service:5432/LOOTS
-- `SPRING_DATASOURCE_USERNAME`: danieloots
-- `SPRING_DATASOURCE_PASSWORD`: *****
-- `DB_USER`: danieloots
-- `DB_PASSWORD`: *****
+- `SPRING_DATASOURCE_USERNAME`: *(from Secret)*
+- `SPRING_DATASOURCE_PASSWORD`: *(from Secret)*
+- `DB_USER`: *(from Secret)*
+- `DB_PASSWORD`: *(from Secret)*
 
-**PostgreSQL** (from ConfigMap):
+**PostgreSQL** (DB name from ConfigMap, credentials from Secret):
 - `POSTGRES_DB`: LOOTS
-- `POSTGRES_USER`: danieloots
-- `POSTGRES_PASSWORD`: *****
+- `POSTGRES_USER`: *(from Secret)*
+- `POSTGRES_PASSWORD`: *(from Secret)*
 - `PGDATA`: /var/lib/postgresql/data/pgdata
 
 ### Networking
@@ -571,7 +582,7 @@ kubectl get nodes
 ## 🔐 Security Considerations
 
 **Current Setup** (Development):
-- Database credentials in ConfigMap (not encrypted)
+- ✅ Database credentials in Kubernetes Secret (base64-encoded, not in plaintext)
 - Simple NodePort exposure
 - No TLS/SSL
 
@@ -582,7 +593,7 @@ kubectl get nodes
 - ✅ Security reports generated on every build
 
 **Production Recommendations**:
-- Use Kubernetes Secrets instead of ConfigMap
+- ✅ Kubernetes Secrets used for database credentials (not ConfigMap)
 - Implement TLS/SSL certificates
 - Use Ingress controller with proper authentication
 - Enable PostgreSQL SSL connections
