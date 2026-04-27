@@ -189,7 +189,7 @@ Upgraded via `npx ng update @angular/core@21 @angular/cli@21` then `npm audit fi
 ## 📝 Documentation Updates
 
 ### Updated Files
-- **TECH_SPEC_UI.md**: Added v1.1 features, routing, new components
+- **frontend/solarman-ui/README.md**: Consolidated v1.1 features, routing, component structure, Angular conventions, and TypeScript models from TECH_SPEC_UI.md
 - **WARP.md**: Added Web UI section with deployment instructions
 - **CHANGELOG_v1.5.md**: This file
 

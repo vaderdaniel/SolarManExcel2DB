@@ -142,7 +142,7 @@ Open your browser to **http://localhost:4200** and start importing your Excel fi
 This project includes comprehensive documentation organized into specialized files:
 
 - **[AGENTS.md](AGENTS.md)** — Main project documentation (overview, features, setup, API reference, deployment, troubleshooting)
-- **[TECH_SPEC_UI.md](TECH_SPEC_UI.md)** — Technical architecture and component specifications
+- **[frontend/solarman-ui/README.md](frontend/solarman-ui/README.md)** — Frontend component structure, Angular conventions, and TypeScript models
 - **[CHANGELOG_v1.6.md](CHANGELOG_v1.6.md)** — Version history, release notes and migration guide
 - **[grafana/README.md](grafana/README.md)** — Grafana dashboard documentation and backup/restore guide
 - **[backend/SECURITY.md](backend/SECURITY.md)** — Security scanning with Trivy (quick reference + full guide)
