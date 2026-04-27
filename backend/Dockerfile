@@ -7,7 +7,7 @@ WORKDIR /app/frontend
 COPY frontend/solarman-ui/package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Copy frontend source
 COPY frontend/solarman-ui/ ./
