@@ -835,7 +835,7 @@ public class WebConfig {
 ```json
 {
   "name": "solarman-ui",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
