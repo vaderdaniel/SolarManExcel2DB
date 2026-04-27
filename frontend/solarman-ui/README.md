@@ -1,65 +1,19 @@
-# SolarmanUi
+# SolarMan UI — Angular Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.8.
+Version 1.6.0 · Angular 21.2 · Vitest
 
-## Development server
+For full project documentation see **[AGENTS.md](../../AGENTS.md)** at the repository root.
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Quick Commands
 
 ```bash
-ng generate component component-name
+npm start                   # dev server on :4200
+npx ng test --no-watch      # unit tests (31 tests)
+npx ng test                 # unit tests in watch mode
+npx playwright test         # e2e tests (requires :4200 running)
+npx ng build --configuration production --output-path=dist/solarman-ui
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Test Documentation
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with [Vitest](https://vitest.dev/) (via the Angular test builder), use the following command:
-
-```bash
-npx ng test --no-watch
-```
-
-To run tests in watch mode during development:
-
-```bash
-npx ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+See **[backend/src/test/README.md](../../backend/src/test/README.md)** for backend and frontend test docs.

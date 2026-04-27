@@ -352,7 +352,7 @@ ls backend/reports/               # maven-dependencies.json, jar-artifact.json, 
 - ✅ Angular 21.2.10 (XSS in i18n patched)
 - ✅ Zero npm audit vulnerabilities
 
-For full security docs: `backend/SECURITY.md` · `backend/SECURITY-QUICKSTART.md`
+For full security docs: `backend/SECURITY.md`
 
 ---
 
@@ -383,7 +383,7 @@ kubectl rollout restart deployment/grafana
 kubectl logs -l app=grafana -f
 ```
 
-Full docs: `grafana/README.md` · `grafana/BACKUP_RESTORE_GUIDE.md`
+Full docs: `grafana/README.md`
 
 ---
 

@@ -1,7 +1,16 @@
-# Backend Unit Tests
+# Unit Tests
 
 ## Overview
-This directory contains comprehensive unit tests for the SolarManExcel2DB backend application, built with Spring Boot and JUnit 5.
+This repository contains unit tests for both the backend (Spring Boot / JUnit 5) and frontend (Angular / Vitest) of SolarManExcel2DB.
+
+| Layer | Tests | Runner |
+|-------|-------|--------|
+| Backend | 56 | `mvn test` |
+| Frontend | 31 | `npx ng test --no-watch` |
+
+---
+
+# Backend Tests
 
 ## Test Structure
 
@@ -226,3 +235,149 @@ When adding new tests:
 - [JUnit 5 Documentation](https://junit.org/junit5/docs/current/user-guide/)
 - [Mockito Documentation](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html)
 - [Spring Boot Testing](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing)
+
+---
+
+# Frontend Tests
+
+## Test Structure
+
+```
+frontend/solarman-ui/src/app/
+├── components/
+│   └── production-chart/
+│       ├── production-chart.ts          # Component
+│       └── production-chart.spec.ts     # 18 tests
+├── pages/
+│   └── upload/
+│       ├── upload.ts                    # Page component
+│       └── upload.spec.ts               # 11 tests
+└── app.spec.ts                          # 2 tests
+```
+
+## Running Tests
+
+```bash
+cd frontend/solarman-ui
+npx ng test --no-watch    # run once
+npx ng test               # watch mode (re-runs on file change)
+npx playwright test       # e2e tests (requires :4200 running)
+```
+
+## Test Coverage Summary
+
+### ProductionChartComponent (18 tests)
+
+#### processChartData (10 tests)
+- ✅ Calculates `yAxisMax` — rounds to "nice" numbers (e.g., 45600.5 → 50000, 15 → 20, 87000 → 100000)
+- ✅ Calculates `heightPercent` for each bar (0–100%)
+- ✅ Handles empty arrays and null/undefined stats
+- ✅ Sets `yAxisMax` to 10 when max value is 0
+- ✅ Sorts data by date ascending (oldest to newest)
+- ✅ Generates 5 y-axis labels from max to 0
+
+#### Chart Auto-Refresh (5 tests)
+- ✅ Reloads chart data when `ChartRefreshService` triggers refresh
+- ✅ Subscribes to `refresh$` on `ngOnInit`
+- ✅ Unsubscribes from `refresh$` on `ngOnDestroy`
+- ✅ Handles multiple refresh triggers
+- ✅ Updates `yAxisMax` when refresh provides different data
+
+#### Loading and Error States (3 tests)
+- ✅ Sets loading state during data fetch
+- ✅ Handles error state when data fetch fails
+- ✅ Clears error state on successful refresh
+
+### UploadComponent (11 tests)
+
+#### Chart Refresh After Import (5 tests)
+- ✅ Triggers refresh after successful import (fileId path)
+- ✅ Triggers refresh after successful import (data array path)
+- ✅ Does NOT trigger refresh when import fails
+- ✅ Triggers refresh for Tshwane file type
+- ✅ Triggers refresh exactly once per successful import
+
+#### Import Service Interaction (2 tests)
+- ✅ Calls `importDataByFileId` when fileId is available
+- ✅ Calls `importData` when fileId is null (fallback)
+
+#### Component State Management (2 tests)
+- ✅ Updates view to `'result'` after successful import
+- ✅ Does NOT change view when import fails
+
+#### Import Flag Management (2 tests)
+- ✅ Clears `isImporting` after successful import
+- ✅ Clears `isImporting` after failed import
+
+## Testing Patterns
+
+### Component Setup with TestBed
+```typescript
+beforeEach(async () => {
+  await TestBed.configureTestingModule({
+    imports: [ProductionChartComponent],
+    providers: [
+      { provide: DatabaseService, useValue: mockDatabaseService },
+      { provide: ChartRefreshService, useValue: mockChartRefreshService }
+    ]
+  }).compileComponents();
+  fixture = TestBed.createComponent(ProductionChartComponent);
+  component = fixture.componentInstance;
+});
+```
+
+### Mocking Services with Vitest
+```typescript
+import { vi } from 'vitest';
+const mockDatabaseService = { getProductionStats: vi.fn() };
+
+// For observable properties
+Object.defineProperty(mockChartRefreshService, 'refresh$', {
+  get: () => refreshSubject.asObservable()
+});
+```
+
+### Testing with Synchronous Observables
+`of()` emits synchronously — no `fakeAsync`/`tick` needed:
+```typescript
+mockService.getData.mockReturnValue(of(testData));
+component.doSomething();
+expect(component.result).toBe(expectedValue);
+```
+
+### Error Case
+```typescript
+mockService.getData.mockReturnValue(throwError(() => new Error('DB error')));
+fixture.detectChanges();
+expect(component.hasError).toBe(true);
+```
+
+## Common Troubleshooting
+
+| Error | Fix |
+|-------|-----|
+| "No provider for HttpClient" | Use `provideHttpClient()` + `provideHttpClientTesting()` in providers |
+| "Cannot read property 'subscribe' of undefined" | Ensure mocked services return observables via `of(...)` |
+| "Expected to be running in 'ProxyZone'" | Remove `fakeAsync`/`tick` — `of()` is synchronous |
+
+## Configuration
+
+- **Runner**: Vitest via `@angular/build:unit-test` builder
+- **Environment**: jsdom
+- **TypeScript**: `tsconfig.spec.json` with `vitest/globals` types
+- **Zone.js**: `zone.js/testing` polyfill included via Angular build config
+
+## Adding New Tests
+
+1. Create `my-component.spec.ts` next to the component
+2. Use `describe('MyComponent', () => { ... })`
+3. Configure `TestBed` in `beforeEach`
+4. Mock all injected services
+5. Name tests: `it('should do X when Y happens', ...)`
+
+## Resources
+
+- [Angular Testing Guide](https://angular.dev/guide/testing)
+- [Vitest Documentation](https://vitest.dev/)
+- [RxJS Testing](https://rxjs.dev/guide/testing/marble-testing)
+- [Angular Material Harnesses](https://material.angular.io/guide/using-component-harnesses)

@@ -2,6 +2,50 @@
 
 This directory contains backup configurations for Grafana dashboards that visualize solar power generation, consumption, and battery data stored in the PostgreSQL `LOOTS` database.
 
+## 🚀 Quick Reference
+
+**Access:** `kubectl port-forward svc/grafana-service 3000:3000 -n default` → http://localhost:3000  
+**Login:** `admin` / `admin123`  
+**Database user:** `grafana` / `grafana123` (read-only)
+
+### Restore All Dashboards (Recommended)
+```bash
+./restore-dashboards-fixed.sh
+```
+
+### Backup All Dashboards
+```bash
+# Ensure port-forward is active first
+kubectl port-forward svc/grafana-service 3000:3000 -n default &
+
+curl -s -u admin:admin123 'http://localhost:3000/api/dashboards/uid/feab8f79-92e8-412e-83a6-99d262725b68' \
+  | jq '.dashboard' > grafana/dashboards/daily-stats.json
+curl -s -u admin:admin123 'http://localhost:3000/api/dashboards/uid/208863de-7e71-4c6d-b5f7-ede14cb35b61' \
+  | jq '.dashboard' > grafana/dashboards/monthly-stats.json
+curl -s -u admin:admin123 'http://localhost:3000/api/dashboards/uid/weekly-stats-iso-week' \
+  | jq '.dashboard' > grafana/dashboards/weekly-stats.json
+curl -s -u admin:admin123 'http://localhost:3000/api/dashboards/uid/by-week-dashboard' \
+  | jq '.dashboard' > grafana/dashboards/by-week.json
+curl -s -u admin:admin123 'http://localhost:3000/api/datasources/uid/P7D58F15E2B4BC203' \
+  | jq 'del(.version)' > grafana/datasource-postgresql.json
+```
+
+### Common Troubleshooting
+```bash
+# Dashboards show "No data" — fix permissions
+kubectl exec -n default deployment/postgres -- \
+  psql -U danieloots -d LOOTS -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana;"
+
+# Test datasource connection
+curl -s -X POST -u admin:admin123 \
+  'http://localhost:3000/api/datasources/uid/P7D58F15E2B4BC203/health' | jq .
+
+# Get current datasource UID (if changed)
+curl -s -u admin:admin123 'http://localhost:3000/api/datasources' | jq '.[].uid'
+```
+
+---
+
 ## 📍 Dashboard Access
 
 The Grafana instance is running in a pod and accessible at:

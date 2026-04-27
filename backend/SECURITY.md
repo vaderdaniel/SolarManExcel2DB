@@ -2,7 +2,24 @@
 
 This document describes the security scanning setup for the SolarManExcel2DB backend using Trivy.
 
-## Overview
+## 🚀 Quick Reference
+
+```bash
+mvn verify              # build + scan (recommended)
+mvn verify -DskipTests  # scan only, skip tests
+./security-scan.sh      # standalone scan (from backend/ directory)
+```
+
+**Scans:** Maven dependencies · JAR artifact · Docker image `solarman-backend:latest`  
+**Reports:** `backend/reports/*.json` and `*.sarif`  
+**Build fails on:** CRITICAL severity only
+
+### Current Status
+- ✅ Tomcat 10.1.54 — no CRITICAL CVEs
+- ✅ Spring Boot 3.5.10 — all dependencies patched
+- ✅ Zero CRITICAL vulnerabilities detected
+
+
 
 The backend build process includes automated security scanning using [Trivy](https://trivy.dev/), which scans for vulnerabilities in:
 - **Maven dependencies** (Java libraries in `pom.xml`)

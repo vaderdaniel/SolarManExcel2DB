@@ -249,9 +249,33 @@ These tests can be integrated into a CI/CD pipeline:
     ./k8s/tests/init-container-tests.sh
 ```
 
+## Requirements Coverage
+
+| Requirement | Test Cases | Script |
+|-------------|------------|--------|
+| 1. Backend waits for PostgreSQL:5432 | YAML tests 1-3, Integration test 1 | Both |
+| 2. Frontend waits for Backend:8080 | YAML tests 4-6, Integration test 2 | Both |
+| 3. Grafana waits for PostgreSQL:5432 | YAML tests 7-9, Integration test 3 | Both |
+| 4. Continuous polling with retry | YAML tests 3,6,9; Integration tests 4-6 | Both |
+| 5. Main container waits for init completion | Integration test 7 | Integration only |
+
+**YAML validation**: 19 tests · **Integration**: 5-9 tests (dynamic) · **Total**: 24-28 tests
+
+## Test Maintenance
+
+### Adding New Tests
+1. Edit `validate-init-containers.sh` (static) or `init-container-tests.sh` (runtime)
+2. Add a new test function following `test_<description>()` naming
+3. Use `log_success` / `log_failure` helpers for consistent output
+4. Call the new function from `main()`
+
+### Modifying Existing Tests
+1. Locate the test function in the appropriate script
+2. Update the logic and ensure it still passes/fails cleanly
+3. Update this README if behavior changes significantly
+
 ## Related Documentation
 
 - [Kubernetes Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/)
 - [Pod Lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
-- Project deployment guide: `DOCKER_KUBERNETES_DEPLOYMENT.md`
-- Startup sequence changelog: `CHANGELOG_STARTUP_SEQUENCE.md`
+- Deployment & troubleshooting guide: `AGENTS.md`

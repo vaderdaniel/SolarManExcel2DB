@@ -144,10 +144,9 @@ This project includes comprehensive documentation organized into specialized fil
 - **[AGENTS.md](AGENTS.md)** — Main project documentation (overview, features, setup, API reference, deployment, troubleshooting)
 - **[TECH_SPEC_UI.md](TECH_SPEC_UI.md)** — Technical architecture and component specifications
 - **[CHANGELOG_v1.6.md](CHANGELOG_v1.6.md)** — Version history, release notes and migration guide
-- **[grafana/README.md](grafana/README.md)** — Grafana dashboard documentation
-- **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** — Grafana backup & restore procedures
-- **[backend/SECURITY.md](backend/SECURITY.md)** — Security scanning with Trivy
-- **[backend/SECURITY-QUICKSTART.md](backend/SECURITY-QUICKSTART.md)** — Security quick reference
+- **[grafana/README.md](grafana/README.md)** — Grafana dashboard documentation and backup/restore guide
+- **[backend/SECURITY.md](backend/SECURITY.md)** — Security scanning with Trivy (quick reference + full guide)
+- **[backend/src/test/README.md](backend/src/test/README.md)** — Backend and frontend unit test documentation
 
 ## 🎯 Recent Major Updates
 
@@ -384,8 +383,7 @@ Security reports are generated in `backend/reports/`:
 - Docker image scan
 
 For detailed security documentation, see:
-- **[backend/SECURITY.md](backend/SECURITY.md)** - Comprehensive security scanning guide
-- **[backend/SECURITY-QUICKSTART.md](backend/SECURITY-QUICKSTART.md)** - Quick reference
+- **[backend/SECURITY.md](backend/SECURITY.md)** - Security scanning guide (includes quick reference)
 
 ## 📊 Grafana Dashboards
 
@@ -410,8 +408,7 @@ open http://localhost:3000
 ```
 
 For detailed Grafana documentation, see:
-- **[grafana/README.md](grafana/README.md)** - Complete dashboard documentation
-- **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** - Backup procedures
+- **[grafana/README.md](grafana/README.md)** - Dashboard documentation and backup/restore guide
 
 ## 📸 Screenshots
 

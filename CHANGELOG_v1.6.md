@@ -257,8 +257,7 @@ Upgraded via `npx ng update @angular/core@21 @angular/cli@21` then `npm audit fi
   - Fixed CVE-2025-24813
   - Updated via `<tomcat.version>` property in `pom.xml`
 - **Security Documentation**: Added comprehensive guides
-  - `backend/SECURITY.md` - Complete security scanning documentation
-  - `backend/SECURITY-QUICKSTART.md` - Quick reference guide
+  - `backend/SECURITY.md` - Complete security scanning documentation (includes quick reference)
   - `backend/security-scan.sh` - Standalone security scan script
 
 #### Grafana Backup/Restore System
@@ -269,8 +268,7 @@ Upgraded via `npx ng update @angular/core@21 @angular/cli@21` then `npm audit fi
   - `restore-dashboards-fixed.sh` - Auto-detects and fixes datasource UIDs
   - `restore-dashboards.sh` - Original restore script
 - **Documentation**: Complete Grafana documentation
-  - `grafana/README.md` - Dashboard descriptions and usage
-  - `grafana/BACKUP_RESTORE_GUIDE.md` - Quick reference for backup/restore
+  - `grafana/README.md` - Dashboard descriptions, usage, and backup/restore guide
 
 #### Docker Improvements
 - **Dockerfile.simple**: New runtime-only Dockerfile
