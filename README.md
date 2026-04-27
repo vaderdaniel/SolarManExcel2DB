@@ -75,7 +75,7 @@ Run the complete application stack in containers with Kubernetes orchestration:
 open http://localhost:30080
 ```
 
-📘 **[Full Docker & Kubernetes Documentation →](DOCKER_KUBERNETES_DEPLOYMENT.md)**
+📘 **[Full Docker & Kubernetes Documentation →](AGENTS.md#-update--deployment-workflow)**
 
 #### 🐋 **Option 2: Docker Compose (Quick Testing)**
 
@@ -141,13 +141,8 @@ Open your browser to **http://localhost:4200** and start importing your Excel fi
 
 This project includes comprehensive documentation organized into specialized files:
 
-- **[AGENTS.md](AGENTS.md)** — Main project documentation (overview, features, setup, troubleshooting)
-- **[WARP_QUICK.md](WARP_QUICK.md)** — Quick reference for common commands and queries
-- **[WARP_API.md](WARP_API.md)** — REST API and CLI class reference
-- **[WARP_DEPLOY.md](WARP_DEPLOY.md)** — Development & deployment guide (local, Docker, Kubernetes)
+- **[AGENTS.md](AGENTS.md)** — Main project documentation (overview, features, setup, API reference, deployment, troubleshooting)
 - **[TECH_SPEC_UI.md](TECH_SPEC_UI.md)** — Technical architecture and component specifications
-- **[DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)** — Docker & Kubernetes deployment with Rancher Desktop
-- **[BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md)** — Spring Boot backend technical documentation
 - **[CHANGELOG_v1.6.md](CHANGELOG_v1.6.md)** — Version history, release notes and migration guide
 - **[grafana/README.md](grafana/README.md)** — Grafana dashboard documentation
 - **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** — Grafana backup & restore procedures
@@ -311,7 +306,7 @@ Deploy the complete application stack to Kubernetes with proper orchestration:
 # Access application at http://localhost:30080
 ```
 
-For detailed deployment instructions, see **[DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)**
+For detailed deployment instructions, see **[AGENTS.md](AGENTS.md#-update--deployment-workflow)**
 
 ### Option 2: Docker Compose
 
