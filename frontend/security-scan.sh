@@ -43,7 +43,7 @@ scan_npm_audit() {
 
     if [ ! -d "solarman-ui/node_modules" ]; then
         echo -e "${YELLOW}  Installing dependencies first...${NC}"
-        (cd solarman-ui && npm ci --silent)
+        (cd solarman-ui && npm install --silent)
     fi
 
     # Run npm audit and save JSON report

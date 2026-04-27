@@ -3,9 +3,9 @@
 ## 📋 Project Overview
 
 **Project Name**: SolarManExcel2DB Web UI  
-**Version**: 1.5.0  
+**Version**: 1.6.0  
 **Architecture**: Separate frontend/backend projects with REST API communication  
-**Frontend**: Angular 21 with Angular Material & Routing  
+**Frontend**: Angular 21.2 with Angular Material & Routing  
 **Backend**: Spring Boot 3.5.x with embedded Tomcat  
 **Database**: PostgreSQL  
 **Build Tools**: Maven (backend) + Angular CLI (frontend)  
@@ -697,7 +697,7 @@ public class WebConfig {
     
     <groupId>com.loots</groupId>
     <artifactId>solarman-ui-parent</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
     <packaging>pom</packaging>
     
     <modules>
@@ -772,7 +772,7 @@ public class WebConfig {
     
     <groupId>com.loots</groupId>
     <artifactId>solarman-ui-backend</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
     <packaging>jar</packaging>
     
     <dependencies>
