@@ -334,7 +334,7 @@ cd frontend/solarman-ui && npm run build
 cd ../../backend && mvn clean package
 
 # Deploy single JAR
-java -jar target/solarman-ui-backend-1.5.0.jar
+java -jar target/solarman-ui-backend-1.6.0.jar
 
 # Access application at http://localhost:8080
 ```
