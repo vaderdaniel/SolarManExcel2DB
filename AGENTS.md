@@ -6,7 +6,7 @@ This file provides comprehensive guidance to AI assistants (Claude Code, Warp, e
 
 ## 🌞 Project Overview
 SolarManExcel2DB is a comprehensive full-stack web application for importing and visualizing solar power generation data:
-- **Web UI** (Version 1.5): Angular + Spring Boot application with production visualization
+- **Web UI** (Version 1.6): Angular + Spring Boot application with production visualization
 
 This tool streamlines the process of transferring solar monitoring data from Excel files into a PostgreSQL database for analysis, reporting, and visualization.
 
@@ -45,7 +45,7 @@ cd backend && mvn clean verify
 
 ### Run Application
 
-#### Web UI (Version 1.5)
+#### Web UI (Version 1.6)
 ```bash
 # Development mode
 cd frontend/solarman-ui && ng serve    # Frontend on :4200
@@ -56,7 +56,7 @@ kubectl get pods -n default            # Check deployment status
 # Access at http://localhost:30080
 ```
 
-## 📊 Web UI Features (Version 1.5)
+## 📊 Web UI Features (Version 1.6)
 
 ### Overview
 The Web UI provides a modern interface for:
@@ -225,7 +225,7 @@ Expected column order:
 ### Key Dependencies
 - **Apache POI 5.5.1**: Excel file processing
 - **PostgreSQL JDBC 42.7.10**: Database connectivity
-- **Apache Tomcat 10.1.52**: Embedded web server (security-patched)
+- **Apache Tomcat 10.1.54**: Embedded web server (security-patched)
 - **Java 17**: Runtime environment
 - **Spring Boot 3.5.10**: Web framework (backend)
 - **Angular 21**: Frontend framework
@@ -315,7 +315,7 @@ cd backend && ./security-scan.sh
 - Logs HIGH, MEDIUM, LOW vulnerabilities
 
 **Security Updates:**
-- ✅ Tomcat upgraded to 10.1.52 (latest security patches)
+- ✅ Tomcat upgraded to 10.1.54 (latest security patches)
 - ✅ Regular dependency scanning
 - ✅ Container image hardening
 
@@ -498,6 +498,15 @@ Upload a sample Excel file through the Web UI and verify the import results and 
 
 ## 📝 Recent Updates
 
+### April 27, 2026 - Security Vulnerability Fixes (v1.6)
+- Upgraded Apache Tomcat from 10.1.52 to 10.1.54 (CRITICAL CVE-2026-29145 + 6 other CVEs)
+- Forced Spring Framework override to 6.2.17 (CVE-2026-22737, CVE-2026-22735)
+- Forced commons-lang3 override to 3.18.0 (CVE-2025-48924)
+- Upgraded Angular from 21.1.x to 21.2.10 (XSS in i18n CVEs fixed)
+- Upgraded @angular/build from 21.1.4 to 21.2.8 (updated vite, undici; path traversal/HTTP smuggling fixed)
+- Resolved all 18 npm audit vulnerabilities (zero remaining)
+- All 56 backend tests and 31 frontend tests passing
+
 ### March 1, 2026 - Documentation Housekeeping & Node 22 Upgrade
 - Upgraded Node.js from 20 to 22 in both frontend and backend Dockerfiles
 - Updated all documentation to reflect current software versions
@@ -523,10 +532,11 @@ Upload a sample Excel file through the Web UI and verify the import results and 
 ### Version History
 - **v1.1** - Production visualization & multi-page UI
 - **v2.0** - Full-stack web application transformation
+- **v1.6** - Security vulnerability fixes (Tomcat, Spring, Angular 21.2)
 - **v1.5** - Dependency upgrades, Angular 21, Java 17, Vitest migration
 
 ---
 
 **Note**: This utility is designed for local development and small-scale data imports. For production environments, consider implementing additional monitoring, error recovery, and scalability features.
 
-**Last Updated**: March 1, 2026
+**Last Updated**: April 27, 2026

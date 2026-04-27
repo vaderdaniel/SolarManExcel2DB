@@ -1,7 +1,7 @@
 # SolarManExcel2DB - Complete Web Application
 
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.oracle.com/java/)
-[![Angular](https://img.shields.io/badge/Angular-21-red.svg)](https://angular.dev/)
+[![Angular](https://img.shields.io/badge/Angular-21.2-red.svg)](https://angular.dev/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-green.svg)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://www.postgresql.org/)
 [![Grafana](https://img.shields.io/badge/Grafana-Latest-orange.svg)](https://grafana.com/)
@@ -37,7 +37,7 @@ This prevents connection errors and ensures clean application startup.
 
 ## ✨ Key Features
 
-### Web UI (Version 1.5)
+### Web UI (Version 1.6)
 - 🌐 **Modern Web UI**: Angular 21 with Material Design and Routing
 - 📊 **Production Visualization**: Interactive bar chart showing last 7 days of solar production
 - 🔄 **Time-Weighted Calculations**: Accurate energy production metrics matching Grafana dashboards
@@ -148,13 +148,21 @@ This project includes comprehensive documentation organized into specialized fil
 - **[TECH_SPEC_UI.md](TECH_SPEC_UI.md)** — Technical architecture and component specifications
 - **[DOCKER_KUBERNETES_DEPLOYMENT.md](DOCKER_KUBERNETES_DEPLOYMENT.md)** — Docker & Kubernetes deployment with Rancher Desktop
 - **[BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md)** — Spring Boot backend technical documentation
-- **[CHANGELOG_v1.5.md](CHANGELOG_v1.5.md)** — Version history, release notes and migration guide
+- **[CHANGELOG_v1.6.md](CHANGELOG_v1.6.md)** — Version history, release notes and migration guide
 - **[grafana/README.md](grafana/README.md)** — Grafana dashboard documentation
 - **[grafana/BACKUP_RESTORE_GUIDE.md](grafana/BACKUP_RESTORE_GUIDE.md)** — Grafana backup & restore procedures
 - **[backend/SECURITY.md](backend/SECURITY.md)** — Security scanning with Trivy
 - **[backend/SECURITY-QUICKSTART.md](backend/SECURITY-QUICKSTART.md)** — Security quick reference
 
 ## 🎯 Recent Major Updates
+
+### v1.6 - Security Vulnerability Fixes (April 27, 2026)
+- ✅ **Tomcat 10.1.54**: Upgraded from 10.1.52 (CRITICAL CVE-2026-29145 auth bypass + 6 other CVEs fixed)
+- ✅ **Spring Framework 6.2.17**: Forced override to fix CVE-2026-22737
+- ✅ **commons-lang3 3.18.0**: Forced override to fix CVE-2025-48924
+- ✅ **Angular 21.2.10**: Upgraded from 21.1.x (XSS in i18n fixed)
+- ✅ **vite & undici**: Updated via @angular/build 21.2.8 (path traversal, HTTP smuggling fixed)
+- ✅ **Zero frontend vulnerabilities**: All 18 npm audit issues resolved
 
 ### v1.5 - Dependency Upgrades & Vitest Migration (February 21, 2026)
 - ✅ **Java 17**: Upgraded from Java 11 to Java 17
@@ -199,7 +207,7 @@ This project includes comprehensive documentation organized into specialized fil
 ## 🛠️ Technology Stack
 
 ### Frontend
-- **Angular 21**: Latest framework with standalone components
+- **Angular 21.2**: Latest framework with standalone components
 - **Angular Material**: Modern Material Design components
 - **TypeScript 5.9**: Type-safe development environment
 - **RxJS**: Reactive programming for API communication
@@ -210,7 +218,7 @@ This project includes comprehensive documentation organized into specialized fil
 - **Spring Boot 3.5.10**: Enterprise-grade Java framework
 - **Spring Data JPA**: Powerful ORM with PostgreSQL integration
 - **Apache POI 5.5.1**: Excel file processing and validation
-- **Apache Tomcat 10.1.52**: Embedded web server (security-patched)
+- **Apache Tomcat 10.1.54**: Embedded web server (security-patched)
 - **Java 17**: Runtime environment
 - **Maven**: Dependency management and build automation
 - **Hibernate**: Advanced database operations and caching
@@ -359,8 +367,8 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 1.5 - Dependency Upgrades & Vitest Migration  
-**Last Updated**: March 1, 2026  
+**Latest Version**: 1.6 - Security Vulnerability Fixes  
+**Last Updated**: April 27, 2026  
 **Status**: Production Ready ✅
 
 ## 🔒 Security

@@ -129,7 +129,7 @@ export class App {
 </div>
 
 <footer class="footer">
-  <p>SolarManExcel2DB © 2024-2026 | Version 1.5</p>
+  <p>SolarManExcel2DB © 2024-2026 | Version 1.6</p>
 </footer>
 ```
 

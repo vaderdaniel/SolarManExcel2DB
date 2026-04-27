@@ -4,7 +4,7 @@
 
 This guide covers:
 1. **CLI Application**: Java-based Excel importer
-2. **Web UI** (v1.5): Angular + Spring Boot web application
+2. **Web UI** (v1.6): Angular + Spring Boot web application
 3. **Kubernetes Deployment**: Containerized deployment with Rancher Desktop
 
 ---
@@ -224,7 +224,7 @@ echo "Deployment complete!"
 
 ---
 
-## 🌐 Web UI Development (Version 1.5)
+## 🌐 Web UI Development (Version 1.6)
 
 ### Prerequisites
 ```bash

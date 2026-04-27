@@ -1,4 +1,49 @@
-# SolarManExcel2DB - Version 1.1 Changelog
+# SolarManExcel2DB - Changelog
+
+---
+
+## v1.6 - Security Vulnerability Fixes
+
+**Release Date**: April 27, 2026  
+**Version**: 1.6.0
+
+### 🔐 Security Fixes
+
+#### Backend — 10 vulnerabilities resolved (pom.xml)
+
+| Library | Before | After | Severity / CVEs Fixed |
+|---------|--------|-------|-----------------------|
+| `tomcat-embed-core` | 10.1.52 | **10.1.54** | CRITICAL CVE-2026-29145 (auth bypass) + 6 others |
+| `spring-webmvc` | 6.2.15 | **6.2.17** | CVE-2026-22737, CVE-2026-22735 |
+| `commons-lang3` | 3.17.0 | **3.18.0** | CVE-2025-48924 |
+
+- Tomcat overridden via `<tomcat.version>10.1.54</tomcat.version>`
+- Spring Framework overridden via `<spring-framework.version>6.2.17</spring-framework.version>`
+- commons-lang3 overridden via `<commons-lang3.version>3.18.0</commons-lang3.version>`
+
+> ⚠️ `jackson-core` 2.19.4 has a MEDIUM advisory (GHSA-72hv-8253-57qq); no fix available in the 2.19.x range managed by Spring Boot 3.5.10. Monitor for a Spring Boot patch that upgrades to 2.21.x.
+
+#### Frontend — 18 vulnerabilities resolved (package.json)
+
+| Package | Before | After | CVEs / Advisories |
+|---------|--------|-------|-------------------|
+| `@angular/core` + all Angular packages | 21.1.x | **21.2.10** | XSS in i18n (CVE), Angular compiler XSS |
+| `@angular/build` | 21.1.4 | **21.2.8** | Brings fixed vite and undici |
+| `@angular/cli` | 21.1.4 | **21.2.8** | — |
+| `vite` (transitive) | 7.3.0 | updated via `@angular/build` | Path traversal, arbitrary file read, `server.fs.deny` bypass |
+| `undici` (transitive) | 7.20.0 | updated via `@angular/build` | HTTP smuggling, WebSocket memory overflow, CRLF injection |
+| `hono` (transitive) | — | patched | Cookie bypass, path traversal, HTML injection |
+| `postcss` (transitive) | — | patched | XSS via unescaped `</style>` |
+
+Upgraded via `npx ng update @angular/core@21 @angular/cli@21` then `npm audit fix`.
+
+### ✅ Test Results
+- **56 backend tests**: All passing
+- **31 frontend tests**: All passing
+
+---
+
+## v1.5 - Version 1.1 Features & Post-Release Updates
 
 **Release Date**: December 10, 2025  
 **Version**: 1.1.0
@@ -307,6 +352,7 @@
 ---
 
 **Next Steps**:
+- Upgrade `jackson-core` once Spring Boot 3.5.x ships a version with 2.21.x (resolves remaining MEDIUM advisory)
 - Consider adding date range selector for chart
 - Add export functionality for chart data
 - Implement user authentication (future enhancement)

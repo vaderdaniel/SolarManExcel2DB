@@ -2,7 +2,7 @@
 
 ## ⚡ Quick Commands
 
-### Web UI (Version 1.5)
+### Web UI (Version 1.6)
 ```bash
 # Development mode
 cd frontend/solarman-ui && ng serve &
@@ -59,7 +59,7 @@ Column 12: SoC (State of Charge)
 
 ---
 
-## 🌐 Web UI API Quick Reference (v1.5)
+## 🌐 Web UI API Quick Reference (v1.6)
 
 ### API Endpoints
 ```bash

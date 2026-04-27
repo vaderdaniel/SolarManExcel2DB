@@ -2,18 +2,18 @@
 
 ## 📚 Overview
 
-This document covers the Web UI REST API (v1.5): HTTP endpoints for the Angular frontend.
+This document covers the Web UI REST API (v1.6): HTTP endpoints for the Angular frontend.
 
 ---
 
-## 🌐 Web UI REST API (Version 1.5)
+## 🌐 Web UI REST API (Version 1.6)
 
 ### Base URL
 - **Development**: `http://localhost:8080/api`
 - **Production** (Kubernetes): `http://localhost:30080/api`
 
 ### Authentication
-No authentication required (v1.5)
+No authentication required (v1.6)
 
 ### Endpoints
 
