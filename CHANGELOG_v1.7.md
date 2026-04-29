@@ -2,6 +2,37 @@
 
 ---
 
+## v1.7.2 - Grafana Dashboard Updates
+
+**Release Date**: April 29, 2026  
+**Version**: 1.7.2
+
+### 📊 New Grafana Dashboard: Tshwane Daily
+
+New dashboard added (`grafana/dashboards/tshwane-daily.json`, UID: `tshwane-daily`):
+
+- **Default time range**: Last 30 days
+- **Panel 1 — Daily Electricity Usage (units/day)**: Two line series
+  - `week_units_per_day` — rolling 7-day average kWh/day from Tshwane cumulative meter (LATERAL join)
+  - `month_units_per_day` — rolling 30-day average kWh/day (LATERAL join)
+- **Panel 2 — Weekly Usage vs Daily Grid Purchased (kWh/day)**: Two line series for direct comparison
+  - `Weekly avg consumption (kWh/day)` — same 7-day rolling average from Panel 1
+  - `Daily grid purchased 7-day avg (kWh/day)` — 7-day rolling average of inverter grid purchases (LAG CTE + sliding window, Wh → kWh)
+- Both panels use table-mode legend with Mean, Max, Sum calcs
+
+### 📊 Legend Calcs Added to Existing Dashboards
+
+- **Daily Stats** (panels 1 & 2): Added Sum / Mean / Max legend calcs, legend switched to table mode
+- **Monthly Stats** (panels 1 & 2): Added Sum / Mean / Max legend calcs, legend switched to table mode
+
+### 🔧 Technical Notes
+
+- Tshwane consumption uses `LATERAL` joins to find the nearest prior reading ≥ 7/30 days back — correct for irregularly-spaced meter readings
+- Inverter purchased units use `LAG()` in a CTE to avoid correlated-subquery NULL issues inside `GROUP BY` aggregates
+- `restore-dashboards-fixed.sh` picks up `tshwane-daily.json` automatically via `*.json` glob — no script changes needed
+
+---
+
 ## v1.7.1 - Tshwane Excel Parsing Bug Fix
 
 **Release Date**: April 29, 2026  

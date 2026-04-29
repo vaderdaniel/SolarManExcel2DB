@@ -26,6 +26,8 @@ curl -s -u admin:admin123 'http://localhost:3000/api/dashboards/uid/weekly-stats
   | jq '.dashboard' > grafana/dashboards/weekly-stats.json
 curl -s -u admin:admin123 'http://localhost:3000/api/dashboards/uid/by-week-dashboard' \
   | jq '.dashboard' > grafana/dashboards/by-week.json
+curl -s -u admin:admin123 'http://localhost:3000/api/dashboards/uid/tshwane-daily' \
+  | jq '.dashboard' > grafana/dashboards/tshwane-daily.json
 curl -s -u admin:admin123 'http://localhost:3000/api/datasources/uid/P7D58F15E2B4BC203' \
   | jq 'del(.version)' > grafana/datasource-postgresql.json
 ```
@@ -68,12 +70,14 @@ Displays daily aggregated solar power statistics with two main visualization pan
 - **Production Units**: Total energy produced by solar panels (Wh)
 - **Purchased Units**: Total energy purchased from the grid (Wh)
 - **Battery Level**: Shows minimum and maximum battery State of Charge (%) as a yellow line overlay
+- **Legend**: Table mode — Sum, Mean, Max for all series
 
 **Panel 2: Consumed and Charging Units**
 - **Consumed Units**: Total energy consumption (Wh)
 - **Charging Units**: Total energy used to charge the battery (Wh)
 - **Feed-in Units**: Total energy fed back to the grid (Wh)
 - **Battery Level**: Shows minimum and maximum battery State of Charge (%) as a yellow line overlay
+- **Legend**: Table mode — Sum, Mean, Max for all series
 
 **Panel 3: Solar Production Heatmap (Hour vs Day)**
 - **Visualization**: Heatmap showing hourly production patterns across days
@@ -108,12 +112,14 @@ Displays monthly aggregated solar power statistics, providing a long-term view o
 - **Production Units**: Total monthly energy produced by solar panels (Wh)
 - **Purchased Units**: Total monthly energy purchased from the grid (Wh)
 - **Average Battery Level**: Shows average minimum and maximum daily battery State of Charge (%) as a yellow line overlay
+- **Legend**: Table mode — Sum, Mean, Max for all series
 
 **Panel 2: Consumed and Charging Units (Monthly)**
 - **Consumed Units**: Total monthly energy consumption (Wh)
 - **Charging Units**: Total monthly energy used to charge the battery (Wh)
 - **Feed-in Units**: Total monthly energy fed back to the grid (Wh)
 - **Average Battery Level**: Shows average minimum and maximum daily battery State of Charge (%) as a yellow line overlay
+- **Legend**: Table mode — Sum, Mean, Max for all series
 
 **Panel 3: Solar Production Heatmap (Hour vs Month)**
 - **Visualization**: Heatmap showing average daily hourly production patterns per month
@@ -204,7 +210,34 @@ Displays seasonal patterns by aggregating data across all years for each ISO wee
 
 ---
 
-## 🔌 PostgreSQL Datasource Configuration
+### 5. Tshwane Daily Dashboard
+**File**: `dashboards/tshwane-daily.json`  
+**UID**: `tshwane-daily`  
+**Title**: Tshwane Daily  
+**Time Range**: Last 30 days (default)  
+**Refresh Rate**: On demand
+
+#### Description
+Displays Tshwane utility electricity consumption trends derived from the `tshwane_electricity` table. Both panels use rolling average calculations to smooth irregular reading intervals.
+
+**Panel 1: Daily Electricity Usage (units/day)**
+- **Weekly avg (units/day)**: Rolling average of kWh consumed per day over the preceding 7+ days — calculated from the Tshwane cumulative meter readings using a LATERAL join
+- **Monthly avg (units/day)**: Same calculation over the preceding 30+ days
+- Useful for identifying short-term vs long-term consumption trends
+- **Legend**: Table mode — Mean, Max, Sum
+
+**Panel 2: Weekly Electricity Usage vs Daily Grid Purchased (kWh/day)**
+- **Weekly avg consumption (kWh/day)**: Same 7-day rolling average from Panel 1 (blue line)
+- **Daily grid purchased 7-day avg (kWh/day)**: 7-day rolling average of units purchased from the grid by the inverter (from `loots_inverter.purchase_power`, converted Wh → kWh) — red line
+- Allows direct comparison between Tshwane meter consumption and inverter grid purchases
+- Both series use kWh/day so they share the same Y-axis
+- **Legend**: Table mode — Mean, Max, Sum
+
+#### SQL Approach
+- Tshwane consumption uses `LATERAL` joins to find the nearest reading ≥ 7/30 days prior
+- Inverter purchased units use a `LAG()` CTE to calculate time-weighted Wh per interval, then a `ROWS BETWEEN 6 PRECEDING AND CURRENT ROW` window for the 7-day rolling average
+
+---
 
 **File**: `datasource-postgresql.json`  
 **UID**: `P7D58F15E2B4BC203`  
@@ -251,24 +284,24 @@ curl -X PUT \
 
 All dashboards query the PostgreSQL database:
 - **Database**: LOOTS
-- **Table**: `public.loots_inverter`
+- **Tables**: `public.loots_inverter` (solar/inverter data), `public.tshwane_electricity` (utility meter data)
 - **Datasource UID**: `P7D58F15E2B4BC203`
 - **Datasource Type**: `grafana-postgresql-datasource`
-- **PostgreSQL Version**: 16.11
+- **PostgreSQL Version**: 16.13
 - **Datasource Backup**: `datasource-postgresql.json`
 
 ### Database Schema
-The dashboards expect the following columns in the `loots_inverter` table:
+The dashboards expect the following columns:
+
+**`public.loots_inverter`** (used by Daily Stats, Monthly Stats, Weekly Stats, By Week Number, Tshwane Daily Panel 2):
 - `updated` (timestamp) - Primary key
-- `production_power` (double precision)
-- `consume_power` (double precision)
-- `grid_power` (double precision)
-- `purchase_power` (double precision)
-- `feed_in` (double precision)
-- `battery_power` (double precision)
-- `charge_power` (double precision)
-- `discharge_power` (double precision)
-- `soc` (double precision) - State of Charge
+- `production_power`, `consume_power`, `grid_power`, `purchase_power`, `feed_in` (double precision)
+- `battery_power`, `charge_power`, `discharge_power`, `soc` (double precision)
+
+**`public.tshwane_electricity`** (used by Tshwane Daily):
+- `reading_date` (timestamp) - Primary key
+- `cumulative_electricity_used` (double precision) - Running total since baseline (kWh)
+- `reading_notes` (text) - Sparse milestone notes
 
 ---
 
@@ -284,14 +317,15 @@ grafana/
     ├── by-week.json
     ├── daily-stats.json
     ├── monthly-stats.json
+    ├── tshwane-daily.json
     └── weekly-stats.json
 ```
 
 ### Backup Information
 - **Created**: 2025-11-08
-- **Last Updated**: February 2, 2026
-- **Grafana Version**: Latest (running in Kubernetes)
-- **PostgreSQL Version**: 16.11
+- **Last Updated**: April 29, 2026
+- **Grafana Version**: 12.3.0 (running in Kubernetes)
+- **PostgreSQL Version**: 16.13
 - **Format**: JSON (Grafana dashboard export format)
 - **Datasource UID**: P7D58F15E2B4BC203
 
@@ -353,7 +387,7 @@ curl -X POST \
 To create new backups of the current dashboards:
 
 ```bash
-# Export all four dashboards
+# Export all five dashboards
 curl -s -u admin:admin123 \
   'http://localhost:3000/api/dashboards/uid/feab8f79-92e8-412e-83a6-99d262725b68' \
   | jq '.dashboard' > grafana/dashboards/daily-stats.json
@@ -369,6 +403,10 @@ curl -s -u admin:admin123 \
 curl -s -u admin:admin123 \
   'http://localhost:3000/api/dashboards/uid/by-week-dashboard' \
   | jq '.dashboard' > grafana/dashboards/by-week.json
+
+curl -s -u admin:admin123 \
+  'http://localhost:3000/api/dashboards/uid/tshwane-daily' \
+  | jq '.dashboard' > grafana/dashboards/tshwane-daily.json
 
 # Export PostgreSQL datasource configuration
 curl -s -u admin:admin123 \
@@ -425,7 +463,7 @@ This accounts for varying intervals between measurements to provide accurate ene
 
 ---
 
-**Last Updated**: February 2, 2026  
+**Last Updated**: April 29, 2026  
 **Maintained By**: Daniel Oots
 
 ## 🔧 Troubleshooting

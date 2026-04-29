@@ -381,10 +381,11 @@ For full security docs: `backend/SECURITY.md`
 **Datasource**: PostgreSQL-LOOTS (read-only `grafana` user, `grafana123`)
 
 ### Dashboards
-- Daily Stats — last 2 days, hourly heatmaps
+- Daily Stats — last 2 days, hourly heatmaps; panels 1 & 2 show Sum/Mean/Max legend calcs
 - Weekly Stats — ISO week aggregations
-- Monthly Stats — long-term trends
+- Monthly Stats — long-term trends; panels 1 & 2 show Sum/Mean/Max legend calcs
 - By Week Number — seasonal patterns
+- Tshwane Daily — last 30 days; rolling avg electricity consumption (kWh/day) from Tshwane meter + grid purchased comparison
 
 ### Management
 ```bash
@@ -395,6 +396,11 @@ For full security docs: `backend/SECURITY.md`
 curl -s -u admin:admin123 \
   'http://localhost:3000/api/dashboards/uid/feab8f79-92e8-412e-83a6-99d262725b68' \
   | jq '.dashboard' > grafana/dashboards/daily-stats.json
+
+# Backup Tshwane Daily dashboard
+curl -s -u admin:admin123 \
+  'http://localhost:3000/api/dashboards/uid/tshwane-daily' \
+  | jq '.dashboard' > grafana/dashboards/tshwane-daily.json
 
 # Restart / delete Grafana
 kubectl rollout restart deployment/grafana
