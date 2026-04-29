@@ -137,8 +137,7 @@ public class FileUploadController {
                 TshwaneRecord record = records.get(i);
                 Map<String, Object> previewRecord = new HashMap<>();
                 previewRecord.put("Reading Date", record.getReadingDate().toString());
-                previewRecord.put("Reading Value", record.getReadingValue());
-                previewRecord.put("Reading Amount", record.getReadingAmount());
+                previewRecord.put("Cumulative Electricity Used", record.getCumulativeElectricityUsed());
                 previewRecord.put("Reading Notes", record.getReadingNotes());
                 previewData.add(previewRecord);
             }

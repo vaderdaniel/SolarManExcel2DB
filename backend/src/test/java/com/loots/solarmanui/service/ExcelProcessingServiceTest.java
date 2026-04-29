@@ -137,8 +137,7 @@ class ExcelProcessingServiceTest {
 
         TshwaneRecord record1 = records.get(0);
         assertEquals(LocalDateTime.of(2024, 1, 15, 0, 0), record1.getReadingDate());
-        assertEquals(1250.5, record1.getReadingValue());
-        assertEquals(350.75, record1.getReadingAmount());
+        assertEquals(1250.5, record1.getCumulativeElectricityUsed());
         assertEquals("January reading", record1.getReadingNotes());
     }
 
@@ -446,25 +445,21 @@ class ExcelProcessingServiceTest {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Elektrisiteit Lesings");
 
-        // Create header row
+        // Create header row matching actual spreadsheet layout
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"Reading Date", "Reading Value", "Reading Amount", "Reading Notes"};
-        for (int i = 0; i < headers.length; i++) {
-            headerRow.createCell(i).setCellValue(headers[i]);
-        }
+        headerRow.createCell(0).setCellValue("Day");
+        headerRow.createCell(2).setCellValue("Cumulative Electricity used");
+        headerRow.createCell(14).setCellValue("Notes");
 
-        // Create data rows
+        // Create data rows: col 0=date, col 2=cumulative, col 14=notes
         Row dataRow1 = sheet.createRow(1);
         dataRow1.createCell(0).setCellValue("2024/01/15 00:00");
-        dataRow1.createCell(1).setCellValue(1250.5);
-        dataRow1.createCell(2).setCellValue(350.75);
-        dataRow1.createCell(3).setCellValue("January reading");
+        dataRow1.createCell(2).setCellValue(1250.5);
+        dataRow1.createCell(14).setCellValue("January reading");
 
         Row dataRow2 = sheet.createRow(2);
         dataRow2.createCell(0).setCellValue("2024/02/15 00:00");
-        dataRow2.createCell(1).setCellValue(1300.0);
-        dataRow2.createCell(2).setCellValue(375.50);
-        dataRow2.createCell(3).setCellValue("February reading");
+        dataRow2.createCell(2).setCellValue(1300.0);
 
         return convertWorkbookToMultipartFile(workbook, "tshwane_test.xlsx");
     }
@@ -486,20 +481,16 @@ class ExcelProcessingServiceTest {
 
         // Create header row
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"Reading Date", "Reading Value", "Reading Amount", "Reading Notes"};
-        for (int i = 0; i < headers.length; i++) {
-            headerRow.createCell(i).setCellValue(headers[i]);
-        }
+        headerRow.createCell(0).setCellValue("Day");
+        headerRow.createCell(2).setCellValue("Cumulative Electricity used");
 
-        // Create empty row
+        // Create empty row (no date, no cumulative — will be skipped)
         sheet.createRow(1);
 
-        // Create valid row
+        // Create valid row: date in col 0, cumulative in col 2
         Row dataRow = sheet.createRow(2);
         dataRow.createCell(0).setCellValue("2024/01/15 00:00");
-        dataRow.createCell(1).setCellValue(1250.5);
-        dataRow.createCell(2).setCellValue(350.75);
-        dataRow.createCell(3).setCellValue("Valid reading");
+        dataRow.createCell(2).setCellValue(1250.5);
 
         return convertWorkbookToMultipartFile(workbook, "tshwane_empty_rows.xlsx");
     }
@@ -510,17 +501,13 @@ class ExcelProcessingServiceTest {
 
         // Create header row
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"Reading Date", "Reading Value", "Reading Amount", "Reading Notes"};
-        for (int i = 0; i < headers.length; i++) {
-            headerRow.createCell(i).setCellValue(headers[i]);
-        }
+        headerRow.createCell(0).setCellValue("Day");
+        headerRow.createCell(2).setCellValue("Cumulative Electricity used");
 
-        // Create row with Excel date number
+        // Create row with Excel date number in col 0, cumulative in col 2
         Row dataRow = sheet.createRow(1);
         dataRow.createCell(0).setCellValue("45323"); // Excel date number for 2024-01-15
-        dataRow.createCell(1).setCellValue(1250.5);
-        dataRow.createCell(2).setCellValue(350.75);
-        dataRow.createCell(3).setCellValue("Excel date reading");
+        dataRow.createCell(2).setCellValue(1250.5);
 
         return convertWorkbookToMultipartFile(workbook, "tshwane_excel_dates.xlsx");
     }

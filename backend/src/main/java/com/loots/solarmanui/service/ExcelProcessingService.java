@@ -148,11 +148,23 @@ public class ExcelProcessingService {
                 return null;
             }
 
+            // Col C (index 2) = Cumulative Electricity used; skip rows where it is null/empty
+            Cell cumulativeCell = row.getCell(2);
+            if (cumulativeCell == null || cumulativeCell.getCellType() == CellType.BLANK) {
+                return null;
+            }
+            double cumulativeValue = getCellValueAsDouble(cumulativeCell, -1.0);
+            if (cumulativeValue < 0) {
+                return null;
+            }
+
+            // Col O (index 14) = sparse milestone notes
+            String notes = getCellValueAsString(row.getCell(14), "");
+
             TshwaneRecord record = new TshwaneRecord();
             record.setReadingDate(readingDate);
-            record.setReadingValue(getCellValueAsDouble(row.getCell(1), 0.0));
-            record.setReadingAmount(getCellValueAsDouble(row.getCell(2), 0.0));
-            record.setReadingNotes(getCellValueAsString(row.getCell(3), ""));
+            record.setCumulativeElectricityUsed(cumulativeValue);
+            record.setReadingNotes(notes);
 
             return record;
         } catch (Exception e) {

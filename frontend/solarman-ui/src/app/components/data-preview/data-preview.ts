@@ -56,7 +56,7 @@ export class DataPreviewComponent implements AfterViewInit {
       ];
     } else if (this.fileType === 'tshwane') {
       this.displayedColumns = [
-        'Reading Date', 'Reading Value', 'Reading Amount', 'Reading Notes'
+        'Reading Date', 'Cumulative Electricity Used', 'Reading Notes'
       ];
     } else {
       // Auto-detect columns from data

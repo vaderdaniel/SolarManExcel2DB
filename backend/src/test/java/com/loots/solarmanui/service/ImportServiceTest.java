@@ -232,8 +232,8 @@ class ImportServiceTest {
         // Verify database interactions
         verify(preparedStatement, times(2)).executeUpdate();
         verify(preparedStatement, times(2)).setTimestamp(eq(1), any(Timestamp.class));
-        verify(preparedStatement, times(4)).setDouble(anyInt(), anyDouble()); // 2 numeric fields * 2 records
-        verify(preparedStatement, times(2)).setString(eq(4), anyString());
+        verify(preparedStatement, times(2)).setDouble(anyInt(), anyDouble()); // 1 numeric field * 2 records
+        verify(preparedStatement, times(2)).setString(eq(3), anyString());
     }
 
     @Test
@@ -301,8 +301,7 @@ class ImportServiceTest {
         // Create record with null values
         TshwaneRecord record = new TshwaneRecord();
         record.setReadingDate(LocalDateTime.of(2024, 1, 15, 0, 0));
-        record.setReadingValue(null);
-        record.setReadingAmount(null);
+        record.setCumulativeElectricityUsed(null);
         record.setReadingNotes(null);
         List<TshwaneRecord> records = Arrays.asList(record);
 
@@ -318,8 +317,8 @@ class ImportServiceTest {
         assertEquals(0, result.getErrorCount());
 
         // Verify default values were used
-        verify(preparedStatement, times(2)).setDouble(anyInt(), eq(0.0));
-        verify(preparedStatement, times(1)).setString(eq(4), eq(""));
+        verify(preparedStatement, times(1)).setDouble(anyInt(), eq(0.0));
+        verify(preparedStatement, times(1)).setString(eq(3), eq(""));
     }
 
     @Test
@@ -451,7 +450,7 @@ class ImportServiceTest {
 
         // Verify prepared statement was used with proper parameter binding
         verify(connection).prepareStatement(contains("INSERT INTO public.tshwane_electricity"));
-        verify(preparedStatement).setString(eq(4), contains("DROP TABLE")); // String is passed as parameter, not concatenated
+        verify(preparedStatement).setString(eq(3), contains("DROP TABLE")); // String is passed as parameter, not concatenated
     }
 
     // ==================== Helper Methods ====================
@@ -495,11 +494,10 @@ class ImportServiceTest {
         return records;
     }
 
-    private TshwaneRecord createTshwaneRecord(LocalDateTime readingDate, double readingValue) {
+    private TshwaneRecord createTshwaneRecord(LocalDateTime readingDate, double cumulativeValue) {
         TshwaneRecord record = new TshwaneRecord();
         record.setReadingDate(readingDate);
-        record.setReadingValue(readingValue);
-        record.setReadingAmount(350.75);
+        record.setCumulativeElectricityUsed(cumulativeValue);
         record.setReadingNotes("Test reading");
         return record;
     }

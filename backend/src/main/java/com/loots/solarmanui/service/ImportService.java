@@ -113,11 +113,10 @@ public class ImportService {
         int inserted = 0;
         int updated = 0;
 
-        String sql = "INSERT INTO public.tshwane_electricity (reading_date, reading_value, reading_amount, reading_notes) " +
-                "VALUES (?, ?, ?, ?) " +
+        String sql = "INSERT INTO public.tshwane_electricity (reading_date, cumulative_electricity_used, reading_notes) " +
+                "VALUES (?, ?, ?) " +
                 "ON CONFLICT (reading_date) DO UPDATE SET " +
-                "reading_value = EXCLUDED.reading_value, " +
-                "reading_amount = EXCLUDED.reading_amount, " +
+                "cumulative_electricity_used = EXCLUDED.cumulative_electricity_used, " +
                 "reading_notes = EXCLUDED.reading_notes";
 
         try (Connection connection = dataSource.getConnection();
@@ -128,9 +127,8 @@ public class ImportService {
             for (TshwaneRecord record : records) {
                 try {
                     pstmt.setTimestamp(1, Timestamp.valueOf(record.getReadingDate()));
-                    pstmt.setDouble(2, record.getReadingValue() != null ? record.getReadingValue() : 0.0);
-                    pstmt.setDouble(3, record.getReadingAmount() != null ? record.getReadingAmount() : 0.0);
-                    pstmt.setString(4, record.getReadingNotes() != null ? record.getReadingNotes() : "");
+                    pstmt.setDouble(2, record.getCumulativeElectricityUsed() != null ? record.getCumulativeElectricityUsed() : 0.0);
+                    pstmt.setString(3, record.getReadingNotes() != null ? record.getReadingNotes() : "");
 
                     int rowsAffected = pstmt.executeUpdate();
                     if (rowsAffected > 0) {

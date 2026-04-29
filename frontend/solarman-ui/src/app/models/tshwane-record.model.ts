@@ -1,14 +1,12 @@
 export interface TshwaneRecord {
   readingDate: Date;
-  readingValue: number;
-  readingAmount: number;
+  cumulativeElectricityUsed: number;
   readingNotes: string;
 }
 
 export interface TshwanePreviewData {
   [key: string]: any;
   'Reading Date': string;
-  'Reading Value': number;
-  'Reading Amount': number;
+  'Cumulative Electricity Used': number;
   'Reading Notes': string;
 }

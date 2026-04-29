@@ -226,8 +226,7 @@ public class ImportController {
                     }
 
                     // Parse numeric fields - check both display names and camelCase
-                    record.setReadingValue(parseDoubleValue(getFieldValue(recordMap, "Reading Value", "readingValue")));
-                    record.setReadingAmount(parseDoubleValue(getFieldValue(recordMap, "Reading Amount", "readingAmount")));
+                    record.setCumulativeElectricityUsed(parseDoubleValue(getFieldValue(recordMap, "Cumulative Electricity Used", "cumulativeElectricityUsed")));
                     record.setReadingNotes((String) getFieldValue(recordMap, "Reading Notes", "readingNotes"));
 
                     records.add(record);
