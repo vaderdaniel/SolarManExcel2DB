@@ -20,13 +20,24 @@ Rules for 2026:
   - charge_power <= 0 (negative = charging), discharge_power >= 0
 """
 
+import os
+import sys
 import psycopg2
 import random
 from datetime import datetime, timedelta
 
 random.seed(99)
 
-DB = dict(host="localhost", port=15432, dbname="LOOTS", user="danieloots", password="SeweEen0528")
+_db_user = os.environ.get("DB_USER", "")
+_db_pass = os.environ.get("DB_PASS", "")
+if not _db_user or not _db_pass:
+    sys.exit(
+        "Error: DB_USER and DB_PASS environment variables must be set.\n"
+        "  export DB_USER=<your_db_username>\n"
+        "  export DB_PASS=<your_db_password>"
+    )
+
+DB = dict(host="localhost", port=5432, dbname="LOOTS", user=_db_user, password=_db_pass)
 
 # ---------------------------------------------------------------------------
 # Hourly reference: average of 2024-04-02, 2025-04-02, 2026-04-01, 2026-04-03

@@ -14,14 +14,25 @@ Year-specific rules:
 Note: only fills gaps BETWEEN existing rows (pre-data and post-data gaps are left untouched).
 """
 
+import os
+import sys
 import psycopg2
 import random
 from datetime import datetime, timedelta
 
 random.seed(2026)
 
-DB = dict(host="localhost", port=15432, dbname="LOOTS",
-          user="danieloots", password="SeweEen0528")
+_db_user = os.environ.get("DB_USER", "")
+_db_pass = os.environ.get("DB_PASS", "")
+if not _db_user or not _db_pass:
+    sys.exit(
+        "Error: DB_USER and DB_PASS environment variables must be set.\n"
+        "  export DB_USER=<your_db_username>\n"
+        "  export DB_PASS=<your_db_password>"
+    )
+
+DB = dict(host="localhost", port=5432, dbname="LOOTS",
+          user=_db_user, password=_db_pass)
 
 INTERVAL = timedelta(minutes=5)
 COL_NAMES = ["updated", "production_power", "consume_power", "grid_power",
