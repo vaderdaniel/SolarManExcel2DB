@@ -3,6 +3,7 @@ package com.loots.solarmanui.service;
 import com.loots.solarmanui.model.SolarManRecord;
 import com.loots.solarmanui.model.TshwaneRecord;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -138,15 +139,21 @@ public class ExcelProcessingService {
 
     private TshwaneRecord parseTshwaneRow(Row row) {
         try {
-            String readingDateStr = getCellValueAsString(row.getCell(0), "");
-            if (readingDateStr.isEmpty()) {
-                return null;
+            // Col A (index 0) = reading date — may be a native date cell or a string
+            Cell dateCell = row.getCell(0);
+            if (dateCell == null) return null;
+
+            LocalDateTime readingDate;
+            if (dateCell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(dateCell)) {
+                readingDate = dateCell.getDateCellValue()
+                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            } else {
+                String readingDateStr = getCellValueAsString(dateCell, "");
+                if (readingDateStr.isEmpty()) return null;
+                readingDate = parseDate(readingDateStr);
             }
 
-            LocalDateTime readingDate = parseDate(readingDateStr);
-            if (readingDate == null) {
-                return null;
-            }
+            if (readingDate == null) return null;
 
             // Col C (index 2) = Cumulative Electricity used; skip rows where it is null/empty
             Cell cumulativeCell = row.getCell(2);
@@ -197,7 +204,12 @@ public class ExcelProcessingService {
 
     private double getCellValueAsDouble(Cell cell, double defaultValue) {
         if (cell == null) return defaultValue;
-        switch (cell.getCellType()) {
+        CellType cellType = cell.getCellType();
+        // For formula cells, use the cached computed result type
+        if (cellType == CellType.FORMULA) {
+            cellType = cell.getCachedFormulaResultType();
+        }
+        switch (cellType) {
             case STRING:
                 String value = cell.getStringCellValue();
                 try {

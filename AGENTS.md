@@ -226,6 +226,8 @@ Status codes: `200` success · `400` bad request · `500` server error · `503` 
 | O | *(no header)* | `reading_notes` (sparse milestone notes) |
 
 - Rows where Column C is empty are skipped (e.g. the initial baseline row)
+- **Col A cells are native Excel date cells** (`data_type=d`); parsed directly via Apache POI `DateUtil.isCellDateFormatted()` — do not treat as plain strings
+- **Col C cells are Excel formula cells** (`=IF(AND(...), SUM(...), "")`); Apache POI resolves them via `getCachedFormulaResultType()` — `getCellValueAsDouble` must handle `CellType.FORMULA` or all rows will be skipped
 - Duplicate dates handled with `ON CONFLICT (reading_date) DO UPDATE SET ...`
 
 ---
@@ -415,6 +417,7 @@ psql -h localhost -p 5432 -d LOOTS -U $DB_USER
 ### Excel File Format Error
 - **SolarMan**: Must have exactly 12 columns in the fixed order
 - **Tshwane**: Must use sheet named "Elektrisiteit Lesings"; data must be in Col A (date) and Col C (cumulative value)
+- **Tshwane preview shows 0 rows**: Col C values are Excel formulas — `getCellValueAsDouble` must resolve `CellType.FORMULA` via `getCachedFormulaResultType()`. If this method falls back to `defaultValue` (-1.0) for formula cells, every row is silently skipped.
 - Timestamps must be in a recognized format (`yyyy/MM/dd`, `MM/dd/yyyy`, SQL format, or Excel serial)
 
 ### Kubernetes: Images Not Found (`ErrImageNeverPull`)
@@ -502,6 +505,11 @@ See `backend/src/test/README.md` for full test documentation.
 ---
 
 ## 📝 Recent Updates
+
+### April 29, 2026 - Tshwane Excel Parsing Bug Fix (v1.7)
+- Fixed `ExcelProcessingService`: Col C "Cumulative Electricity used" cells are Excel formulas (`CellType.FORMULA`); `getCellValueAsDouble` now resolves via `getCachedFormulaResultType()` — previously returned -1.0 for all formula cells, causing every row to be silently skipped (0 preview rows on upload)
+- Fixed `parseTshwaneRow`: Col A date cells are native Excel date type; now read directly via `DateUtil.isCellDateFormatted()` instead of string conversion
+- All 56 backend tests passing
 
 ### April 29, 2026 - Tshwane Data Model Redesign (v1.7)
 - Renamed `tshwane_electricity.reading_value` → `cumulative_electricity_used` (now stores Col C "Cumulative Electricity used" from "Elektrisiteit Lesings" sheet)

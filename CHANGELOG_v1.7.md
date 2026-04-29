@@ -2,6 +2,29 @@
 
 ---
 
+## v1.7.1 - Tshwane Excel Parsing Bug Fix
+
+**Release Date**: April 29, 2026  
+**Version**: 1.7.1
+
+### 🐛 Bug Fixes
+
+#### Tshwane Upload Preview Showed 0 Rows
+
+**Root cause 1 — Formula cells in Col C:**  
+All "Cumulative Electricity used" values (Col C) in the spreadsheet are Excel formula cells (`=IF(AND(...), SUM(...), "")`). Apache POI reports these as `CellType.FORMULA`. The `getCellValueAsDouble` helper only handled `STRING` and `NUMERIC`, returning the default value of `-1.0` for any other type — silently skipping every row.
+
+**Fix:** `getCellValueAsDouble` now detects `CellType.FORMULA` and resolves the actual result type via `cell.getCachedFormulaResultType()` before reading the numeric value.
+
+**Root cause 2 — Native date cells in Col A:**  
+Date values in Col A are native Excel date cells (`data_type=d`). Previously converted to a serial number string then parsed back via string patterns, which was fragile.
+
+**Fix:** `parseTshwaneRow` now detects date cells via `DateUtil.isCellDateFormatted()` and reads them directly with `cell.getDateCellValue()`.
+
+**Result:** All 869 rows from the spreadsheet now parse and preview correctly.
+
+---
+
 ## v1.7 - Tshwane Electricity Data Model Redesign
 
 **Release Date**: April 29, 2026  
