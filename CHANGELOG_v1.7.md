@@ -2,6 +2,97 @@
 
 ---
 
+## v1.7 - Tshwane Electricity Data Model Redesign
+
+**Release Date**: April 29, 2026  
+**Version**: 1.7.0
+
+### 🔄 Feature Changes
+
+#### Tshwane Electricity Import — New Columns
+
+The `tshwane_electricity` table previously stored the raw Electricity Reading meter value (`reading_value`) and a billing amount (`reading_amount`, always 0). The import now captures the data that is actually useful for energy analysis:
+
+| Before | After |
+|--------|-------|
+| `reading_value` (raw meter reading, Col B) | `cumulative_electricity_used` (running total since baseline, Col C) |
+| `reading_amount` (always 0, dropped) | — |
+| `reading_notes` (never populated) | `reading_notes` now populated from Col O (sparse milestone notes) |
+
+#### Excel Source Mapping — "Elektrisiteit Lesings" Sheet
+
+| Excel Column | Header | Maps To |
+|---|---|---|
+| A | Day | `reading_date` (PRIMARY KEY — unchanged) |
+| C | Cumulative Electricity used | `cumulative_electricity_used` (new) |
+| O | *(no header)* | `reading_notes` (sparse milestone notes) |
+
+Rows where Column C is empty are skipped (e.g., the first baseline row).
+
+#### Example Notes Captured (Col O)
+- *"Last reading by Tshwane before Prepaid Electricity Installed"*
+- *"Tshwane Prepaid Electricity Installed"*
+- *"Moved swimming pool pump to Inverter and switch on daily"*
+- *"Added two batteries to the inverter and got new geyser element"*
+
+### 🗄️ Database Schema Change
+
+```sql
+-- Before
+CREATE TABLE public.tshwane_electricity (
+    reading_date   TIMESTAMP PRIMARY KEY,
+    reading_value  DOUBLE PRECISION NOT NULL,
+    reading_amount DOUBLE PRECISION,
+    reading_notes  TEXT
+);
+
+-- After
+CREATE TABLE public.tshwane_electricity (
+    reading_date                TIMESTAMP PRIMARY KEY,
+    cumulative_electricity_used DOUBLE PRECISION NOT NULL,
+    reading_notes               TEXT
+);
+```
+
+Migration applied:
+```sql
+DELETE FROM public.tshwane_electricity;  -- existing data cleared
+ALTER TABLE public.tshwane_electricity RENAME COLUMN reading_value TO cumulative_electricity_used;
+ALTER TABLE public.tshwane_electricity DROP COLUMN reading_amount;
+```
+
+### 🔧 Technical Changes
+
+#### Backend
+- **`TshwaneRecord.java`**: Removed `readingAmount` field; renamed `readingValue` → `cumulativeElectricityUsed`; removed unused JPA annotations (`@Entity`, `@Table`, `@Id`, `@Column`)
+- **`ExcelProcessingService.java`**: `parseTshwaneRow()` now reads Col C (index 2) for value and Col O (index 14) for notes; rows with no Col C value are skipped
+- **`ImportService.java`**: UPSERT SQL updated to 3-column schema (`reading_date`, `cumulative_electricity_used`, `reading_notes`)
+- **`FileUploadController.java`**: Preview map key changed from `"Reading Value"` → `"Cumulative Electricity Used"`; `"Reading Amount"` removed
+- **`ImportController.java`**: Legacy data-path field lookups updated to `cumulativeElectricityUsed` / `"Cumulative Electricity Used"`
+
+#### Frontend
+- **`tshwane-record.model.ts`**: Removed `readingAmount`; replaced `readingValue` with `cumulativeElectricityUsed` in both `TshwaneRecord` and `TshwanePreviewData` interfaces
+- **`data-preview.ts`**: Tshwane column list updated — `"Cumulative Electricity Used"` replaces `"Reading Value"`; `"Reading Amount"` removed
+
+### ✅ Test Results
+- **56 backend tests**: All passing
+- **31 frontend tests**: All passing
+
+### 🔄 Migration Notes
+
+#### Breaking Changes
+- `tshwane_electricity.reading_value` → renamed to `cumulative_electricity_used`
+- `tshwane_electricity.reading_amount` → dropped
+- All existing Tshwane data must be re-imported from the Excel source file
+
+#### Upgrade Path
+1. Pull latest code
+2. Apply DB migration (already done in k8s environment)
+3. Re-import Tshwane data via Upload page using the Excel source file
+4. Build and deploy Docker images
+
+---
+
 ## v1.6 - Security Vulnerability Fixes
 
 **Release Date**: April 27, 2026  

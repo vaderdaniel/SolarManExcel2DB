@@ -6,7 +6,7 @@ This file provides comprehensive guidance to AI assistants (Claude Code, Warp, e
 
 ## 🌞 Project Overview
 SolarManExcel2DB is a comprehensive full-stack web application for importing and visualizing solar power generation data:
-- **Web UI** (Version 1.6): Angular + Spring Boot application with production visualization
+- **Web UI** (Version 1.7): Angular + Spring Boot application with production visualization
 
 This tool streamlines the process of transferring solar monitoring data from Excel files into a PostgreSQL database for analysis, reporting, and visualization.
 
@@ -207,7 +207,7 @@ Status codes: `200` success · `400` bad request · `500` server error · `503` 
 
 ## 📋 Data Processing
 
-### Excel File Format (12 columns, fixed order)
+### SolarMan Excel File Format (12 columns, fixed order)
 | # | Column | Notes |
 |---|--------|-------|
 | 1 | Plant | identifier |
@@ -217,6 +217,16 @@ Status codes: `200` success · `400` bad request · `500` server error · `503` 
 
 - Records before 2020-01-01 are filtered out
 - Duplicate timestamps handled with `ON CONFLICT (updated) DO UPDATE SET ...`
+
+### Tshwane Excel File Format — Sheet: "Elektrisiteit Lesings"
+| Excel Col | Header | Maps To |
+|---|---|---|
+| A | Day | `reading_date` (PRIMARY KEY) |
+| C | Cumulative Electricity used | `cumulative_electricity_used` |
+| O | *(no header)* | `reading_notes` (sparse milestone notes) |
+
+- Rows where Column C is empty are skipped (e.g. the initial baseline row)
+- Duplicate dates handled with `ON CONFLICT (reading_date) DO UPDATE SET ...`
 
 ---
 
@@ -236,6 +246,12 @@ CREATE TABLE public.loots_inverter (
     charge_power     DOUBLE PRECISION,
     discharge_power  DOUBLE PRECISION,
     soc              DOUBLE PRECISION
+);
+
+CREATE TABLE public.tshwane_electricity (
+    reading_date                TIMESTAMP PRIMARY KEY,
+    cumulative_electricity_used DOUBLE PRECISION NOT NULL,
+    reading_notes               TEXT
 );
 ```
 
@@ -397,7 +413,8 @@ psql -h localhost -p 5432 -d LOOTS -U $DB_USER
 ```
 
 ### Excel File Format Error
-- Must have exactly 12 columns in the fixed order above
+- **SolarMan**: Must have exactly 12 columns in the fixed order
+- **Tshwane**: Must use sheet named "Elektrisiteit Lesings"; data must be in Col A (date) and Col C (cumulative value)
 - Timestamps must be in a recognized format (`yyyy/MM/dd`, `MM/dd/yyyy`, SQL format, or Excel serial)
 
 ### Kubernetes: Images Not Found (`ErrImageNeverPull`)
@@ -440,7 +457,7 @@ lsof -i :8080 && lsof -i :8081 && lsof -i :5432
 <!-- backend/pom.xml -->
 <groupId>com.loots</groupId>
 <artifactId>solarman-ui-backend</artifactId>
-<version>1.6.0</version>
+<version>1.7.0</version>
 
 <properties>
   <tomcat.version>10.1.54</tomcat.version>
@@ -486,6 +503,14 @@ See `backend/src/test/README.md` for full test documentation.
 
 ## 📝 Recent Updates
 
+### April 29, 2026 - Tshwane Data Model Redesign (v1.7)
+- Renamed `tshwane_electricity.reading_value` → `cumulative_electricity_used` (now stores Col C "Cumulative Electricity used" from "Elektrisiteit Lesings" sheet)
+- Dropped `reading_amount` column (was always 0)
+- `reading_notes` now populated from Col O (sparse milestone notes)
+- Updated `TshwaneRecord.java`, `ExcelProcessingService`, `ImportService`, `FileUploadController`, `ImportController`
+- Updated frontend `tshwane-record.model.ts` and `data-preview` component
+- All 56 backend tests and 31 frontend tests passing
+
 ### April 27, 2026 - Security Vulnerability Fixes (v1.6)
 - Upgraded Apache Tomcat from 10.1.52 to 10.1.54 (CRITICAL CVE-2026-29145 + 6 other CVEs)
 - Forced Spring Framework override to 6.2.17 (CVE-2026-22737, CVE-2026-22735)
@@ -518,6 +543,7 @@ See `backend/src/test/README.md` for full test documentation.
 - Updated Grafana dashboard backups
 
 ### Version History
+- **v1.7** - Tshwane data model redesign (cumulative electricity used + Col O notes)
 - **v1.6** - Security vulnerability fixes (Tomcat, Spring, Angular 21.2)
 - **v1.5** - Dependency upgrades, Angular 21, Java 17, Vitest migration
 - **v1.1** - Production visualization & multi-page UI

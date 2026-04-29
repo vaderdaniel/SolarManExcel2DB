@@ -37,7 +37,7 @@ This prevents connection errors and ensures clean application startup.
 
 ## ✨ Key Features
 
-### Web UI (Version 1.6)
+### Web UI (Version 1.7)
 - 🌐 **Modern Web UI**: Angular 21 with Material Design and Routing
 - 📊 **Production Visualization**: Interactive bar chart showing last 7 days of solar production
 - 🔄 **Time-Weighted Calculations**: Accurate energy production metrics matching Grafana dashboards
@@ -143,12 +143,19 @@ This project includes comprehensive documentation organized into specialized fil
 
 - **[AGENTS.md](AGENTS.md)** — Main project documentation (overview, features, setup, API reference, deployment, troubleshooting)
 - **[frontend/solarman-ui/README.md](frontend/solarman-ui/README.md)** — Frontend component structure, Angular conventions, and TypeScript models
-- **[CHANGELOG_v1.6.md](CHANGELOG_v1.6.md)** — Version history, release notes and migration guide
+- **[CHANGELOG_v1.7.md](CHANGELOG_v1.7.md)** — Version history, release notes and migration guide
 - **[grafana/README.md](grafana/README.md)** — Grafana dashboard documentation and backup/restore guide
 - **[backend/SECURITY.md](backend/SECURITY.md)** — Security scanning with Trivy (quick reference + full guide)
 - **[backend/src/test/README.md](backend/src/test/README.md)** — Backend and frontend unit test documentation
 
 ## 🎯 Recent Major Updates
+
+### v1.7 - Tshwane Electricity Data Model Redesign (April 29, 2026)
+- ✅ **New column `cumulative_electricity_used`**: Stores running total from Col C of "Elektrisiteit Lesings" sheet (replacing raw meter reading)
+- ✅ **Notes from Col O**: Sparse milestone notes (e.g. "Prepaid Electricity Installed") now captured in `reading_notes`
+- ✅ **`reading_amount` dropped**: Column was always 0, now removed from schema and model
+- ✅ **Upload preview updated**: "Cumulative Electricity Used" column shown in data preview
+- ✅ **All 56 backend and 31 frontend tests passing**
 
 ### v1.6 - Security Vulnerability Fixes (April 27, 2026)
 - ✅ **Tomcat 10.1.54**: Upgraded from 10.1.52 (CRITICAL CVE-2026-29145 auth bypass + 6 other CVEs fixed)
@@ -235,8 +242,8 @@ This project includes comprehensive documentation organized into specialized fil
 - Timestamp validation and filtering (post-2020 data)
 
 ### Tshwane Electricity Files  
-- Reading dates, values, and amounts
-- Billing notes and consumption patterns
+- Cumulative electricity used (running total since baseline reading)
+- Milestone notes (e.g. prepaid meter installation, infrastructure changes)
 - Municipal electricity usage tracking
 
 ## 🔄 Development Workflow
@@ -328,7 +335,7 @@ cd frontend/solarman-ui && npm run build
 cd ../../backend && mvn clean package
 
 # Deploy single JAR
-java -jar target/solarman-ui-backend-1.6.0.jar
+java -jar target/solarman-ui-backend-1.7.0.jar
 
 # Access application at http://localhost:8080
 ```
@@ -361,8 +368,8 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 1.6 - Security Vulnerability Fixes  
-**Last Updated**: April 27, 2026  
+**Latest Version**: 1.7 - Tshwane Data Model Redesign  
+**Last Updated**: April 29, 2026  
 **Status**: Production Ready ✅
 
 ## 🔒 Security

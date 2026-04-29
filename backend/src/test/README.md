@@ -126,7 +126,9 @@ Tests Excel file parsing and data extraction.
 
 **Key Tests:**
 - ✅ Valid SolarMan and Tshwane file processing
-- ✅ Column validation (12 expected columns)
+- ✅ SolarMan column validation (12 expected columns)
+- ✅ Tshwane column mapping: Col A (date), Col C (cumulative electricity used), Col O (notes)
+- ✅ Tshwane rows with no Col C value are skipped
 - ✅ Date filtering (after January 1, 2020)
 - ✅ Multiple date format parsing (yyyy/MM/dd, MM/dd/yyyy, SQL format)
 - ✅ Excel date serial number conversion
