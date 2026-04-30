@@ -119,6 +119,7 @@ backend/src/main/java/com/loots/solarmanui/
 │   ├── SolarManRecord.java
 │   ├── TshwaneRecord.java
 │   ├── ProductionStat.java          # {LocalDate date, Double productionUnits}
+│   ├── TshwaneUsageStat.java        # {LocalDateTime readingDate, Double usageKwh}
 │   ├── ImportResult.java            # {recordsInserted, recordsUpdated, ...}
 │   ├── DatabaseStatus.java
 │   └── LatestRecords.java
@@ -168,6 +169,26 @@ FROM per_point GROUP BY production_date
 ORDER BY production_date DESC LIMIT ?;
 ```
 
+### `GET /api/database/tshwane-usage`
+```json
+[
+  {"readingDate": "2026-04-29T08:53:00", "usageKwh": 10.71},
+  {"readingDate": "2026-04-28T07:00:00", "usageKwh": 13.14}
+]
+```
+Returns last 7 readings with kWh consumed between consecutive readings:
+```sql
+SELECT a.reading_date,
+  ROUND((a.cumulative_electricity_used - b.cumulative_electricity_used)::numeric, 2) AS usage_kwh
+FROM public.tshwane_electricity a
+LEFT JOIN LATERAL (
+  SELECT cumulative_electricity_used FROM public.tshwane_electricity
+  WHERE reading_date < a.reading_date ORDER BY reading_date DESC LIMIT 1
+) b ON true
+WHERE b.cumulative_electricity_used IS NOT NULL
+ORDER BY a.reading_date DESC LIMIT 7;
+```
+
 ### `POST /api/upload/{fileType}`
 - `fileType`: `solarman` | `tshwane`
 - Request: `multipart/form-data`, field `file`, max 10 MB
@@ -191,6 +212,7 @@ Status codes: `200` success · `400` bad request · `500` server error · `503` 
 
 ### Home Page (`/`)
 - CSS-based production bar chart — last 7 days, time-weighted, auto-refreshes after import
+- CSS-based Tshwane electricity usage bar chart — last 7 readings, kWh consumed between readings, auto-refreshes after import
 - System status panel — polls every 10 seconds, color-coded indicators
 
 ### Upload Page (`/upload`)
@@ -491,12 +513,12 @@ lsof -i :8080 && lsof -i :8081 && lsof -i :5432
 
 ### Testing
 ```bash
-# Backend (56 tests)
+# Backend (61 tests)
 cd backend && mvn test
 mvn test -Dtest=DatabaseServiceTest          # single class
 mvn test -Dtest=ImportServiceTest#methodName # single method
 
-# Frontend (31 tests)
+# Frontend (42 tests)
 cd frontend/solarman-ui && npx ng test --no-watch
 npx ng test                                  # watch mode
 npx playwright test                          # e2e (requires :4200)
@@ -512,7 +534,20 @@ See `backend/src/test/README.md` for full test documentation.
 
 ## 📝 Recent Updates
 
-### April 29, 2026 - Tshwane Excel Parsing Bug Fix (v1.7)
+### April 30, 2026 - Tshwane Electricity Usage Bar Chart (v1.7.3)
+- Added `TshwaneChartComponent` to home page (between Solar Production chart and System Status panel)
+- Green CSS bar chart displaying kWh consumed between the last 7 consecutive Tshwane readings
+- X-axis shows date + time labels (`MM/dd HH:mm`) — important since multiple readings can share the same date
+- New `GET /api/database/tshwane-usage` endpoint using LATERAL join to compute per-interval kWh
+- New `TshwaneUsageStat` model (`readingDate`, `usageKwh`); new `tshwane-usage-stat.model.ts` interface
+- Chart subscribes to `ChartRefreshService` — auto-refreshes after a Tshwane import
+- 61 backend tests passing (+5 new); 42 frontend tests passing (+11 new)
+
+### April 29, 2026 - Grafana Dashboard Updates (v1.7.2)
+- Added "Tshwane Daily" dashboard (2 panels: daily units/day line chart + weekly avg vs grid purchased)
+- Added Sum/Mean/Max legend calcs to panels 1 & 2 of "Daily Stats" and "Monthly Stats"
+
+### April 29, 2026 - Tshwane Excel Parsing Bug Fix (v1.7.1)
 - Fixed `ExcelProcessingService`: Col C "Cumulative Electricity used" cells are Excel formulas (`CellType.FORMULA`); `getCellValueAsDouble` now resolves via `getCachedFormulaResultType()` — previously returned -1.0 for all formula cells, causing every row to be silently skipped (0 preview rows on upload)
 - Fixed `parseTshwaneRow`: Col A date cells are native Excel date type; now read directly via `DateUtil.isCellDateFormatted()` instead of string conversion
 - All 56 backend tests passing
@@ -557,6 +592,9 @@ See `backend/src/test/README.md` for full test documentation.
 - Updated Grafana dashboard backups
 
 ### Version History
+- **v1.7.3** - Tshwane electricity usage bar chart on home page
+- **v1.7.2** - Grafana dashboard updates (Tshwane Daily + legend calcs)
+- **v1.7.1** - Tshwane Excel parsing bug fix (formula cells, native date cells)
 - **v1.7** - Tshwane data model redesign (cumulative electricity used + Col O notes)
 - **v1.6** - Security vulnerability fixes (Tomcat, Spring, Angular 21.2)
 - **v1.5** - Dependency upgrades, Angular 21, Java 17, Vitest migration

@@ -40,6 +40,7 @@ This prevents connection errors and ensures clean application startup.
 ### Web UI (Version 1.7)
 - 🌐 **Modern Web UI**: Angular 21 with Material Design and Routing
 - 📊 **Production Visualization**: Interactive bar chart showing last 7 days of solar production
+- ⚡ **Tshwane Usage Visualization**: Bar chart showing kWh consumed between the last 7 Tshwane meter readings
 - 🔄 **Time-Weighted Calculations**: Accurate energy production metrics matching Grafana dashboards
 - 🧭 **Multi-Page Navigation**: Dedicated Home and Upload pages with toolbar navigation
 - 📊 **Real-time Status**: Live database connectivity monitoring with 10-second polling
@@ -149,6 +150,13 @@ This project includes comprehensive documentation organized into specialized fil
 - **[backend/src/test/README.md](backend/src/test/README.md)** — Backend and frontend unit test documentation
 
 ## 🎯 Recent Major Updates
+
+### v1.7.3 - Tshwane Electricity Usage Bar Chart (April 30, 2026)
+- ✅ **New `TshwaneChartComponent`**: Green CSS bar chart on home page between Solar Production and System Status
+- ✅ **kWh per interval**: Shows `cumulative_electricity_used` difference between each of the last 7 readings
+- ✅ **New API endpoint** `GET /api/database/tshwane-usage` using LATERAL join query
+- ✅ **Auto-refresh**: Reloads after Tshwane import via `ChartRefreshService`
+- ✅ **61 backend and 42 frontend tests passing**
 
 ### v1.7 - Tshwane Electricity Data Model Redesign (April 29, 2026)
 - ✅ **New column `cumulative_electricity_used`**: Stores running total from Col C of "Elektrisiteit Lesings" sheet (replacing raw meter reading)
@@ -368,8 +376,8 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 1.7 - Tshwane Data Model Redesign  
-**Last Updated**: April 29, 2026  
+**Latest Version**: 1.7.3 - Tshwane Electricity Usage Bar Chart  
+**Last Updated**: April 30, 2026  
 **Status**: Production Ready ✅
 
 ## 🔒 Security
@@ -401,6 +409,7 @@ The application integrates with Grafana for data visualization:
 - Weekly Stats - ISO week aggregations
 - Monthly Stats - Long-term trends
 - By Week Number - Seasonal patterns
+- Tshwane Daily - Rolling avg electricity consumption vs grid purchased comparison
 
 **Access:**
 ```bash
@@ -419,8 +428,9 @@ For detailed Grafana documentation, see:
 
 ## 📸 Screenshots
 
-### Home Page with Production Chart
+### Home Page with Production and Usage Charts
 - 7-day production bar chart with time-weighted calculations
+- Tshwane electricity usage bar chart (kWh between last 7 readings)
 - System status panel with real-time database monitoring
 - Responsive Material Design interface
 

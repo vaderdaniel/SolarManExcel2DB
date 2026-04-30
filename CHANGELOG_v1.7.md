@@ -2,6 +2,53 @@
 
 ---
 
+## v1.7.3 - Tshwane Electricity Usage Bar Chart
+
+**Release Date**: April 30, 2026  
+**Version**: 1.7.3
+
+### 🆕 New Feature: Tshwane Electricity Usage Chart on Home Page
+
+A new bar chart has been added to the home page, positioned between the Solar Production chart and the System Status panel.
+
+**What it shows:** kWh consumed between each of the last 7 consecutive Tshwane meter readings, computed as `current_cumulative - previous_cumulative` per interval.
+
+**Visual design:** Green gradient bars (distinct from the blue Solar Production chart), same CSS bar chart pattern with dynamic Y-axis scaling, hover tooltips, and responsive layout.
+
+**X-axis labels:** Date + time (`MM/dd HH:mm`) — important because multiple readings can occur on the same day.
+
+**Auto-refresh:** Subscribes to `ChartRefreshService.refresh$` — reloads automatically after a successful Tshwane import.
+
+### 🔧 Technical Changes
+
+#### Backend
+- **`TshwaneUsageStat.java`** (new model): `LocalDateTime readingDate`, `Double usageKwh`
+- **`DatabaseService.java`**: New `getTshwaneUsageStats(int readings)` method using LATERAL join:
+  ```sql
+  SELECT a.reading_date,
+    ROUND((a.cumulative_electricity_used - b.cumulative_electricity_used)::numeric, 2) AS usage_kwh
+  FROM public.tshwane_electricity a
+  LEFT JOIN LATERAL (
+    SELECT cumulative_electricity_used FROM public.tshwane_electricity
+    WHERE reading_date < a.reading_date ORDER BY reading_date DESC LIMIT 1
+  ) b ON true
+  WHERE b.cumulative_electricity_used IS NOT NULL
+  ORDER BY a.reading_date DESC LIMIT ?
+  ```
+- **`DatabaseController.java`**: New `GET /api/database/tshwane-usage` endpoint (fixed at 7 readings)
+
+#### Frontend
+- **`tshwane-usage-stat.model.ts`** (new model): `{ readingDate: string; usageKwh: number }`
+- **`database.service.ts`**: New `getTshwaneUsageStats()` method
+- **`TshwaneChartComponent`** (new, `components/tshwane-chart/`): Standalone, OnPush, green CSS bar chart
+- **`HomeComponent`**: Imports and renders `<app-tshwane-chart>` between production chart and status panel
+
+### ✅ Test Results
+- **61 backend tests**: All passing (+5 new in `DatabaseServiceTest`)
+- **42 frontend tests**: All passing (+11 new in `tshwane-chart.spec.ts`)
+
+---
+
 ## v1.7.2 - Grafana Dashboard Updates
 
 **Release Date**: April 29, 2026  
