@@ -3,6 +3,7 @@ package com.loots.solarmanui.service;
 import com.loots.solarmanui.model.DatabaseStatus;
 import com.loots.solarmanui.model.LatestRecords;
 import com.loots.solarmanui.model.ProductionStat;
+import com.loots.solarmanui.model.TshwaneUsageStat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayList;import java.util.List;
 
 @Service
 public class DatabaseService {
@@ -133,6 +133,45 @@ public class DatabaseService {
             System.err.println("Error getting production stats: " + e.getMessage());
         }
         
+        return stats;
+    }
+
+    public List<TshwaneUsageStat> getTshwaneUsageStats(int readings) {
+        List<TshwaneUsageStat> stats = new ArrayList<>();
+
+        String sql =
+            "SELECT a.reading_date, " +
+            "  ROUND((a.cumulative_electricity_used - b.cumulative_electricity_used)::numeric, 2) AS usage_kwh " +
+            "FROM public.tshwane_electricity a " +
+            "LEFT JOIN LATERAL ( " +
+            "  SELECT cumulative_electricity_used " +
+            "  FROM public.tshwane_electricity " +
+            "  WHERE reading_date < a.reading_date " +
+            "  ORDER BY reading_date DESC LIMIT 1 " +
+            ") b ON true " +
+            "WHERE b.cumulative_electricity_used IS NOT NULL " +
+            "ORDER BY a.reading_date DESC " +
+            "LIMIT ?";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setInt(1, readings);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                java.sql.Timestamp ts = rs.getTimestamp("reading_date");
+                Double usageKwh = rs.getDouble("usage_kwh");
+
+                if (ts != null) {
+                    LocalDateTime readingDate = ts.toLocalDateTime();
+                    stats.add(new TshwaneUsageStat(readingDate, usageKwh));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting Tshwane usage stats: " + e.getMessage());
+        }
+
         return stats;
     }
 }

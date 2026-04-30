@@ -1,6 +1,7 @@
 package com.loots.solarmanui.service;
 
 import com.loots.solarmanui.model.ProductionStat;
+import com.loots.solarmanui.model.TshwaneUsageStat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -262,5 +264,95 @@ class DatabaseServiceTest {
             sql.contains("production_power") &&
             sql.contains("WHERE updated IS NOT NULL")
         ));
+    }
+
+    // ==================== getTshwaneUsageStats Tests ====================
+
+    @Test
+    void testGetTshwaneUsageStats_SuccessfulCalculation() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next())
+                .thenReturn(true)
+                .thenReturn(true)
+                .thenReturn(true)
+                .thenReturn(false);
+
+        LocalDateTime ts1 = LocalDateTime.of(2026, 4, 29, 8, 53);
+        LocalDateTime ts2 = LocalDateTime.of(2026, 4, 28, 7, 0);
+        LocalDateTime ts3 = LocalDateTime.of(2026, 4, 27, 9, 14);
+
+        when(resultSet.getTimestamp("reading_date"))
+                .thenReturn(java.sql.Timestamp.valueOf(ts1))
+                .thenReturn(java.sql.Timestamp.valueOf(ts2))
+                .thenReturn(java.sql.Timestamp.valueOf(ts3));
+
+        when(resultSet.getDouble("usage_kwh"))
+                .thenReturn(10.71)
+                .thenReturn(13.14)
+                .thenReturn(0.41);
+
+        List<TshwaneUsageStat> stats = databaseService.getTshwaneUsageStats(7);
+
+        assertNotNull(stats);
+        assertEquals(3, stats.size());
+        assertEquals(ts1, stats.get(0).getReadingDate());
+        assertEquals(10.71, stats.get(0).getUsageKwh());
+        assertEquals(ts2, stats.get(1).getReadingDate());
+        assertEquals(13.14, stats.get(1).getUsageKwh());
+
+        verify(preparedStatement).setInt(1, 7);
+    }
+
+    @Test
+    void testGetTshwaneUsageStats_EmptyResult() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(false);
+
+        List<TshwaneUsageStat> stats = databaseService.getTshwaneUsageStats(7);
+
+        assertNotNull(stats);
+        assertTrue(stats.isEmpty());
+    }
+
+    @Test
+    void testGetTshwaneUsageStats_WithNullTimestamp() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next())
+                .thenReturn(true)
+                .thenReturn(false);
+
+        when(resultSet.getTimestamp("reading_date")).thenReturn(null);
+        when(resultSet.getDouble("usage_kwh")).thenReturn(10.71);
+
+        List<TshwaneUsageStat> stats = databaseService.getTshwaneUsageStats(7);
+
+        assertNotNull(stats);
+        assertTrue(stats.isEmpty());
+    }
+
+    @Test
+    void testGetTshwaneUsageStats_VerifiesCorrectQuery() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(false);
+
+        databaseService.getTshwaneUsageStats(7);
+
+        verify(connection).prepareStatement(argThat(sql ->
+            sql.contains("FROM public.tshwane_electricity") &&
+            sql.contains("cumulative_electricity_used") &&
+            sql.contains("LATERAL") &&
+            sql.contains("ORDER BY a.reading_date DESC") &&
+            sql.contains("LIMIT ?")
+        ));
+    }
+
+    @Test
+    void testGetTshwaneUsageStats_HandlesSQLException() throws SQLException {
+        when(dataSource.getConnection()).thenThrow(new SQLException("Connection failed"));
+
+        List<TshwaneUsageStat> stats = databaseService.getTshwaneUsageStats(7);
+
+        assertNotNull(stats);
+        assertTrue(stats.isEmpty());
     }
 }

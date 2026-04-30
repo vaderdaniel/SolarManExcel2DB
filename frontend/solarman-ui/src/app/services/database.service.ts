@@ -4,6 +4,7 @@ import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { DatabaseStatus, LatestRecords, DatabaseCredentials } from '../models/database-status.model';
 import { ProductionStat } from '../models/production-stat.model';
+import { TshwaneUsageStat } from '../models/tshwane-usage-stat.model';
 
 @Injectable({
   providedIn: 'root'
@@ -74,6 +75,16 @@ export class DatabaseService {
       .pipe(
         catchError(error => {
           console.error('Production stats fetch error:', error);
+          return throwError(() => new Error(this.getErrorMessage(error)));
+        })
+      );
+  }
+
+  getTshwaneUsageStats(): Observable<TshwaneUsageStat[]> {
+    return this.http.get<TshwaneUsageStat[]>(`${this.baseUrl}/database/tshwane-usage`)
+      .pipe(
+        catchError(error => {
+          console.error('Tshwane usage stats fetch error:', error);
           return throwError(() => new Error(this.getErrorMessage(error)));
         })
       );

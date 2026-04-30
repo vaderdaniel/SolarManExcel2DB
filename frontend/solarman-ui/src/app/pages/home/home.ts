@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
 import { ProductionChartComponent } from '../../components/production-chart/production-chart';
+import { TshwaneChartComponent } from '../../components/tshwane-chart/tshwane-chart';
 import { StatusPanelComponent } from '../../components/status-panel/status-panel';
 
 @Component({
@@ -8,6 +9,7 @@ import { StatusPanelComponent } from '../../components/status-panel/status-panel
   standalone: true,
   imports: [
     ProductionChartComponent,
+    TshwaneChartComponent,
     StatusPanelComponent
 ],
   templateUrl: './home.html',

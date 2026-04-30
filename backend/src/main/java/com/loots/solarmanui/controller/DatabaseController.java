@@ -3,6 +3,7 @@ package com.loots.solarmanui.controller;
 import com.loots.solarmanui.model.DatabaseStatus;
 import com.loots.solarmanui.model.LatestRecords;
 import com.loots.solarmanui.model.ProductionStat;
+import com.loots.solarmanui.model.TshwaneUsageStat;
 import com.loots.solarmanui.service.DatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -102,6 +103,16 @@ public class DatabaseController {
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             // Return empty list on error
+            return ResponseEntity.ok(List.of());
+        }
+    }
+
+    @GetMapping("/tshwane-usage")
+    public ResponseEntity<List<TshwaneUsageStat>> getTshwaneUsageStats() {
+        try {
+            List<TshwaneUsageStat> stats = databaseService.getTshwaneUsageStats(7);
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
             return ResponseEntity.ok(List.of());
         }
     }
