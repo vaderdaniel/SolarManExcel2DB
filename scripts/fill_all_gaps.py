@@ -14,24 +14,119 @@ Year-specific rules:
 Note: only fills gaps BETWEEN existing rows (pre-data and post-data gaps are left untouched).
 """
 
+import base64
+import getpass
 import os
+import subprocess
 import sys
+import time
 import psycopg2
 import random
 from datetime import datetime, timedelta
 
 random.seed(2026)
 
-_db_user = os.environ.get("DB_USER", "")
-_db_pass = os.environ.get("DB_PASS", "")
-if not _db_user or not _db_pass:
-    sys.exit(
-        "Error: DB_USER and DB_PASS environment variables must be set.\n"
-        "  export DB_USER=<your_db_username>\n"
-        "  export DB_PASS=<your_db_password>"
-    )
+NAMESPACE   = "default"
+DB_NAME     = "LOOTS"
+SECRET_NAME = "solarman-secret"
+PF_PORT     = 15432   # local port used for kubectl port-forward
 
-DB = dict(host="localhost", port=5432, dbname="LOOTS",
+
+# ---------------------------------------------------------------------------
+# Kubernetes helpers
+# ---------------------------------------------------------------------------
+
+def _kubectl(*args, timeout=10):
+    """Run kubectl and return (returncode, stdout)."""
+    result = subprocess.run(
+        ["kubectl", *args], capture_output=True, text=True, timeout=timeout
+    )
+    return result.returncode, result.stdout.strip()
+
+
+def resolve_secret(key):
+    """Decode a base64-encoded field from the solarman-secret."""
+    rc, out = _kubectl(
+        "get", "secret", SECRET_NAME, "-n", NAMESPACE,
+        f"-o=jsonpath={{.data.{key}}}"
+    )
+    if rc == 0 and out:
+        try:
+            return base64.b64decode(out).decode()
+        except Exception:
+            pass
+    return ""
+
+
+def resolve_credentials():
+    """Return (db_user, db_pass) from env vars, k8s secret, or interactive prompt."""
+    user   = os.environ.get("DB_USER", "")
+    passwd = os.environ.get("DB_PASS", "")
+
+    if not user or not passwd:
+        print("DB_USER/DB_PASS not set — checking Kubernetes secret...")
+        try:
+            if not user:
+                user   = resolve_secret("DB_USER")
+            if not passwd:
+                passwd = resolve_secret("DB_PASSWORD")
+            if user and passwd:
+                print("  ✅ Credentials loaded from Kubernetes secret.")
+        except FileNotFoundError:
+            print("  kubectl not found; skipping secret lookup.")
+        except Exception as exc:
+            print(f"  Secret lookup failed: {exc}")
+
+    if not user:
+        user = input("Database username: ").strip()
+    if not passwd:
+        passwd = getpass.getpass("Database password: ")
+
+    return user, passwd
+
+
+def find_postgres_pod():
+    """Return the name of the running postgres pod, or None."""
+    rc, out = _kubectl(
+        "get", "pod", "-n", NAMESPACE, "-l", "app=postgres",
+        "-o=jsonpath={.items[0].metadata.name}"
+    )
+    return out if rc == 0 and out else None
+
+
+def start_port_forward(pod_name, local_port=PF_PORT):
+    """Start kubectl port-forward and wait briefly for it to be ready."""
+    proc = subprocess.Popen(
+        ["kubectl", "port-forward", "-n", NAMESPACE,
+         pod_name, f"{local_port}:5432"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
+    time.sleep(2)   # allow the tunnel to establish
+    if proc.poll() is not None:
+        raise RuntimeError("kubectl port-forward exited immediately.")
+    return proc
+
+
+# ---------------------------------------------------------------------------
+# Credentials + connection config
+# ---------------------------------------------------------------------------
+
+_db_user, _db_pass = resolve_credentials()
+
+print("\nLooking for postgres pod in Rancher Desktop...")
+_pod = find_postgres_pod()
+if _pod:
+    print(f"  ✅ Found pod: {_pod}")
+    print(f"  ⏳ Starting port-forward localhost:{PF_PORT} → {_pod}:5432 ...")
+    _pf_proc = start_port_forward(_pod, PF_PORT)
+    print(f"  ✅ Port-forward established.\n")
+    _db_host, _db_port = "localhost", PF_PORT
+else:
+    print("  ⚠️  No postgres pod found — connecting to localhost:5432 directly.\n")
+    _pf_proc = None
+    _db_host, _db_port = "localhost", 5432
+
+DB = dict(host=_db_host, port=_db_port, dbname=DB_NAME,
           user=_db_user, password=_db_pass)
 
 INTERVAL = timedelta(minutes=5)
@@ -275,3 +370,6 @@ if __name__ == "__main__":
             print(f"\n⚠️  {gaps_left} gap events ({slots_left} slots) remain.")
     finally:
         conn.close()
+        if _pf_proc is not None:
+            _pf_proc.terminate()
+            print("\n🔌 Port-forward closed.")
