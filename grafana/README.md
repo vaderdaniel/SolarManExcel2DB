@@ -10,7 +10,8 @@ This directory contains backup configurations for Grafana dashboards that visual
 
 ### Restore All Dashboards (Recommended)
 ```bash
-./restore-dashboards-fixed.sh
+# From the project root directory
+./scripts/restore-dashboards.sh
 ```
 
 ### Backup All Dashboards
@@ -340,7 +341,7 @@ The project includes a script that automatically fixes datasource UIDs and impor
 
 ```bash
 # From the project root directory
-./restore-dashboards-fixed.sh
+./scripts/restore-dashboards.sh
 ```
 
 This script will:

@@ -420,7 +420,7 @@ For full security docs: `backend/SECURITY.md`
 ### Management
 ```bash
 # Restore all dashboards
-./restore-dashboards-fixed.sh
+./scripts/restore-dashboards.sh
 
 # Backup a specific dashboard
 curl -s -u admin:admin123 \

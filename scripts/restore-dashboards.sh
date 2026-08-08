@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Restore Grafana dashboards from backup JSON files
-# This script wraps dashboard JSON in the proper API format and imports them
+# Restore Grafana dashboards with datasource UID correction
+# This script updates datasource UIDs to match the current Grafana instance
 
 set -e
 
@@ -14,23 +14,17 @@ echo "🔄 Starting Grafana dashboard restore process..."
 echo "📍 Grafana URL: $GRAFANA_URL"
 echo ""
 
-# Check if port-forward is needed
-if ! curl -s -f "$GRAFANA_URL/api/health" > /dev/null 2>&1; then
-    echo "⚠️  Grafana not accessible at $GRAFANA_URL"
-    echo "🔌 Starting port-forward in background..."
-    kubectl port-forward svc/grafana-service 3000:3000 -n default > /dev/null 2>&1 &
-    PORT_FORWARD_PID=$!
-    sleep 3
-    
-    # Verify connection
-    if ! curl -s -f "$GRAFANA_URL/api/health" > /dev/null 2>&1; then
-        echo "❌ Failed to connect to Grafana after port-forward"
-        kill $PORT_FORWARD_PID 2>/dev/null || true
-        exit 1
-    fi
-    echo "✅ Port-forward established (PID: $PORT_FORWARD_PID)"
-    echo ""
+# Get the actual datasource UID from Grafana
+echo "🔍 Fetching datasource configuration..."
+DATASOURCE_UID=$(curl -s -u "$GRAFANA_USER:$GRAFANA_PASSWORD" "$GRAFANA_URL/api/datasources" | jq -r '.[0].uid')
+
+if [ -z "$DATASOURCE_UID" ] || [ "$DATASOURCE_UID" = "null" ]; then
+    echo "❌ Failed to get datasource UID from Grafana"
+    exit 1
 fi
+
+echo "✅ Found datasource UID: $DATASOURCE_UID"
+echo ""
 
 # Function to restore a dashboard
 restore_dashboard() {
@@ -39,35 +33,49 @@ restore_dashboard() {
     
     echo "📊 Restoring: $name"
     
-    # Create temporary file with wrapped JSON
-    local temp_file=$(mktemp)
+    # Create temporary file with corrected datasource UID
+    local temp_dashboard=$(mktemp)
+    local temp_payload=$(mktemp)
+    
+    # Replace all datasource UIDs and remove ID in the dashboard JSON
+    jq --arg uid "$DATASOURCE_UID" '
+        del(.id) |
+        walk(
+            if type == "object" and has("datasource") and .datasource.type == "grafana-postgresql-datasource" 
+            then .datasource.uid = $uid 
+            else . 
+            end
+        )
+    ' "$file" > "$temp_dashboard"
     
     # Wrap dashboard JSON in API format
-    jq -n --slurpfile dashboard "$file" '{
+    jq -n --slurpfile dashboard "$temp_dashboard" '{
         dashboard: $dashboard[0],
         overwrite: true
-    }' > "$temp_file"
+    }' > "$temp_payload"
     
     # Import dashboard
     response=$(curl -s -w "\n%{http_code}" \
         -X POST \
         -H "Content-Type: application/json" \
         -u "$GRAFANA_USER:$GRAFANA_PASSWORD" \
-        -d @"$temp_file" \
+        -d @"$temp_payload" \
         "$GRAFANA_URL/api/dashboards/db")
     
     http_code=$(echo "$response" | tail -n 1)
     body=$(echo "$response" | sed '$d')
     
-    rm -f "$temp_file"
+    rm -f "$temp_dashboard" "$temp_payload"
     
     if [ "$http_code" = "200" ]; then
         uid=$(echo "$body" | jq -r '.uid // "unknown"')
+        url=$(echo "$body" | jq -r '.url // "unknown"')
         echo "   ✅ Success - UID: $uid"
+        echo "   🔗 URL: $GRAFANA_URL$url"
         return 0
     else
         echo "   ❌ Failed (HTTP $http_code)"
-        echo "   Response: $body" | head -n 3
+        echo "   Response: $(echo "$body" | jq -r '.message // .')"
         return 1
     fi
 }
@@ -97,11 +105,8 @@ echo "   Username: $GRAFANA_USER"
 echo "   Password: $GRAFANA_PASSWORD"
 echo ""
 
-# Clean up port-forward if we started it
-if [ ! -z "$PORT_FORWARD_PID" ]; then
-    echo "⚠️  Port-forward still running (PID: $PORT_FORWARD_PID)"
-    echo "   To stop: kill $PORT_FORWARD_PID"
-    echo "   Or keep it running to access Grafana"
+if [ $success_count -gt 0 ]; then
+    echo "✨ Dashboards restored successfully!"
 fi
 
 exit $fail_count

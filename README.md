@@ -378,7 +378,7 @@ open http://localhost:3000
 **Backup & Restore:**
 ```bash
 # Restore all dashboards
-./restore-dashboards-fixed.sh
+./scripts/restore-dashboards.sh
 ```
 
 For detailed Grafana documentation, see:
