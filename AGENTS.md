@@ -218,12 +218,20 @@ Status codes: `200` success · `400` bad request · `500` server error · `503` 
 ### Upload Page (`/upload`)
 - File selection (SolarMan or Tshwane), data preview with pagination, import confirmation, results display
 
-### Angular Conventions
-- Standalone components (`ChangeDetectionStrategy.OnPush`)
-- Signals: `signal()`, `computed()`, `effect()` — use `update()`/`set()`, never `mutate()`
-- `inject()` for DI, `input()`/`output()` functions instead of decorators
-- Native control flow: `@if`, `@for`, `@switch`
-- `ChartRefreshService.triggerRefresh()` after successful import → `ProductionChartComponent` reloads
+### Angular Conventions (canonical — other docs link here)
+- **Standalone components only** — `NgModules` are never used. `standalone: true` is the default in Angular 21 and must not be set explicitly.
+- **`ChangeDetectionStrategy.OnPush`** on every component.
+- **Signals** for state — `signal()`, `computed()`, `effect()`. Use `update()`/`set()`, never `mutate()`.
+- **`inject()`** for DI in components (not constructor injection).
+- **`input()` / `output()` functions** instead of `@Input()`/`@Output()` decorators.
+- **Native control flow** — `@if`, `@for`, `@switch`; never `*ngIf`/`*ngFor`/`*ngSwitch`.
+- **`[class]` / `[style]` bindings** — never `ngClass`/`ngStyle`.
+- **Host bindings** inside the `host` object of `@Component`/`@Directive` — never `@HostBinding`/`@HostListener`.
+- **`NgOptimizedImage`** for static images (does not work for inline base64).
+- **Reactive forms** over template-driven forms.
+- **`ChartRefreshService.triggerRefresh()`** after a successful import → `ProductionChartComponent` and `TshwaneChartComponent` both reload.
+
+TypeScript: use strict type checking, prefer type inference when the type is obvious, avoid `any` (use `unknown` when uncertain).
 
 ---
 
@@ -479,6 +487,15 @@ kubectl exec -it $(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metad
 lsof -i :8080 && lsof -i :8081 && lsof -i :5432
 ```
 
+### `npm ci` Fails in Docker Build
+Use `npm install`, not `npm ci`, in Dockerfiles and scripts — `package-lock.json` is generated with a newer npm than ships in the Node 22 Docker image, so `npm ci` fails on a lock file mismatch.
+
+### nerdctl Build Fails / Hangs
+nerdctl buildkit may not be running in Rancher Desktop. Use `docker` directly for image builds instead (`./scripts/build-images.sh` already falls back to `docker` automatically).
+
+### Known Unfixed CVE: `jackson-core`
+`jackson-core` 2.19.x (managed by Spring Boot 3.5.x) has an unfixed MEDIUM CVE with no available fix in that range. Monitor for a future Spring Boot patch rather than forcing an override.
+
 ---
 
 ## 🔧 Configuration
@@ -532,71 +549,40 @@ See `backend/src/test/README.md` for full test documentation.
 
 ---
 
+## 📝 Documentation Maintenance
+
+**Whenever you make a code change or version bump, update documentation in the same change — don't defer it.** Docs in this repo have drifted from the code before (stale test counts, a dead changelog link, a "Spring Data JPA" claim left over after the codebase moved to raw JDBC); treat that as a standing risk, not a one-time cleanup.
+
+This file (`AGENTS.md`, symlinked as `CLAUDE.md`) is the **single source of truth** for architecture, conventions, API reference, and schema. Other docs should link to it rather than re-describe the same facts:
+
+| File | Scope | Update when... |
+|------|-------|-----------------|
+| `AGENTS.md` / `CLAUDE.md` | Source of truth: architecture, API reference, schema, conventions, troubleshooting | Any behavioral change to the API, schema, build/deploy commands, or conventions |
+| `.github/copilot-instructions.md` (root + `frontend/solarman-ui/`) | Condensed excerpt for GitHub Copilot | Whenever the underlying fact in `AGENTS.md` changes — keep numbers (test counts, versions, dependency versions) identical, don't let them drift independently |
+| `README.md` | Human-facing project overview | Version bumps, new features, new "Recent Major Updates" entry — pull the summary from `CHANGELOG.md`, don't hand-author a second description of the same release |
+| `CHANGELOG.md` | Authoritative, detailed release history | Every version bump — this is the one place full release detail belongs; `AGENTS.md`'s "Recent Updates" and `README.md`'s "Recent Major Updates" should stay to 3-6 bullet summaries and link here, not duplicate it |
+| `frontend/solarman-ui/README.md` | Frontend component/service structure and TypeScript models | New/renamed/removed component, service, or model file |
+| `backend/src/test/README.md` | Test counts and coverage breakdown | Any test added/removed — recount rather than incrementing by feel (`grep -rc "@Test" backend/src/test/java` and `grep -rc "it(" frontend/solarman-ui/src/**/*.spec.ts`) |
+| `backend/SECURITY.md` | Trivy scanning guide | Severity threshold or scan target changes (rarely) |
+| `grafana/README.md` | Dashboard inventory and datasource config | Dashboard added/changed, UID changes |
+
+Before editing a doc, verify the current fact against the code (dependency versions in `pom.xml`/`package.json`, actual `@Test`/`it(` counts, actual directory structure) rather than incrementing the old number — the drift above happened exactly because numbers were copied forward instead of recounted.
+
 ## 📝 Recent Updates
 
+Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.md)**. This section is a teaser of the latest releases only — don't re-add older entries here when adding a new one; just add the new entry at the top of both this section and CHANGELOG.md, and drop the oldest entry here if there are more than three.
+
 ### August 8, 2026 - Security Patches (v1.7.4)
-- Backend: upgraded Apache Tomcat from 10.1.54 to 10.1.55 (3 CRITICAL CVEs fixed: CVE-2026-41293 HTTP/2 header validation bypass, CVE-2026-43512 digest-auth bypass, CVE-2026-43515 authorization bypass); confirmed via `mvn verify` — pom.xml, JAR, and rebuilt Docker image all scan clean
-- Frontend: `npm update` resolved 27 of 32 npm-audit findings (both CRITICALs — `tar`, `vitest`) within existing semver ranges; Angular 21.2.10 → 21.2.20, vitest 4.0.18 → 4.1.10
-- Remaining 5 frontend findings (4 moderate, 1 high) require an Angular v22 major bump; deferred since they're confined to dev/build tooling, not shipped in the app or Docker image
-- Renamed `CHANGELOG_v1.7.md` → `CHANGELOG.md`
-- 61 backend tests passing; 42 frontend unit tests passing; 87/93 e2e passing (6 pre-existing failures unrelated to this change)
+- Backend: Tomcat 10.1.54 → 10.1.55 (3 CRITICAL CVEs fixed); confirmed clean via `mvn verify`
+- Frontend: `npm update` resolved 27 of 32 npm-audit findings; remaining 5 deferred (dev/build tooling only, need Angular v22)
+- 61 backend tests passing; 42 frontend unit tests passing
 
 ### April 30, 2026 - Tshwane Electricity Usage Bar Chart (v1.7.3)
-- Added `TshwaneChartComponent` to home page (between Solar Production chart and System Status panel)
-- Green CSS bar chart displaying kWh consumed between the last 7 consecutive Tshwane readings
-- X-axis shows date + time labels (`MM/dd HH:mm`) — important since multiple readings can share the same date
-- New `GET /api/database/tshwane-usage` endpoint using LATERAL join to compute per-interval kWh
-- New `TshwaneUsageStat` model (`readingDate`, `usageKwh`); new `tshwane-usage-stat.model.ts` interface
-- Chart subscribes to `ChartRefreshService` — auto-refreshes after a Tshwane import
+- Added `TshwaneChartComponent` + `GET /api/database/tshwane-usage` — kWh consumed between the last 7 Tshwane readings, auto-refreshes after import
 - 61 backend tests passing (+5 new); 42 frontend tests passing (+11 new)
 
 ### April 29, 2026 - Grafana Dashboard Updates (v1.7.2)
-- Added "Tshwane Daily" dashboard (2 panels: daily units/day line chart + weekly avg vs grid purchased)
-- Added Sum/Mean/Max legend calcs to panels 1 & 2 of "Daily Stats" and "Monthly Stats"
-
-### April 29, 2026 - Tshwane Excel Parsing Bug Fix (v1.7.1)
-- Fixed `ExcelProcessingService`: Col C "Cumulative Electricity used" cells are Excel formulas (`CellType.FORMULA`); `getCellValueAsDouble` now resolves via `getCachedFormulaResultType()` — previously returned -1.0 for all formula cells, causing every row to be silently skipped (0 preview rows on upload)
-- Fixed `parseTshwaneRow`: Col A date cells are native Excel date type; now read directly via `DateUtil.isCellDateFormatted()` instead of string conversion
-- All 56 backend tests passing
-
-### April 29, 2026 - Tshwane Data Model Redesign (v1.7)
-- Renamed `tshwane_electricity.reading_value` → `cumulative_electricity_used` (now stores Col C "Cumulative Electricity used" from "Elektrisiteit Lesings" sheet)
-- Dropped `reading_amount` column (was always 0)
-- `reading_notes` now populated from Col O (sparse milestone notes)
-- Updated `TshwaneRecord.java`, `ExcelProcessingService`, `ImportService`, `FileUploadController`, `ImportController`
-- Updated frontend `tshwane-record.model.ts` and `data-preview` component
-- All 56 backend tests and 31 frontend tests passing
-
-### April 27, 2026 - Security Vulnerability Fixes (v1.6)
-- Upgraded Apache Tomcat from 10.1.52 to 10.1.54 (CRITICAL CVE-2026-29145 + 6 other CVEs)
-- Forced Spring Framework override to 6.2.17 (CVE-2026-22737, CVE-2026-22735)
-- Forced commons-lang3 override to 3.18.0 (CVE-2025-48924)
-- Upgraded Angular from 21.1.x to 21.2.10 (XSS in i18n CVEs fixed)
-- Upgraded @angular/build from 21.1.4 to 21.2.8 (updated vite, undici; path traversal/HTTP smuggling fixed)
-- Resolved all 18 npm audit vulnerabilities (zero remaining)
-- All 56 backend tests and 31 frontend tests passing
-
-### March 1, 2026 - Documentation Housekeeping & Node 22 Upgrade
-- Upgraded Node.js from 20 to 22 in both frontend and backend Dockerfiles
-- Updated all documentation to reflect current software versions
-
-### February 21, 2026 - Dependency Upgrades & Vitest Migration
-- Upgraded Java from 11 to 17 (backend)
-- Upgraded Angular from 20.3 to 21
-- Migrated frontend tests from Karma/Jasmine to Vitest
-- Upgraded Spring Boot from 3.2.2 to 3.5.10
-- Upgraded Apache POI from 4.1.1 to 5.5.1
-- Upgraded PostgreSQL JDBC from 42.7.3 to 42.7.10
-- Upgraded Apache Tomcat from 10.1.35 to 10.1.52
-- All 56 backend tests and 31 frontend tests passing
-
-### February 2, 2026 - Security & Infrastructure
-- Added Trivy security scanning integration
-- Upgraded Apache Tomcat to 10.1.35 (CVE-2025-24813 fixed)
-- Added comprehensive Grafana backup/restore system
-- Created Dockerfile.simple for runtime-only builds
-- Enhanced security documentation
-- Updated Grafana dashboard backups
+- Added "Tshwane Daily" dashboard; added Sum/Mean/Max legend calcs to Daily/Monthly Stats panels
 
 ### Version History
 - **v1.7.4** - Security patches (Tomcat 10.1.55 CVEs, frontend npm audit fix)

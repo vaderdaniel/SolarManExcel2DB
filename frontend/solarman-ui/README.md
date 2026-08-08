@@ -1,6 +1,6 @@
 # SolarMan UI — Angular Frontend
 
-Version 1.7.0 · Angular 21.2 · Vitest
+Version 1.7.4 · Angular 21.2 · Vitest
 
 For full project documentation see **[AGENTS.md](../../AGENTS.md)** at the repository root.
 
@@ -10,7 +10,7 @@ For full project documentation see **[AGENTS.md](../../AGENTS.md)** at the repos
 
 ```bash
 npm start                   # dev server on :4200
-npx ng test --no-watch      # unit tests (31 tests)
+npx ng test --no-watch      # unit tests (42 tests)
 npx ng test                 # unit tests in watch mode
 npx playwright test         # e2e tests (requires :4200 running)
 npx ng build --configuration production --output-path=dist/solarman-ui
@@ -36,37 +36,34 @@ npx ng build --configuration production --output-path=dist/solarman-ui
 ```
 src/app/
 ├── pages/
-│   ├── home/            # HomeComponent — production chart + status panel
+│   ├── home/            # HomeComponent — production chart + Tshwane usage chart + status panel
 │   └── upload/          # UploadComponent — file selection → preview → import
 ├── components/
 │   ├── production-chart/  # CSS bar chart, last 7 days, auto-refreshes on import
+│   ├── tshwane-chart/     # Green CSS bar chart, kWh between last 7 Tshwane readings, auto-refreshes on import
 │   ├── status-panel/      # polls /api/database/status every 10 s
 │   ├── file-upload/       # file picker, 10 MB limit, solarman | tshwane
 │   ├── data-preview/      # paginated Material table, Confirm / Cancel
 │   └── import-result/     # shows inserted/updated counts + date range
 ├── services/
 │   ├── chart-refresh.service.ts  # cross-component Subject; call triggerRefresh() after import
-│   ├── database.service.ts       # GET /api/database/status, /latest-records, /production-stats
+│   ├── database.service.ts       # GET /api/database/status, /latest-records, /production-stats, /tshwane-usage
 │   ├── file-upload.service.ts    # POST /api/upload/{fileType}
 │   └── import.service.ts         # POST /api/import/{fileType}
 └── models/
-    └── production-stat.model.ts  # { date: string; productionUnits: number }
+    ├── production-stat.model.ts    # { date: string; productionUnits: number }
+    ├── tshwane-usage-stat.model.ts # { readingDate: string; usageKwh: number }
+    ├── database-status.model.ts
+    ├── import-result.model.ts
+    ├── solar-record.model.ts
+    └── tshwane-record.model.ts
 ```
 
 ---
 
 ## Angular Conventions
 
-- **Standalone components only** — `NgModules` are never used. `standalone: true` is the default in Angular 21 and must not be set explicitly.
-- **`ChangeDetectionStrategy.OnPush`** on every component.
-- **Signals** for state — `signal()`, `computed()`, `effect()`; use `update()`/`set()`, never `mutate()`.
-- **`inject()`** for DI in components (not constructor injection).
-- **`input()` / `output()` functions** instead of `@Input()`/`@Output()` decorators.
-- **Native control flow** — `@if`, `@for`, `@switch`; never `*ngIf`/`*ngFor`.
-- **`[class]` / `[style]` bindings** — never `ngClass`/`ngStyle`.
-- **Host bindings** inside the `host` object of `@Component` — never `@HostBinding`/`@HostListener`.
-- **`NgOptimizedImage`** for static images (does not work for inline base64).
-- **Reactive forms** over template-driven forms.
+See **[AGENTS.md § Angular Conventions](../../AGENTS.md#angular-conventions-canonical--other-docs-link-here)** at the repository root for the canonical list (standalone components, signals, `inject()`, native control flow, etc.).
 
 ---
 
@@ -84,7 +81,7 @@ Configured in `app.config.ts`.
 
 ## Cross-Component Chart Refresh
 
-`ChartRefreshService` exposes a `refresh$` observable. Call `triggerRefresh()` after a successful import; `ProductionChartComponent` subscribes and reloads data from `/api/database/production-stats?days=7`.
+`ChartRefreshService` exposes a `refresh$` observable. Call `triggerRefresh()` after a successful import; `ProductionChartComponent` and `TshwaneChartComponent` both subscribe and reload from `/api/database/production-stats?days=7` and `/api/database/tshwane-usage` respectively.
 
 ---
 
@@ -95,6 +92,12 @@ Configured in `app.config.ts`.
 export interface ProductionStat {
   date: string;           // ISO date "YYYY-MM-DD"
   productionUnits: number; // Wh (time-weighted)
+}
+
+// models/tshwane-usage-stat.model.ts
+export interface TshwaneUsageStat {
+  readingDate: string; // ISO datetime
+  usageKwh: number;    // kWh consumed since the previous reading
 }
 
 // Inline in services / components:

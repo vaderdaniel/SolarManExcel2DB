@@ -5,8 +5,8 @@ This repository contains unit tests for both the backend (Spring Boot / JUnit 5)
 
 | Layer | Tests | Runner |
 |-------|-------|--------|
-| Backend | 56 | `mvn test` |
-| Frontend | 31 | `npx ng test --no-watch` |
+| Backend | 61 | `mvn test` |
+| Frontend | 42 | `npx ng test --no-watch` |
 
 ---
 
@@ -50,10 +50,10 @@ mvn test jacoco:report
 
 ## Test Coverage Summary
 
-**Total: 56 backend tests** (DatabaseServiceTest: 10, DatabaseControllerTest: 11, ImportServiceTest: 19, ExcelProcessingServiceTest: 16)
+**Total: 61 backend tests** (DatabaseServiceTest: 15, DatabaseControllerTest: 11, ImportServiceTest: 19, ExcelProcessingServiceTest: 16)
 
-### DatabaseServiceTest (10 tests)
-Tests the core database service layer, focusing on production statistics calculation.
+### DatabaseServiceTest (15 tests)
+Tests the core database service layer: production statistics (`getProductionStats`, 10 tests) and Tshwane usage statistics (`getTshwaneUsageStats`, 5 tests).
 
 **Key Tests:**
 - ✅ Time-weighted production calculation using SQL window functions
@@ -62,6 +62,7 @@ Tests the core database service layer, focusing on production statistics calcula
 - ✅ Connection and query exception handling
 - ✅ SQL query verification (LAG, EXTRACT, GREATEST functions)
 - ✅ Correct table/column usage (`public.loots_inverter`)
+- ✅ Tshwane usage: LATERAL join query verification, empty result, null timestamp, and SQL exception handling
 
 **Example:**
 ```java
@@ -247,9 +248,12 @@ When adding new tests:
 ```
 frontend/solarman-ui/src/app/
 ├── components/
-│   └── production-chart/
-│       ├── production-chart.ts          # Component
-│       └── production-chart.spec.ts     # 18 tests
+│   ├── production-chart/
+│   │   ├── production-chart.ts          # Component
+│   │   └── production-chart.spec.ts     # 18 tests
+│   └── tshwane-chart/
+│       ├── tshwane-chart.ts             # Component
+│       └── tshwane-chart.spec.ts        # 11 tests
 ├── pages/
 │   └── upload/
 │       ├── upload.ts                    # Page component
@@ -267,6 +271,10 @@ npx playwright test       # e2e tests (requires :4200 running)
 ```
 
 ## Test Coverage Summary
+
+### TshwaneChartComponent (11 tests)
+
+Mirrors `ProductionChartComponent`'s chart-data processing, loading/error states, and `ChartRefreshService` auto-refresh subscription, but sources data from `getTshwaneUsageStats()` (`GET /api/database/tshwane-usage`) instead of production stats.
 
 ### ProductionChartComponent (18 tests)
 
