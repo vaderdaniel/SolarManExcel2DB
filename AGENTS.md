@@ -386,11 +386,11 @@ ls backend/reports/               # maven-dependencies.json, jar-artifact.json, 
 - Regenerate secret value: `echo -n "value" | base64`
 
 ### Status
-- ✅ Tomcat 10.1.54 (CRITICAL CVE-2026-29145 patched)
+- ✅ Tomcat 10.1.55 (CRITICAL CVE-2026-41293, CVE-2026-43512, CVE-2026-43515 patched)
 - ✅ Spring Framework 6.2.17 (CVE-2026-22737 patched)
 - ✅ commons-lang3 3.18.0 (CVE-2025-48924 patched)
-- ✅ Angular 21.2.10 (XSS in i18n patched)
-- ✅ Zero npm audit vulnerabilities
+- ✅ Angular 21.2.20 (XSS in i18n patched)
+- ⚠️ 5 npm audit findings remain (4 moderate, 1 high) — require an Angular v22 major bump to fully resolve; confined to dev/build tooling (`ng serve` dev-server, Angular CLI's bundled MCP server), not shipped in the app or Docker image
 
 For full security docs: `backend/SECURITY.md`
 
@@ -488,10 +488,10 @@ lsof -i :8080 && lsof -i :8081 && lsof -i :5432
 <!-- backend/pom.xml -->
 <groupId>com.loots</groupId>
 <artifactId>solarman-ui-backend</artifactId>
-<version>1.7.0</version>
+<version>1.7.4</version>
 
 <properties>
-  <tomcat.version>10.1.54</tomcat.version>
+  <tomcat.version>10.1.55</tomcat.version>
   <spring-framework.version>6.2.17</spring-framework.version>
   <commons-lang3.version>3.18.0</commons-lang3.version>
 </properties>
@@ -500,7 +500,7 @@ lsof -i :8080 && lsof -i :8081 && lsof -i :5432
 ### Key Dependencies
 - **Apache POI 5.5.1** — Excel file processing
 - **PostgreSQL JDBC 42.7.10** — Database connectivity
-- **Apache Tomcat 10.1.54** — Embedded web server
+- **Apache Tomcat 10.1.55** — Embedded web server
 - **Java 17** — Runtime
 - **Spring Boot 3.5.10** — Web framework
 - **Angular 21.2** — Frontend framework
@@ -533,6 +533,13 @@ See `backend/src/test/README.md` for full test documentation.
 ---
 
 ## 📝 Recent Updates
+
+### August 8, 2026 - Security Patches (v1.7.4)
+- Backend: upgraded Apache Tomcat from 10.1.54 to 10.1.55 (3 CRITICAL CVEs fixed: CVE-2026-41293 HTTP/2 header validation bypass, CVE-2026-43512 digest-auth bypass, CVE-2026-43515 authorization bypass); confirmed via `mvn verify` — pom.xml, JAR, and rebuilt Docker image all scan clean
+- Frontend: `npm update` resolved 27 of 32 npm-audit findings (both CRITICALs — `tar`, `vitest`) within existing semver ranges; Angular 21.2.10 → 21.2.20, vitest 4.0.18 → 4.1.10
+- Remaining 5 frontend findings (4 moderate, 1 high) require an Angular v22 major bump; deferred since they're confined to dev/build tooling, not shipped in the app or Docker image
+- Renamed `CHANGELOG_v1.7.md` → `CHANGELOG.md`
+- 61 backend tests passing; 42 frontend unit tests passing; 87/93 e2e passing (6 pre-existing failures unrelated to this change)
 
 ### April 30, 2026 - Tshwane Electricity Usage Bar Chart (v1.7.3)
 - Added `TshwaneChartComponent` to home page (between Solar Production chart and System Status panel)
@@ -592,6 +599,7 @@ See `backend/src/test/README.md` for full test documentation.
 - Updated Grafana dashboard backups
 
 ### Version History
+- **v1.7.4** - Security patches (Tomcat 10.1.55 CVEs, frontend npm audit fix)
 - **v1.7.3** - Tshwane electricity usage bar chart on home page
 - **v1.7.2** - Grafana dashboard updates (Tshwane Daily + legend calcs)
 - **v1.7.1** - Tshwane Excel parsing bug fix (formula cells, native date cells)
@@ -603,6 +611,6 @@ See `backend/src/test/README.md` for full test documentation.
 
 ---
 
-**Last Updated**: April 27, 2026
+**Last Updated**: August 8, 2026
 
 

@@ -2,6 +2,35 @@
 
 ---
 
+## v1.7.4 - Security Patches (Backend Tomcat CVEs + Frontend npm audit)
+
+**Release Date**: August 8, 2026
+**Version**: 1.7.4
+
+### 🔐 Security Fixes
+
+#### Backend — 3 CRITICAL CVEs resolved (`pom.xml`)
+
+| Library | Before | After | CVEs Fixed |
+|---------|--------|-------|-------------|
+| `tomcat-embed-core` | 10.1.54 | **10.1.55** | CVE-2026-41293 (HTTP/2 request header validation bypass), CVE-2026-43512 (digest-auth bypass), CVE-2026-43515 (authorization bypass via overlapping method constraints) |
+
+- Tomcat overridden via `<tomcat.version>10.1.55</tomcat.version>`
+- Confirmed via `mvn verify` (integrated Trivy scan): `pom.xml`, the built JAR, and the rebuilt `solarman-backend:latest` Docker image all scan clean (0 vulnerabilities)
+
+#### Frontend — 27 of 32 npm-audit findings resolved (`package.json` / `package-lock.json`)
+
+- `npm update` pulled in-range fixes for both CRITICAL findings (`tar`, `vitest`) plus 25 high/moderate/low findings, all within existing `^` semver ranges — no `package.json` range changes required
+- Angular packages: `21.2.10` → `21.2.20`; `vitest`: `4.0.18` → `4.1.10` (fixes a critical arbitrary file read via the Vitest UI server)
+- **Remaining 5** (4 moderate, 1 high — `@angular/build`, `@angular/cli`, `@modelcontextprotocol/sdk`, `@hono/node-server`, `undici`) require an Angular v22 major-version bump to fully resolve; deferred as a separate decision since they're confined to dev/build tooling (the `ng serve` dev-server HTTP client and the Angular CLI's bundled MCP server) and not shipped in the built app or Docker image
+
+### ✅ Test Results
+- **61 backend tests**: All passing
+- **42 frontend unit tests**: All passing (vitest 4.1.10)
+- **87/93 frontend e2e tests**: Passing — the 6 failures are pre-existing stale fixtures unrelated to this change (a footer version-string assertion and a `.error-state` locator that stopped being unique after the Tshwane usage chart was added in v1.7.3)
+
+---
+
 ## v1.7.3 - Tshwane Electricity Usage Bar Chart
 
 **Release Date**: April 30, 2026  
