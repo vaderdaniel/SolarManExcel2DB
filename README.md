@@ -3,7 +3,7 @@
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.oracle.com/java/)
 [![Angular](https://img.shields.io/badge/Angular-21.2-red.svg)](https://angular.dev/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-green.svg)](https://spring.io/projects/spring-boot)
-[![Version](https://img.shields.io/badge/version-1.7.4-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.7.5-informational.svg)](CHANGELOG.md)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://www.postgresql.org/)
 [![Grafana](https://img.shields.io/badge/Grafana-Latest-orange.svg)](https://grafana.com/)
 
@@ -154,6 +154,10 @@ This project includes comprehensive documentation organized into specialized fil
 
 Full release history lives in **[CHANGELOG.md](CHANGELOG.md)**. This is a teaser of the latest releases only.
 
+### v1.7.5 - Security Patch (September 12, 2026)
+- ✅ **Tomcat 10.1.59**: 3 CRITICAL CVEs fixed (security constraint bypass, DIGEST-auth replay bypass, FORM-auth bypass)
+- ✅ **61 backend tests passing**
+
 ### v1.7.4 - Security Patches (August 8, 2026)
 - ✅ **Tomcat 10.1.55**: 3 CRITICAL CVEs fixed (HTTP/2 header validation bypass, digest-auth bypass, authorization bypass)
 - ✅ **npm audit**: 27 of 32 findings resolved via `npm update`, including both CRITICALs (`tar`, `vitest`)
@@ -166,11 +170,6 @@ Full release history lives in **[CHANGELOG.md](CHANGELOG.md)**. This is a teaser
 - ✅ **New API endpoint** `GET /api/database/tshwane-usage` using LATERAL join query
 - ✅ **Auto-refresh**: Reloads after Tshwane import via `ChartRefreshService`
 - ✅ **61 backend and 42 frontend tests passing**
-
-### v1.7 - Tshwane Electricity Data Model Redesign (April 29, 2026)
-- ✅ **New column `cumulative_electricity_used`**: Stores running total from Col C of "Elektrisiteit Lesings" sheet (replacing raw meter reading)
-- ✅ **Notes from Col O**: Sparse milestone notes (e.g. "Prepaid Electricity Installed") now captured in `reading_notes`
-- ✅ **`reading_amount` dropped**: Column was always 0, now removed from schema and model
 
 ## 🛠️ Technology Stack
 
@@ -186,7 +185,7 @@ Full release history lives in **[CHANGELOG.md](CHANGELOG.md)**. This is a teaser
 - **Spring Boot 3.5.10**: Enterprise-grade Java framework
 - **Raw JDBC**: `DataSource`/`Connection`/`PreparedStatement` for all database access — no Spring Data JPA repositories
 - **Apache POI 5.5.1**: Excel file processing and validation
-- **Apache Tomcat 10.1.55**: Embedded web server (security-patched)
+- **Apache Tomcat 10.1.59**: Embedded web server (security-patched)
 - **Java 17**: Runtime environment
 - **Maven**: Dependency management and build automation
 - **Trivy**: Security vulnerability scanning
@@ -301,7 +300,7 @@ cd frontend/solarman-ui && npm run build
 cd ../../backend && mvn clean package
 
 # Deploy single JAR
-java -jar target/solarman-ui-backend-1.7.4.jar
+java -jar target/solarman-ui-backend-1.7.5.jar
 
 # Access application at http://localhost:8080
 ```
@@ -334,8 +333,8 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 1.7.4 - Security Patches (Tomcat CVEs, npm audit)  
-**Last Updated**: August 8, 2026  
+**Latest Version**: 1.7.5 - Security Patch (Tomcat CVEs)  
+**Last Updated**: September 12, 2026  
 **Status**: Production Ready ✅
 
 ## 🔒 Security

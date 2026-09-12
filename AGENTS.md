@@ -394,7 +394,7 @@ ls backend/reports/               # maven-dependencies.json, jar-artifact.json, 
 - Regenerate secret value: `echo -n "value" | base64`
 
 ### Status
-- ✅ Tomcat 10.1.55 (CRITICAL CVE-2026-41293, CVE-2026-43512, CVE-2026-43515 patched)
+- ✅ Tomcat 10.1.59 (CRITICAL CVE-2026-65182, CVE-2026-65905, CVE-2026-68525 patched)
 - ✅ Spring Framework 6.2.17 (CVE-2026-22737 patched)
 - ✅ commons-lang3 3.18.0 (CVE-2025-48924 patched)
 - ✅ Angular 21.2.20 (XSS in i18n patched)
@@ -505,10 +505,10 @@ nerdctl buildkit may not be running in Rancher Desktop. Use `docker` directly fo
 <!-- backend/pom.xml -->
 <groupId>com.loots</groupId>
 <artifactId>solarman-ui-backend</artifactId>
-<version>1.7.4</version>
+<version>1.7.5</version>
 
 <properties>
-  <tomcat.version>10.1.55</tomcat.version>
+  <tomcat.version>10.1.59</tomcat.version>
   <spring-framework.version>6.2.17</spring-framework.version>
   <commons-lang3.version>3.18.0</commons-lang3.version>
 </properties>
@@ -517,7 +517,7 @@ nerdctl buildkit may not be running in Rancher Desktop. Use `docker` directly fo
 ### Key Dependencies
 - **Apache POI 5.5.1** — Excel file processing
 - **PostgreSQL JDBC 42.7.10** — Database connectivity
-- **Apache Tomcat 10.1.55** — Embedded web server
+- **Apache Tomcat 10.1.59** — Embedded web server
 - **Java 17** — Runtime
 - **Spring Boot 3.5.10** — Web framework
 - **Angular 21.2** — Frontend framework
@@ -572,6 +572,10 @@ Before editing a doc, verify the current fact against the code (dependency versi
 
 Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.md)**. This section is a teaser of the latest releases only — don't re-add older entries here when adding a new one; just add the new entry at the top of both this section and CHANGELOG.md, and drop the oldest entry here if there are more than three.
 
+### September 12, 2026 - Security Patch (v1.7.5)
+- Backend: Tomcat 10.1.55 → 10.1.59 (3 CRITICAL CVEs fixed: CVE-2026-65182, CVE-2026-65905, CVE-2026-68525); confirmed clean via `mvn verify`
+- 61 backend tests passing
+
 ### August 8, 2026 - Security Patches (v1.7.4)
 - Backend: Tomcat 10.1.54 → 10.1.55 (3 CRITICAL CVEs fixed); confirmed clean via `mvn verify`
 - Frontend: `npm update` resolved 27 of 32 npm-audit findings; remaining 5 deferred (dev/build tooling only, need Angular v22)
@@ -581,10 +585,8 @@ Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.m
 - Added `TshwaneChartComponent` + `GET /api/database/tshwane-usage` — kWh consumed between the last 7 Tshwane readings, auto-refreshes after import
 - 61 backend tests passing (+5 new); 42 frontend tests passing (+11 new)
 
-### April 29, 2026 - Grafana Dashboard Updates (v1.7.2)
-- Added "Tshwane Daily" dashboard; added Sum/Mean/Max legend calcs to Daily/Monthly Stats panels
-
 ### Version History
+- **v1.7.5** - Security patch (Tomcat 10.1.59 CVEs)
 - **v1.7.4** - Security patches (Tomcat 10.1.55 CVEs, frontend npm audit fix)
 - **v1.7.3** - Tshwane electricity usage bar chart on home page
 - **v1.7.2** - Grafana dashboard updates (Tshwane Daily + legend calcs)
@@ -597,6 +599,6 @@ Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.m
 
 ---
 
-**Last Updated**: August 8, 2026
+**Last Updated**: September 12, 2026
 
 

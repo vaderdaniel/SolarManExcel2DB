@@ -2,6 +2,27 @@
 
 ---
 
+## v1.7.5 - Security Patch (Backend Tomcat CVEs)
+
+**Release Date**: September 12, 2026
+**Version**: 1.7.5
+
+### 🔐 Security Fixes
+
+#### Backend — 3 CRITICAL CVEs resolved (`pom.xml`)
+
+| Library | Before | After | CVEs Fixed |
+|---------|--------|-------|-------------|
+| `tomcat-embed-core` | 10.1.55 | **10.1.59** | CVE-2026-65182 (security constraint bypass via improper access control), CVE-2026-65905 (DIGEST authenticator replay-attack auth bypass), CVE-2026-68525 (FORM authentication bypass → unauthorized resource access) |
+
+- Tomcat overridden via `<tomcat.version>10.1.59</tomcat.version>` — the Trivy-reported fixed version `10.1.58` was never published to Maven Central (withdrawn release); `10.1.59` is the next available release in the 10.1.x line and supersedes it
+- Confirmed via `mvn verify` (integrated Trivy scan): `pom.xml`, the built JAR, and the rebuilt `solarman-backend:latest` Docker image all scan clean (0 vulnerabilities)
+
+### ✅ Test Results
+- **61 backend tests**: All passing
+
+---
+
 ## v1.7.4 - Security Patches (Backend Tomcat CVEs + Frontend npm audit)
 
 **Release Date**: August 8, 2026
