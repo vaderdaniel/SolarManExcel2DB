@@ -22,7 +22,7 @@ echo "========================================"
 
 resolve_secret() {
     local key="$1"
-    kubectl get secret "$SECRET_NAME" -n "$NAMESPACE" \
+    kubectl --context rancher-desktop get secret "$SECRET_NAME" -n "$NAMESPACE" \
         -o jsonpath="{.data.${key}}" 2>/dev/null \
         | base64 --decode 2>/dev/null
 }
@@ -30,7 +30,7 @@ resolve_secret() {
 DB_USER=""
 DB_PASSWORD=""
 
-if command -v kubectl &>/dev/null && kubectl cluster-info &>/dev/null 2>&1; then
+if command -v kubectl &>/dev/null && kubectl cluster-info --context rancher-desktop &>/dev/null 2>&1; then
     DB_USER=$(resolve_secret "DB_USER")
     DB_PASSWORD=$(resolve_secret "DB_PASSWORD")
 fi
@@ -46,7 +46,7 @@ fi
 
 # ── Find the postgres pod ─────────────────────────────────────────────────────
 
-POSTGRES_POD=$(kubectl get pod -n "$NAMESPACE" -l app=postgres \
+POSTGRES_POD=$(kubectl --context rancher-desktop get pod -n "$NAMESPACE" -l app=postgres \
     -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
 
 if [[ -z "$POSTGRES_POD" ]]; then
@@ -62,7 +62,7 @@ echo ""
 
 echo "⏳  Running pg_dump (maximum gzip compression)..."
 
-PGPASSWORD="$DB_PASSWORD" kubectl exec -n "$NAMESPACE" "$POSTGRES_POD" -- \
+PGPASSWORD="$DB_PASSWORD" kubectl --context rancher-desktop exec -n "$NAMESPACE" "$POSTGRES_POD" -- \
     pg_dump -U "$DB_USER" "$DB_NAME" \
     | gzip -9 > "$BACKUP_FILE"
 
