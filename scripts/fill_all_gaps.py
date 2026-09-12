@@ -26,10 +26,11 @@ from datetime import datetime, timedelta
 
 random.seed(2026)
 
-NAMESPACE   = "default"
-DB_NAME     = "LOOTS"
-SECRET_NAME = "solarman-secret"
-PF_PORT     = 15432   # local port used for kubectl port-forward
+NAMESPACE       = "default"
+DB_NAME         = "LOOTS"
+SECRET_NAME     = "solarman-secret"
+PF_PORT         = 15432   # local port used for kubectl port-forward
+KUBECTL_CONTEXT = "rancher-desktop"   # always use this context, regardless of current-context
 
 
 # ---------------------------------------------------------------------------
@@ -37,9 +38,10 @@ PF_PORT     = 15432   # local port used for kubectl port-forward
 # ---------------------------------------------------------------------------
 
 def _kubectl(*args, timeout=10):
-    """Run kubectl and return (returncode, stdout)."""
+    """Run kubectl (always pinned to KUBECTL_CONTEXT) and return (returncode, stdout)."""
     result = subprocess.run(
-        ["kubectl", *args], capture_output=True, text=True, timeout=timeout
+        ["kubectl", "--context", KUBECTL_CONTEXT, *args],
+        capture_output=True, text=True, timeout=timeout
     )
     return result.returncode, result.stdout.strip()
 
@@ -97,7 +99,7 @@ def find_postgres_pod():
 def start_port_forward(pod_name, local_port=PF_PORT):
     """Start kubectl port-forward and wait briefly for it to be ready."""
     proc = subprocess.Popen(
-        ["kubectl", "port-forward", "-n", NAMESPACE,
+        ["kubectl", "--context", KUBECTL_CONTEXT, "port-forward", "-n", NAMESPACE,
          pod_name, f"{local_port}:5432"],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
