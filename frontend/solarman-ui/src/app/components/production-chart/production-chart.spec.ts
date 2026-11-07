@@ -40,8 +40,7 @@ describe('ProductionChartComponent', () => {
   // ==================== processChartData Tests ====================
 
   describe('processChartData', () => {
-    it('should correctly calculate yAxisMax for typical production data', () => {
-      // Test data with max value of 45600.5
+    it('should scale bars so the best day is 100%', () => {
       const stats: ProductionStat[] = [
         { date: '2024-12-08', productionUnits: 45600.5 },
         { date: '2024-12-07', productionUnits: 43200.0 },
@@ -49,13 +48,11 @@ describe('ProductionChartComponent', () => {
       ];
 
       mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
-
-      // Trigger data load
       fixture.detectChanges();
 
-      // yAxisMax should be rounded up to 50000 (nice round number)
-      expect(component.yAxisMax).toBe(50000);
       expect(component.chartData.length).toBe(3);
+      expect(component.chartData[2].heightPercent).toBe(100);
+      expect(component.chartData[0].heightPercent).toBeCloseTo(41000.25 / 45600.5 * 100, 5);
     });
 
     it('should correctly calculate heightPercent for each bar', () => {
@@ -68,24 +65,18 @@ describe('ProductionChartComponent', () => {
       mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
-      // yAxisMax should be 50000 (already at nice number)
-      expect(component.yAxisMax).toBe(50000);
-
-      // Verify height percentages (sorted oldest to newest, so index 0 is 2024-12-06)
-      expect(component.chartData[0].heightPercent).toBe(0);   // 2024-12-06
-      expect(component.chartData[1].heightPercent).toBe(50);  // 2024-12-07
-      expect(component.chartData[2].heightPercent).toBe(100); // 2024-12-08
+      // Sorted oldest to newest, so index 0 is 2024-12-06
+      expect(component.chartData[0].heightPercent).toBe(0);
+      expect(component.chartData[1].heightPercent).toBe(50);
+      expect(component.chartData[2].heightPercent).toBe(100);
     });
 
     it('should handle empty data array', () => {
-      const stats: ProductionStat[] = [];
-
-      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
+      mockDatabaseService.getProductionStats.mockReturnValue(of([]));
       fixture.detectChanges();
 
       expect(component.chartData).toEqual([]);
-      expect(component.yAxisMax).toBe(0);
-      expect(component.yAxisLabels).toEqual([]);
+      expect(component.ariaLabel).toBe('');
     });
 
     it('should handle null or undefined stats', () => {
@@ -93,11 +84,10 @@ describe('ProductionChartComponent', () => {
       fixture.detectChanges();
 
       expect(component.chartData).toEqual([]);
-      expect(component.yAxisMax).toBe(0);
-      expect(component.yAxisLabels).toEqual([]);
+      expect(component.ariaLabel).toBe('');
     });
 
-    it('should calculate yAxisMax as 10 when max value is 0', () => {
+    it('should not mark a best day when every value is 0', () => {
       const stats: ProductionStat[] = [
         { date: '2024-12-08', productionUnits: 0 },
         { date: '2024-12-07', productionUnits: 0 }
@@ -106,7 +96,8 @@ describe('ProductionChartComponent', () => {
       mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
-      expect(component.yAxisMax).toBe(10);
+      expect(component.chartData.every(bar => bar.heightPercent === 0)).toBe(true);
+      expect(component.chartData.some(bar => bar.isBest)).toBe(false);
     });
 
     it('should sort data by date ascending (oldest to newest)', () => {
@@ -119,54 +110,51 @@ describe('ProductionChartComponent', () => {
       mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
-      // Should be sorted oldest to newest
       expect(component.chartData[0].date).toBe('2024-12-06');
       expect(component.chartData[1].date).toBe('2024-12-07');
       expect(component.chartData[2].date).toBe('2024-12-08');
     });
 
-    it('should calculate heightPercent as 0 when yAxisMax is 0', () => {
+    it('should mark only the highest day as best', () => {
       const stats: ProductionStat[] = [
-        { date: '2024-12-08', productionUnits: 0 }
+        { date: '2024-12-08', productionUnits: 19047.42 },
+        { date: '2024-12-07', productionUnits: 20296.0 },
+        { date: '2024-12-06', productionUnits: 18457.33 }
       ];
 
       mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
-      // When yAxisMax is calculated as 10 and production is 0
-      expect(component.yAxisMax).toBe(10);
-      expect(component.chartData[0].heightPercent).toBe(0);
+      const best = component.chartData.filter(bar => bar.isBest);
+      expect(best.length).toBe(1);
+      expect(best[0].date).toBe('2024-12-07');
     });
 
-    it('should correctly calculate yAxisMax for various magnitudes', () => {
-      // Test with small values
-      const smallStats: ProductionStat[] = [
-        { date: '2024-12-08', productionUnits: 15 }
+    it('should format bar labels in kWh with one decimal', () => {
+      const stats: ProductionStat[] = [
+        { date: '2024-12-08', productionUnits: 45600.5 }
       ];
-      mockDatabaseService.getProductionStats.mockReturnValue(of(smallStats));
-      fixture.detectChanges();
-      expect(component.yAxisMax).toBe(20); // Should round to 20
 
-      // Test with medium values
-      const mediumStats: ProductionStat[] = [
-        { date: '2024-12-08', productionUnits: 3500 }
-      ];
-      mockDatabaseService.getProductionStats.mockReturnValue(of(mediumStats));
-      (component as any).loadChartData();
+      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
-      expect(component.yAxisMax).toBe(5000); // Should round to 5000
 
-      // Test with large values
-      const largeStats: ProductionStat[] = [
-        { date: '2024-12-08', productionUnits: 87000 }
-      ];
-      mockDatabaseService.getProductionStats.mockReturnValue(of(largeStats));
-      (component as any).loadChartData();
-      fixture.detectChanges();
-      expect(component.yAxisMax).toBe(100000); // Should round to 100000
+      expect(component.chartData[0].label).toBe('45.6');
+      expect(component.chartData[0].displayValue).toBe('45.60 kWh');
     });
 
-    it('should generate correct y-axis labels', () => {
+    it('should show values under 1 kWh in Wh in the tooltip', () => {
+      const stats: ProductionStat[] = [
+        { date: '2024-12-08', productionUnits: 870 }
+      ];
+
+      mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
+      fixture.detectChanges();
+
+      expect(component.chartData[0].displayValue).toBe('870 Wh');
+      expect(component.chartData[0].label).toBe('0.9');
+    });
+
+    it('should label each bar with weekday and day-month', () => {
       const stats: ProductionStat[] = [
         { date: '2024-12-08', productionUnits: 50000 }
       ];
@@ -174,11 +162,9 @@ describe('ProductionChartComponent', () => {
       mockDatabaseService.getProductionStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
-      expect(component.yAxisMax).toBe(50000);
-      expect(component.yAxisLabels.length).toBe(5);
-      // Labels should be in descending order (highest to lowest)
-      expect(component.yAxisLabels[0]).toBe(50000);
-      expect(component.yAxisLabels[4]).toBe(0);
+      expect(component.chartData[0].weekday).toBe('Sun');
+      expect(component.chartData[0].dayMonth).toBe('8 Dec');
+      expect(component.ariaLabel).toContain('8 Dec 50.0 kWh');
     });
   });
 
@@ -257,29 +243,29 @@ describe('ProductionChartComponent', () => {
       expect(mockDatabaseService.getProductionStats).toHaveBeenCalledTimes(4);
     });
 
-    it('should update yAxisMax when refresh provides different data', () => {
+    it('should rescale bars when refresh provides different data', () => {
       const initialStats: ProductionStat[] = [
-        { date: '2024-12-08', productionUnits: 1000 }
+        { date: '2024-12-08', productionUnits: 1000 },
+        { date: '2024-12-07', productionUnits: 500 }
       ];
 
       const updatedStats: ProductionStat[] = [
-        { date: '2024-12-08', productionUnits: 50000 }
+        { date: '2024-12-08', productionUnits: 1000 },
+        { date: '2024-12-07', productionUnits: 4000 }
       ];
 
       mockDatabaseService.getProductionStats.mockReturnValue(of(initialStats));
       fixture.detectChanges();
-
-      const initialYAxisMax = component.yAxisMax;
-      expect(initialYAxisMax).toBe(1000);
+      expect(component.chartData[1].heightPercent).toBe(100);
 
       // Update mock and trigger refresh
       mockDatabaseService.getProductionStats.mockReturnValue(of(updatedStats));
       refreshSubject.next();
       fixture.detectChanges();
 
-      // yAxisMax should be updated
-      expect(component.yAxisMax).toBe(50000);
-      expect(component.yAxisMax).not.toBe(initialYAxisMax);
+      // 2024-12-08 is no longer the best day, so it shrinks to 25%
+      expect(component.chartData[1].heightPercent).toBe(25);
+      expect(component.chartData[0].heightPercent).toBe(100);
     });
 
     it('should handle errors during refresh gracefully', () => {

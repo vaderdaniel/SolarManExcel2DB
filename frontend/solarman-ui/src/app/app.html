@@ -1,31 +1,28 @@
-<mat-toolbar color="primary">
-  <span>{{ title }}</span>
-  <span class="spacer"></span>
-  <button 
-    mat-button 
-    routerLink="/" 
-    routerLinkActive="active-link"
-    [routerLinkActiveOptions]="{exact: true}"
-  >
-    <mat-icon>home</mat-icon>
-    Home
-  </button>
-  <button 
-    mat-button 
-    routerLink="/upload" 
-    routerLinkActive="active-link"
-  >
-    <mat-icon>cloud_upload</mat-icon>
-    Upload
-  </button>
-</mat-toolbar>
+<header class="site-header">
+  <div class="site-header__inner">
+    <a routerLink="/" class="brand">
+      <span class="brand__mark" aria-hidden="true">
+        <svg class="sm-icon" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+      </span>
+      <span class="brand__name">SolarMan</span>
+    </a>
 
-<div class="main-container">
-  <router-outlet></router-outlet>
-</div>
+    <nav class="site-nav" aria-label="Main">
+      <a routerLink="/" routerLinkActive="is-active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: true }">Overview</a>
+      <a routerLink="/upload" routerLinkActive="is-active" ariaCurrentWhenActive="page">Import data</a>
+    </nav>
 
-<footer class="footer">
-  <div class="footer-content">
-    <p>SolarManExcel2DB &copy; 2024-2026 | Version 1.7.5</p>
+    <div class="status-pill" [class.is-down]="!systemStatus.isHealthy() && !systemStatus.isChecking()" role="status">
+      <span class="sm-dot" [class.is-down]="!systemStatus.isHealthy()" aria-hidden="true"></span>
+      {{ systemStatus.summary() }}
+    </div>
   </div>
+</header>
+
+<main class="site-main">
+  <router-outlet></router-outlet>
+</main>
+
+<footer class="site-footer">
+  SolarManExcel2DB &copy; 2024-2026 · Version 2.0.0
 </footer>

@@ -6,7 +6,8 @@ This repository contains unit tests for both the backend (Spring Boot / JUnit 5)
 | Layer | Tests | Runner |
 |-------|-------|--------|
 | Backend | 61 | `mvn test` |
-| Frontend | 42 | `npx ng test --no-watch` |
+| Frontend | 53 | `npx ng test --no-watch` |
+| Frontend e2e | 33 (× 3 browsers) | `npx playwright test` |
 
 ---
 
@@ -249,16 +250,17 @@ When adding new tests:
 ```
 frontend/solarman-ui/src/app/
 ├── components/
+│   ├── energy-summary/
+│   │   └── energy-summary.spec.ts       # 5 tests
 │   ├── production-chart/
-│   │   ├── production-chart.ts          # Component
-│   │   └── production-chart.spec.ts     # 18 tests
+│   │   └── production-chart.spec.ts     # 19 tests
 │   └── tshwane-chart/
-│       ├── tshwane-chart.ts             # Component
 │       └── tshwane-chart.spec.ts        # 11 tests
 ├── pages/
 │   └── upload/
-│       ├── upload.ts                    # Page component
 │       └── upload.spec.ts               # 11 tests
+├── services/
+│   └── system-status.service.spec.ts    # 5 tests
 └── app.spec.ts                          # 2 tests
 ```
 
@@ -268,33 +270,36 @@ frontend/solarman-ui/src/app/
 cd frontend/solarman-ui
 npx ng test --no-watch    # run once
 npx ng test               # watch mode (re-runs on file change)
-npx playwright test       # e2e tests (requires :4200 running)
+npx playwright test       # e2e tests (starts ng serve on :4200 if it isn't running)
 ```
 
-Playwright e2e specs live in `e2e/` (`home.spec.ts` 11, `navigation.spec.ts` 7, `upload.spec.ts` 13 — 31 tests, each run in Chromium, Firefox and WebKit) with API responses mocked via `e2e/mock-api.ts`.
+Playwright e2e specs live in `e2e/` (`home.spec.ts` 13, `navigation.spec.ts` 7, `upload.spec.ts` 13 — 33 tests, each run in Chromium, Firefox and WebKit) with every API response mocked via `e2e/mock-api.ts` (`mockAllAPIs()` covers status, latest records, production stats and Tshwane usage; `excelFile()` builds a fake .xlsx for `#file-input`). Prefer role- and label-based locators (`getByRole('button', { name: 'Upload & preview' })`) over CSS classes.
 
 ## Test Coverage Summary
 
 ### TshwaneChartComponent (11 tests)
 
-Mirrors `ProductionChartComponent`'s chart-data processing, loading/error states, and `ChartRefreshService` auto-refresh subscription, but sources data from `getTshwaneUsageStats()` (`GET /api/database/tshwane-usage`) instead of production stats.
+Mirrors `ProductionChartComponent`'s chart-data processing, loading/error states, and `ChartRefreshService` auto-refresh subscription, but sources data from `getTshwaneUsageStats()` (`GET /api/database/tshwane-usage`) instead of production stats. Also checks that only the latest reading is highlighted and that dates format as `d MMM HH:mm`.
 
-### ProductionChartComponent (18 tests)
+### ProductionChartComponent (19 tests)
 
 #### processChartData (10 tests)
-- ✅ Calculates `yAxisMax` — rounds to "nice" numbers (e.g., 45600.5 → 50000, 15 → 20, 87000 → 100000)
+- ✅ Scales bars to the week's maximum (best day = 100%; there is no y-axis)
 - ✅ Calculates `heightPercent` for each bar (0–100%)
 - ✅ Handles empty arrays and null/undefined stats
-- ✅ Sets `yAxisMax` to 10 when max value is 0
+- ✅ Marks no best day when every value is 0
 - ✅ Sorts data by date ascending (oldest to newest)
-- ✅ Generates 5 y-axis labels from max to 0
+- ✅ Marks exactly one best day
+- ✅ Formats bar labels in kWh (1 decimal) and tooltips in kWh/Wh
+- ✅ Labels each bar with weekday and day-month, and builds the chart's `aria-label`
 
-#### Chart Auto-Refresh (5 tests)
+#### Chart Auto-Refresh (6 tests)
 - ✅ Reloads chart data when `ChartRefreshService` triggers refresh
 - ✅ Subscribes to `refresh$` on `ngOnInit`
 - ✅ Unsubscribes from `refresh$` on `ngOnDestroy`
 - ✅ Handles multiple refresh triggers
-- ✅ Updates `yAxisMax` when refresh provides different data
+- ✅ Rescales bars when a refresh brings a new best day
+- ✅ Handles errors during refresh gracefully
 
 #### Loading and Error States (3 tests)
 - ✅ Sets loading state during data fetch
@@ -321,6 +326,21 @@ Mirrors `ProductionChartComponent`'s chart-data processing, loading/error states
 #### Import Flag Management (2 tests)
 - ✅ Clears `isImporting` after successful import
 - ✅ Clears `isImporting` after failed import
+
+### EnergySummaryComponent (5 tests)
+- ✅ Computes latest day, N-day total + average, best day and Tshwane total/date range
+- ✅ Renders four KPI cards
+- ✅ Shows "—" placeholders with "No data yet" when there is no data, and when the API fails
+- ✅ Reloads both data sources when `ChartRefreshService` triggers a refresh
+
+### SystemStatusService (5 tests)
+- ✅ Reports "Checking connection…" before the first check
+- ✅ Healthy status and latest records after a refresh
+- ✅ "API unavailable" when the status call fails; "Database disconnected" when only the DB is down
+- ✅ Polls on a 10 s timer and re-checks immediately after an import (fake timers)
+
+### App (2 tests)
+- ✅ Creates the app shell; renders the brand and the Overview / Import data navigation
 
 ## Testing Patterns
 

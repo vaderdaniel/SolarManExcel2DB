@@ -2,6 +2,43 @@
 
 ---
 
+## v2.0.0 - "Daylight" UI Redesign
+
+**Release Date**: November 7, 2026
+**Version**: 2.0.0
+
+A full visual redesign of the Angular frontend, built from direction A ("Daylight") of the design exploration. No backend or API changes.
+
+### 🎨 Design
+- **Daylight theme**: light grey ground, white cards, amber for solar, blue for grid; Space Grotesk headings over Inter body text (Roboto and the Material Icons font are no longer loaded)
+- **Design tokens**: `--sm-*` CSS custom properties and shared `.sm-card` / `.sm-btn` / `.sm-icon` classes in `src/styles.scss`; inline SVG icons
+- Angular Material toolbar, cards, buttons and icons removed; Material remains only for the preview table, its paginator and snack bars
+
+### 🏠 App shell and Home page
+- New header: brand, **Overview** / **Import data** navigation (`aria-current` on the active link) and a live status pill
+- New `SystemStatusService` (signals): one app-wide 10 s poll of status + latest records, re-checked after every import; `StatusPanelComponent` now reads from it
+- New `EnergySummaryComponent`: four KPI cards (latest day, 7-day total + average, best day, Tshwane usage over the last 7 readings)
+- Production and Tshwane charts restyled: value label on every bar, weekday/date axis labels, best day / latest reading highlighted. Bars are now scaled to the week's maximum instead of a rounded y-axis maximum (which left bars at ~40% height)
+- System status redesigned as a single strip: API, database, latest SolarMan record, latest Tshwane reading, last check time
+
+### 📤 Upload page
+- Three-step flow with a step indicator: Choose file → Review → Done
+- One file input with SolarMan / Tshwane radio cards (replaces the two separate inputs), drag-and-drop support and inline validation errors
+- Preview table with short column labels (the constant `Plant` and duplicate `Time` columns are hidden), numeric columns right-aligned
+- Result screen shows inserted / updated / errors / date range, with expandable error messages
+
+### 🧹 Code
+- `FileUploadComponent`, `DataPreviewComponent`, `StatusPanelComponent`, `App` and `HomeComponent` follow the project conventions (OnPush, signals, `inject()`, `input()`/`output()`)
+- `UploadComponent` and the chart components are OnPush and call `markForCheck()` after HTTP callbacks (`App` is OnPush, so routed pages with plain fields would otherwise stop updating)
+- Removed the unused `ImportResultComponent` stub
+
+### ✅ Test Results
+- **53 frontend unit tests** passing (was 42): production chart y-axis tests rewritten for the new scaling, +5 `EnergySummaryComponent`, +5 `SystemStatusService`
+- **33 Playwright e2e tests** rewritten for the new markup; passing in Chromium and WebKit
+- **61 backend tests** unchanged
+
+---
+
 ## v1.7.5 - Security Patch (Backend Tomcat CVEs)
 
 **Release Date**: September 12, 2026

@@ -1,159 +1,138 @@
-import { test, expect } from '@playwright/test';
-import {
-  mockAllAPIs,
-  mockStatusConnected,
-  mockStatusDisconnected,
-  mockLatestRecords,
-  mockProductionStats,
-} from './mock-api';
+import { test, expect, Page } from '@playwright/test';
+import { mockAllAPIs, mockStatusDisconnected } from './mock-api';
 
-test.describe('Home Page - Production Chart', () => {
-  test('chart card renders with title', async ({ page }) => {
+/** Overrides one endpoint after mockAllAPIs (later routes take precedence). */
+async function mockJson(page: Page, url: string, body: unknown, status = 200) {
+  await page.route(url, (route) =>
+    route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })
+  );
+}
+
+test.describe('Home Page - Key figures', () => {
+  test('shows the page heading and four KPI cards', async ({ page }) => {
     await mockAllAPIs(page);
     await page.goto('/');
-    const chartCard = page.locator('app-production-chart mat-card');
-    await expect(chartCard).toBeVisible();
-    await expect(chartCard).toContainText('Solar Production - Last 7 Days');
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Energy overview' })).toBeVisible();
+    const kpis = page.locator('app-energy-summary .kpi');
+    await expect(kpis).toHaveCount(4);
+    await expect(kpis.nth(1)).toContainText('Produced, last 7 days');
+    await expect(kpis.nth(3)).toContainText('Tshwane meter, last 7 readings');
+    await expect(kpis.nth(3)).toContainText('40.8');
   });
 
-  test('chart bars render when API returns data', async ({ page }) => {
-    const stats = mockProductionStats();
-    await page.route('**/api/database/status', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockStatusConnected()) })
-    );
-    await page.route('**/api/database/production-stats*', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(stats) })
-    );
-    await page.route('**/api/database/latest-records', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockLatestRecords()) })
-    );
-
+  test('Import data button opens the import page', async ({ page }) => {
+    await mockAllAPIs(page);
     await page.goto('/');
-    // Wait for bars to render
-    const bars = page.locator('.bar-wrapper');
+
+    await page.locator('.page__header').getByRole('link', { name: 'Import data' }).click();
+    await expect(page).toHaveURL(/\/upload/);
+  });
+});
+
+test.describe('Home Page - Charts', () => {
+  test('production chart renders with title', async ({ page }) => {
+    await mockAllAPIs(page);
+    await page.goto('/');
+
+    const chart = page.locator('app-production-chart');
+    await expect(chart.getByRole('heading', { name: 'Solar production' })).toBeVisible();
+    await expect(chart).toContainText('Last 7 days · kWh');
+  });
+
+  test('production bars render when API returns data', async ({ page }) => {
+    await mockAllAPIs(page);
+    await page.goto('/');
+
+    const bars = page.locator('app-production-chart .bar-wrapper');
     await expect(bars.first()).toBeVisible();
     await expect(bars).toHaveCount(7);
   });
 
-  test('chart shows empty state when API returns empty array', async ({ page }) => {
-    await page.route('**/api/database/status', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockStatusConnected()) })
-    );
-    await page.route('**/api/database/production-stats*', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) })
-    );
-    await page.route('**/api/database/latest-records', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockLatestRecords()) })
-    );
-
+  test('production chart shows empty state when API returns empty array', async ({ page }) => {
+    await mockAllAPIs(page);
+    await mockJson(page, '**/api/database/production-stats*', []);
     await page.goto('/');
-    await expect(page.locator('.empty-state')).toBeVisible();
+
+    await expect(page.locator('app-production-chart .empty-state')).toBeVisible();
     await expect(page.locator('text=No production data available')).toBeVisible();
   });
 
-  test('chart shows error state when API fails', async ({ page }) => {
-    await page.route('**/api/database/status', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockStatusConnected()) })
-    );
-    await page.route('**/api/database/production-stats*', (route) =>
-      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'Server error' }) })
-    );
-    await page.route('**/api/database/latest-records', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockLatestRecords()) })
-    );
-
+  test('production chart shows error state when API fails', async ({ page }) => {
+    await mockAllAPIs(page);
+    await mockJson(page, '**/api/database/production-stats*', { error: 'boom' }, 500);
     await page.goto('/');
-    await expect(page.locator('.error-state')).toBeVisible();
+
+    await expect(page.locator('app-production-chart .error-state')).toBeVisible();
     await expect(page.locator('text=Failed to load production data')).toBeVisible();
   });
 
-  test('bar tooltip shows kWh value on hover', async ({ page }) => {
-    const stats = [
-      { date: '2026-02-20', productionUnits: 4500 },
-      { date: '2026-02-19', productionUnits: 3200 },
-    ];
-    await page.route('**/api/database/status', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockStatusConnected()) })
-    );
-    await page.route('**/api/database/production-stats*', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(stats) })
-    );
-    await page.route('**/api/database/latest-records', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockLatestRecords()) })
-    );
-
-    await page.goto('/');
-    const firstBar = page.locator('.bar').first();
-    await expect(firstBar).toBeVisible();
-    // The title attribute should contain the kWh display value
-    const title = await firstBar.getAttribute('title');
-    expect(title).toContain('kWh');
-  });
-
-  test('chart info shows energy units label', async ({ page }) => {
+  test('bar tooltip shows kWh value', async ({ page }) => {
     await mockAllAPIs(page);
     await page.goto('/');
-    await expect(page.locator('.chart-info')).toContainText('Watt-hours');
+
+    const firstBar = page.locator('app-production-chart .bar').first();
+    await expect(firstBar).toBeVisible();
+    expect(await firstBar.getAttribute('title')).toContain('kWh');
+  });
+
+  test('Tshwane chart renders one bar per reading', async ({ page }) => {
+    await mockAllAPIs(page);
+    await page.goto('/');
+
+    const chart = page.locator('app-tshwane-chart');
+    await expect(chart.getByRole('heading', { name: 'Tshwane electricity' })).toBeVisible();
+    await expect(chart.locator('.bar-wrapper')).toHaveCount(7);
+    await expect(chart.locator('.bar.is-highlight')).toHaveCount(1);
   });
 });
 
-test.describe('Home Page - Status Panel', () => {
-  test('status panel renders with title', async ({ page }) => {
+test.describe('Home Page - System status', () => {
+  test('status section renders with title', async ({ page }) => {
     await mockAllAPIs(page);
     await page.goto('/');
-    const statusCard = page.locator('app-status-panel mat-card');
-    await expect(statusCard).toBeVisible();
-    await expect(statusCard).toContainText('System Status');
+
+    const status = page.locator('app-status-panel');
+    await expect(status.getByRole('heading', { name: 'System status' })).toBeVisible();
   });
 
-  test('status panel shows connected state', async ({ page }) => {
+  test('shows connected state in the panel and the header', async ({ page }) => {
     await mockAllAPIs(page);
     await page.goto('/');
-    const statusPanel = page.locator('app-status-panel');
-    await expect(statusPanel).toContainText('API Ready');
-    await expect(statusPanel).toContainText('Database Connected');
+
+    const status = page.locator('app-status-panel');
+    await expect(status.locator('.status-value').first()).toContainText('Ready');
+    await expect(status.locator('.status-value').nth(1)).toContainText('Connected');
+    await expect(page.locator('.status-pill')).toContainText('All systems normal');
   });
 
-  test('status panel shows disconnected state when API is unavailable', async ({ page }) => {
-    await page.route('**/api/database/status', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockStatusDisconnected()) })
-    );
-    await page.route('**/api/database/production-stats*', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) })
-    );
-    await page.route('**/api/database/latest-records', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ solarman: null, tshwane: null }) })
-    );
-
+  test('shows disconnected state when API is unavailable', async ({ page }) => {
+    await mockAllAPIs(page);
+    await mockJson(page, '**/api/database/status', mockStatusDisconnected());
     await page.goto('/');
-    const statusPanel = page.locator('app-status-panel');
-    await expect(statusPanel).toContainText('API Unavailable');
-    await expect(statusPanel).toContainText('Database Disconnected');
+
+    const status = page.locator('app-status-panel');
+    await expect(status.locator('.status-value').first()).toContainText('Unavailable');
+    await expect(status.locator('.status-value').nth(1)).toContainText('Disconnected');
+    await expect(page.locator('.status-pill')).toContainText('API unavailable');
   });
 
   test('latest import records display correctly', async ({ page }) => {
     await mockAllAPIs(page);
     await page.goto('/');
-    const statusPanel = page.locator('app-status-panel');
-    await expect(statusPanel).toContainText('Latest Import Records');
-    await expect(statusPanel).toContainText('SolarMan:');
-    await expect(statusPanel).toContainText('Tshwane:');
-    // Should show formatted dates, not "No records found"
-    await expect(statusPanel.locator('.record-value').first()).not.toContainText('No records found');
+
+    const status = page.locator('app-status-panel');
+    await expect(status).toContainText('Latest SolarMan record');
+    await expect(status).toContainText('Latest Tshwane reading');
+    await expect(status.locator('.record-value').first()).toContainText('20 Feb 2026, 14:30');
+    await expect(page.locator('.page__subtitle')).toContainText('solar data up to 20 Feb, 14:30');
   });
 
   test('latest records show "No records found" when null', async ({ page }) => {
-    await page.route('**/api/database/status', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockStatusConnected()) })
-    );
-    await page.route('**/api/database/production-stats*', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProductionStats()) })
-    );
-    await page.route('**/api/database/latest-records', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ solarman: null, tshwane: null }) })
-    );
-
+    await mockAllAPIs(page);
+    await mockJson(page, '**/api/database/latest-records', { solarman: null, tshwane: null });
     await page.goto('/');
+
     const recordValues = page.locator('app-status-panel .record-value');
     await expect(recordValues.first()).toContainText('No records found');
     await expect(recordValues.last()).toContainText('No records found');

@@ -1,54 +1,54 @@
-<mat-card class="status-card">
-  <mat-card-header>
-    <mat-card-title>System Status</mat-card-title>
-  </mat-card-header>
+<section class="sm-card status" aria-labelledby="status-title">
+  <h2 id="status-title" class="status__title">System status</h2>
 
-  <mat-card-content>
-    <div class="status-grid">
-      <!-- API Status -->
-      <div class="status-item">
-        <mat-icon [style.color]="getStatusColor()">{{ databaseStatus.apiStatus === 'ready' ? 'cloud_done' : 'cloud_off' }}</mat-icon>
-        <span class="status-label">API Status:</span>
-        <span class="status-value" [style.color]="getStatusColor()">{{ getApiStatusText() }}</span>
-      </div>
-
-      <!-- Database Status -->
-      <div class="status-item">
-        <mat-icon [style.color]="getStatusColor()">{{ databaseStatus.connected ? 'storage' : 'portable_wifi_off' }}</mat-icon>
-        <span class="status-label">Database:</span>
-        <span class="status-value" [style.color]="getStatusColor()">{{ getDatabaseStatusText() }}</span>
-      </div>
-
-      <!-- Last Update -->
-      @if (databaseStatus.lastChecked) {
-        <div class="status-item">
-          <mat-icon>access_time</mat-icon>
-          <span class="status-label">Last Checked:</span>
-          <span class="status-value">{{ formatDate(databaseStatus.lastChecked) }}</span>
-        </div>
-      }
+  <dl class="status__grid">
+    <div>
+      <dt>API</dt>
+      <dd class="status-value">
+        <span class="sm-dot" [class.is-down]="!systemStatus.apiReady()" aria-hidden="true"></span>
+        {{ systemStatus.apiReady() ? 'Ready' : 'Unavailable' }}
+      </dd>
     </div>
-
-    <!-- Latest Records -->
-    <div class="records-section">
-      <h4>Latest Import Records</h4>
-      <div class="records-grid">
-        <div class="record-item">
-          <span class="record-label">SolarMan:</span>
-          <span class="record-value">{{ formatDate(latestRecords.solarman) }}</span>
-        </div>
-        <div class="record-item">
-          <span class="record-label">Tshwane:</span>
-          <span class="record-value">{{ formatDate(latestRecords.tshwane) }}</span>
-        </div>
-      </div>
+    <div>
+      <dt>Database</dt>
+      <dd class="status-value">
+        <span class="sm-dot" [class.is-down]="!systemStatus.dbConnected()" aria-hidden="true"></span>
+        {{ systemStatus.dbConnected() ? 'Connected' : 'Disconnected' }}
+      </dd>
     </div>
+    <div>
+      <dt>Latest SolarMan record</dt>
+      <dd class="record-value">
+        @if (systemStatus.latestRecords().solarman; as solarman) {
+          {{ solarman | date: 'd MMM y, HH:mm' }}
+        } @else {
+          No records found
+        }
+      </dd>
+    </div>
+    <div>
+      <dt>Latest Tshwane reading</dt>
+      <dd class="record-value">
+        @if (systemStatus.latestRecords().tshwane; as tshwane) {
+          {{ tshwane | date: 'd MMM y, HH:mm' }}
+        } @else {
+          No records found
+        }
+      </dd>
+    </div>
+    <div>
+      <dt>Last checked</dt>
+      <dd>
+        @if (systemStatus.status().lastChecked; as lastChecked) {
+          {{ lastChecked | date: 'HH:mm:ss' }} · every 10 s
+        } @else {
+          Checking…
+        }
+      </dd>
+    </div>
+  </dl>
 
-    <!-- Status Message -->
-    @if (databaseStatus.message) {
-      <div class="status-message">
-        <small>{{ databaseStatus.message }}</small>
-      </div>
-    }
-  </mat-card-content>
-</mat-card>
+  @if (!systemStatus.isHealthy() && !systemStatus.isChecking()) {
+    <p class="status__message" role="alert">{{ systemStatus.status().message }}</p>
+  }
+</section>

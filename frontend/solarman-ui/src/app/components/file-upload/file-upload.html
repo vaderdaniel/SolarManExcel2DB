@@ -1,117 +1,77 @@
-<mat-card class="upload-card">
-  <mat-card-header>
-    <mat-card-title>File Upload</mat-card-title>
-    <mat-card-subtitle>Select and upload Excel files for data import</mat-card-subtitle>
-  </mat-card-header>
-
-  <mat-card-content>
-    <div class="upload-section">
-      <!-- SolarMan File Upload -->
-      <div class="upload-option">
-        <div class="upload-header">
-          <mat-icon>wb_sunny</mat-icon>
-          <h4>SolarMan Excel File</h4>
-        </div>
-        <div class="file-input-container">
+<section class="sm-card upload">
+  <fieldset class="sources">
+    <legend>What are you importing?</legend>
+    <div class="sources__grid">
+      @for (source of sources; track source.id) {
+        <label class="source" [class.is-selected]="fileType() === source.id">
           <input
-            type="file"
-            id="solarman-file"
-            accept=".xlsx,.xls"
-            (change)="onFileSelected($event, 'solarman')"
-            class="file-input"
-            >
-          <label for="solarman-file" class="file-label">
-            <mat-icon>cloud_upload</mat-icon>
-            <span>Choose SolarMan File</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Divider -->
-      <div class="divider">OR</div>
-
-      <!-- Tshwane File Upload -->
-      <div class="upload-option">
-        <div class="upload-header">
-          <mat-icon>electrical_services</mat-icon>
-          <h4>Tshwane Electricity File</h4>
-        </div>
-        <div class="file-input-container">
-          <input
-            type="file"
-            id="tshwane-file"
-            accept=".xlsx,.xls"
-            (change)="onFileSelected($event, 'tshwane')"
-            class="file-input"
-            >
-          <label for="tshwane-file" class="file-label">
-            <mat-icon>cloud_upload</mat-icon>
-            <span>Choose Tshwane File</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <!-- Selected File Info -->
-    @if (selectedFile) {
-      <div class="selected-file-info">
-        <div class="file-details">
-          <mat-icon>description</mat-icon>
-          <div class="file-info">
-            <span class="file-name">{{ getSelectedFileName() }}</span>
-            <span class="file-size">{{ getFileSize() }}</span>
-            <span class="file-type">Type: {{ selectedFileType }}</span>
-          </div>
-          <button
-            mat-icon-button
-            (click)="clearFileSelection()"
-            matTooltip="Remove file"
-            class="remove-btn"
-            >
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      </div>
-    }
-
-    <!-- Upload Actions -->
-    @if (selectedFile) {
-      <div class="upload-actions">
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="uploadFile()"
-          [disabled]="isUploading"
-          class="upload-btn"
+            type="radio"
+            name="file-type"
+            [value]="source.id"
+            [checked]="fileType() === source.id"
+            (change)="selectFileType(source.id)"
           >
-          @if (!isUploading) {
-            <mat-icon>upload</mat-icon>
-          }
-          @if (isUploading) {
-            <mat-icon class="spinner">refresh</mat-icon>
-          }
-          {{ isUploading ? 'Processing...' : 'Upload & Preview' }}
-        </button>
-        <button
-          mat-button
-          (click)="clearFileSelection()"
-          [disabled]="isUploading"
-          class="cancel-btn"
-          >
-          Cancel
-        </button>
-      </div>
-    }
-
-    <!-- Upload Guidelines -->
-    <div class="upload-guidelines">
-      <h5>Upload Guidelines:</h5>
-      <ul>
-        <li>Maximum file size: 10MB</li>
-        <li>Supported formats: .xlsx, .xls</li>
-        <li>SolarMan files should have 12 columns with proper headers</li>
-        <li>Tshwane files should contain electricity reading data</li>
-      </ul>
+          <span class="source__text">
+            <span class="source__title">{{ source.title }}</span>
+            <span class="source__desc">{{ source.description }}</span>
+          </span>
+        </label>
+      }
     </div>
-  </mat-card-content>
-</mat-card>
+  </fieldset>
+
+  <label
+    class="dropzone"
+    [class.is-dragging]="isDragging()"
+    for="file-input"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+  >
+    <input
+      #fileInput
+      id="file-input"
+      type="file"
+      accept=".xlsx,.xls"
+      class="sm-visually-hidden"
+      (change)="onFileSelected($event)"
+    >
+    <svg class="sm-icon dropzone__icon" width="32" height="32" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"></path></svg>
+    <span class="dropzone__title">Choose an Excel file or drop it here</span>
+    <span class="dropzone__hint">.xlsx or .xls · up to 10 MB · {{ sourceHint() }}</span>
+  </label>
+
+  @if (errorMessage(); as error) {
+    <p class="upload__error" role="alert">{{ error }}</p>
+  }
+
+  @if (selectedFile(); as file) {
+    <div class="selected-file">
+      <svg class="sm-icon selected-file__icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg>
+      <div class="selected-file__info">
+        <div class="selected-file__name">{{ file.name }}</div>
+        <div class="selected-file__meta">{{ fileSize() }}</div>
+      </div>
+      <button
+        type="button"
+        class="icon-btn"
+        aria-label="Remove file"
+        (click)="clearFileSelection()"
+        [disabled]="isUploading()"
+      >
+        <svg class="sm-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+  }
+
+  <div class="upload__actions">
+    <button
+      type="button"
+      class="sm-btn sm-btn--primary"
+      (click)="uploadFile()"
+      [disabled]="!selectedFile() || isUploading()"
+    >
+      {{ isUploading() ? 'Reading file…' : 'Upload & preview' }}
+    </button>
+  </div>
+</section>

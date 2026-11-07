@@ -3,7 +3,7 @@
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.oracle.com/java/)
 [![Angular](https://img.shields.io/badge/Angular-21.2-red.svg)](https://angular.dev/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-green.svg)](https://spring.io/projects/spring-boot)
-[![Version](https://img.shields.io/badge/version-1.7.5-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.0-informational.svg)](CHANGELOG.md)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://www.postgresql.org/)
 [![Grafana](https://img.shields.io/badge/Grafana-Latest-orange.svg)](https://grafana.com/)
 
@@ -38,16 +38,17 @@ This prevents connection errors and ensures clean application startup.
 
 ## ✨ Key Features
 
-### Web UI (Version 1.7)
-- 🌐 **Modern Web UI**: Angular 21 with Material Design and Routing
+### Web UI (Version 2.0)
+- 🌐 **Modern Web UI**: Angular 21 with the light "Daylight" design, signals and routing
 - 📊 **Production Visualization**: Interactive bar chart showing last 7 days of solar production
 - ⚡ **Tshwane Usage Visualization**: Bar chart showing kWh consumed between the last 7 Tshwane meter readings
 - 🔄 **Time-Weighted Calculations**: Accurate energy production metrics matching Grafana dashboards
-- 🧭 **Multi-Page Navigation**: Dedicated Home and Upload pages with toolbar navigation
+- 🧭 **Multi-Page Navigation**: Overview and Import pages with header navigation and a live status pill
+- 🔢 **Key Figures**: Latest day, 7-day total, best day and Tshwane usage at a glance
 - 📊 **Real-time Status**: Live database connectivity monitoring with 10-second polling
 - 🔄 **Auto-Refresh Charts**: Charts automatically update after data imports
-- 📂 **File Upload**: Excel file selection (SolarMan or Tshwane), up to 10 MB
-- 👀 **Data Preview**: Review data before importing with Material tables
+- 📂 **File Upload**: Choose or drag-and-drop an Excel file (SolarMan or Tshwane), up to 10 MB
+- 👀 **Data Preview**: Review data in a paginated table before importing
 - 🚀 **Full File Import**: Processes thousands of records efficiently
 - 📈 **Import Results**: Detailed statistics and error reporting
 - 🔄 **Dual Support**: SolarMan and Tshwane electricity data formats
@@ -154,6 +155,10 @@ This project includes comprehensive documentation organized into specialized fil
 
 Full release history lives in **[CHANGELOG.md](CHANGELOG.md)**. This is a teaser of the latest releases only.
 
+### v2.0.0 - "Daylight" UI Redesign (November 7, 2026)
+- ✅ **New visual design**: header navigation with status pill, KPI cards, restyled charts, three-step import with drag-and-drop
+- ✅ **53 frontend unit tests and 33 e2e tests passing**; backend unchanged
+
 ### v1.7.5 - Security Patch (September 12, 2026)
 - ✅ **Tomcat 10.1.59**: 3 CRITICAL CVEs fixed (security constraint bypass, DIGEST-auth replay bypass, FORM-auth bypass)
 - ✅ **61 backend tests passing**
@@ -175,7 +180,7 @@ Full release history lives in **[CHANGELOG.md](CHANGELOG.md)**. This is a teaser
 
 ### Frontend
 - **Angular 21.2**: Latest framework with standalone components
-- **Angular Material**: Modern Material Design components
+- **Angular Material**: Preview table, paginator and snack bars only; everything else uses the app's own `--sm-*` design tokens
 - **TypeScript 5.9**: Type-safe development environment
 - **RxJS**: Reactive programming for API communication
 - **Vitest**: Fast unit test runner (migrated from Karma/Jasmine)
@@ -300,7 +305,7 @@ cd frontend/solarman-ui && npm run build
 cd ../../backend && mvn clean package
 
 # Deploy single JAR
-java -jar target/solarman-ui-backend-1.7.5.jar
+java -jar target/solarman-ui-backend-2.0.0.jar
 
 # Access application at http://localhost:8080
 ```
@@ -335,7 +340,7 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 1.7.5 - Security Patch (Tomcat CVEs)  
+**Latest Version**: 2.0.0 - "Daylight" UI Redesign  
 **Last Updated**: November 7, 2026  
 **Status**: Production Ready ✅
 
@@ -387,18 +392,18 @@ For detailed Grafana documentation, see:
 
 ## 📸 Screenshots
 
-### Home Page with Production and Usage Charts
-- 7-day production bar chart with time-weighted calculations
-- Tshwane electricity usage bar chart (kWh between last 7 readings)
-- System status panel with real-time database monitoring
-- Responsive Material Design interface
+### Overview (Home)
+- Four key-figure cards: latest day, 7-day total and average, best day, Tshwane usage
+- 7-day solar production chart (time-weighted, best day highlighted)
+- Tshwane electricity chart (kWh used since the previous reading)
+- System status strip with live API/database state and latest record times
+- Responsive down to phone width
 
-### Upload Page
-- File selection and preview
-- Import confirmation workflow
-- Detailed import results with statistics
+### Import data
+- Three steps: choose file → review → done
+- SolarMan / Tshwane choice, drag-and-drop or browse, inline validation
+- Paginated preview and an import summary with inserted / updated / error counts
 
 ### Navigation
-- Toolbar with Home and Upload buttons
-- Active route highlighting
-- Seamless page transitions
+- Header with Overview and Import data links, active page marked
+- Status pill shows "All systems normal", "API unavailable" or "Database disconnected"

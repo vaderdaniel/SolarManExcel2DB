@@ -1,22 +1,18 @@
-import { Component } from '@angular/core';
-
-import { RouterModule } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { SystemStatusService } from './services/system-status.service';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [
-    RouterModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule
-],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  title = 'SolarMan Excel Import';
+  protected readonly systemStatus = inject(SystemStatusService);
+
+  constructor() {
+    this.systemStatus.start();
+  }
 }

@@ -15,6 +15,19 @@ export function mockProductionStats() {
   return stats;
 }
 
+/** Mock Tshwane usage: kWh between the last 7 readings, newest first */
+export function mockTshwaneUsage() {
+  return [
+    { readingDate: '2026-11-05T06:28:00', usageKwh: 11.87 },
+    { readingDate: '2026-11-02T06:06:00', usageKwh: 9.61 },
+    { readingDate: '2026-10-30T06:28:00', usageKwh: 1.43 },
+    { readingDate: '2026-10-29T05:59:00', usageKwh: 3.18 },
+    { readingDate: '2026-10-27T07:37:00', usageKwh: 10.9 },
+    { readingDate: '2026-10-23T05:59:00', usageKwh: 2.9 },
+    { readingDate: '2026-10-22T06:10:00', usageKwh: 0.88 },
+  ];
+}
+
 /** Mock database status (connected) */
 export function mockStatusConnected() {
   return {
@@ -118,4 +131,17 @@ export async function mockAllAPIs(page: Page) {
   await page.route('**/api/database/latest-records', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockLatestRecords()) })
   );
+
+  await page.route('**/api/database/tshwane-usage', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockTshwaneUsage()) })
+  );
+}
+
+/** A small fake .xlsx file for file inputs */
+export function excelFile(name: string) {
+  return {
+    name,
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    buffer: Buffer.from('mock excel content'),
+  };
 }

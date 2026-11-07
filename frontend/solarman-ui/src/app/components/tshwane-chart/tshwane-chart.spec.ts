@@ -38,7 +38,7 @@ describe('TshwaneChartComponent', () => {
   // ==================== processChartData Tests ====================
 
   describe('processChartData', () => {
-    it('should correctly calculate yAxisMax for typical usage data', () => {
+    it('should scale bars to the largest reading and highlight the latest', () => {
       const stats: TshwaneUsageStat[] = [
         { readingDate: '2026-04-29T08:53:00', usageKwh: 10.71 },
         { readingDate: '2026-04-28T07:00:00', usageKwh: 13.14 },
@@ -48,8 +48,10 @@ describe('TshwaneChartComponent', () => {
       mockDatabaseService.getTshwaneUsageStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
-      expect(component.yAxisMax).toBe(20);
       expect(component.chartData.length).toBe(3);
+      expect(component.chartData[1].heightPercent).toBe(100); // 13.14 kWh on 28 Apr
+      expect(component.chartData[2].isLatest).toBe(true);
+      expect(component.chartData.filter(b => b.isLatest).length).toBe(1);
     });
 
     it('should sort data ascending by date (oldest left)', () => {
@@ -93,7 +95,7 @@ describe('TshwaneChartComponent', () => {
       expect(component.chartData[0].displayValue).toBe('10.71 kWh');
     });
 
-    it('should format date as MM/dd HH:mm', () => {
+    it('should format reading dates as d MMM HH:mm with weekday labels', () => {
       const stats: TshwaneUsageStat[] = [
         { readingDate: '2026-04-29T08:53:00', usageKwh: 10.71 }
       ];
@@ -101,7 +103,10 @@ describe('TshwaneChartComponent', () => {
       mockDatabaseService.getTshwaneUsageStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
-      expect(component.chartData[0].displayDate).toBe('04/29 08:53');
+      expect(component.chartData[0].displayDate).toBe('29 Apr 08:53');
+      expect(component.chartData[0].weekday).toBe('Wed');
+      expect(component.chartData[0].dayMonth).toBe('29 Apr');
+      expect(component.chartData[0].label).toBe('10.7');
     });
 
     it('should handle empty data array', () => {
@@ -109,8 +114,7 @@ describe('TshwaneChartComponent', () => {
       fixture.detectChanges();
 
       expect(component.chartData).toEqual([]);
-      expect(component.yAxisMax).toBe(0);
-      expect(component.yAxisLabels).toEqual([]);
+      expect(component.ariaLabel).toBe('');
     });
 
     it('should handle null stats', () => {

@@ -1,0 +1,48 @@
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.kpi__label {
+  color: var(--sm-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.kpi__value {
+  margin-top: 6px;
+  font-family: var(--sm-font-display);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi__unit {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--sm-muted);
+}
+
+.kpi__note {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--sm-muted);
+}
+
+.kpi__note--solar { color: var(--sm-solar-ink); font-weight: 500; }
+.kpi__note--grid { color: var(--sm-grid-ink); font-weight: 500; }
+
+// Two cards per row on phones instead of four tall single-column cards
+@media (max-width: 520px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .kpi { padding: 14px; }
+  .kpi__value { font-size: 26px; }
+  .kpi__unit { font-size: 13px; }
+}

@@ -1,107 +1,135 @@
-import { Component, Output, EventEmitter } from '@angular/core';
-
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, output, signal, viewChild } from '@angular/core';
 import { FileUploadService } from '../../services/file-upload.service';
+
+export type ImportFileType = 'solarman' | 'tshwane';
+
+export interface FileUploadedEvent {
+  data: any[];
+  fileType: ImportFileType;
+  fileId?: string;
+  totalRecords?: number;
+}
+
+interface SourceOption {
+  id: ImportFileType;
+  title: string;
+  description: string;
+  hint: string;
+}
 
 @Component({
   selector: 'app-file-upload',
-  standalone: true,
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule],
   templateUrl: './file-upload.html',
-  styleUrl: './file-upload.scss'
+  styleUrl: './file-upload.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FileUploadComponent {
-  @Output() fileUploaded = new EventEmitter<{data: any[], fileType: 'solarman' | 'tshwane', fileId?: string, totalRecords?: number}>();
-  
-  selectedFile: File | null = null;
-  selectedFileType: 'solarman' | 'tshwane' | null = null;
-  isUploading = false;
+  private readonly fileUploadService = inject(FileUploadService);
+  private readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
-  constructor(
-    private fileUploadService: FileUploadService,
-    private snackBar: MatSnackBar
-  ) { }
+  readonly fileUploaded = output<FileUploadedEvent>();
 
-  onFileSelected(event: any, fileType: 'solarman' | 'tshwane'): void {
-    const file = event.target.files[0];
-    if (!file) {
-      this.selectedFile = null;
-      this.selectedFileType = null;
-      return;
+  readonly sources: readonly SourceOption[] = [
+    {
+      id: 'solarman',
+      title: 'SolarMan inverter export',
+      description: '12 columns — production, consumption, grid, battery and SoC every 5 minutes.',
+      hint: '12 columns in fixed order'
+    },
+    {
+      id: 'tshwane',
+      title: 'Tshwane electricity readings',
+      description: 'Sheet “Elektrisiteit Lesings” — reading date, cumulative kWh and notes.',
+      hint: 'sheet “Elektrisiteit Lesings”'
     }
+  ];
 
-    const validationError = this.fileUploadService.getFileValidationError(file);
-    if (validationError) {
-      this.showError(validationError);
-      this.clearFileSelection();
-      return;
-    }
+  readonly fileType = signal<ImportFileType>('solarman');
+  readonly selectedFile = signal<File | null>(null);
+  readonly isUploading = signal(false);
+  readonly isDragging = signal(false);
+  readonly errorMessage = signal<string | null>(null);
 
-    this.selectedFile = file;
-    this.selectedFileType = fileType;
+  readonly sourceHint = computed(() => this.sources.find(s => s.id === this.fileType())!.hint);
+  readonly fileSize = computed(() => {
+    const file = this.selectedFile();
+    if (!file) return '';
+    return file.size >= 1024 * 1024
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+      : `${Math.max(1, Math.round(file.size / 1024))} KB`;
+  });
+
+  selectFileType(type: ImportFileType): void {
+    this.fileType.set(type);
   }
 
-  uploadFile(): void {
-    if (!this.selectedFile || !this.selectedFileType) {
-      this.showError('Please select a file first');
-      return;
-    }
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.setFile(input.files?.[0] ?? null);
+  }
 
-    this.isUploading = true;
-    this.fileUploadService.uploadFile(this.selectedFile, this.selectedFileType)
-      .subscribe({
-        next: (response) => {
-          this.isUploading = false;
-          this.fileUploaded.emit({ 
-            data: response.data, 
-            fileType: this.selectedFileType!,
-            fileId: response.fileId,
-            totalRecords: response.totalRecords
-          });
-          const recordCount = response.totalRecords || response.data.length;
-          this.showSuccess(`File uploaded successfully! Found ${recordCount} records.`);
-        },
-        error: (error) => {
-          this.isUploading = false;
-          this.showError(error.message || 'Failed to upload file');
-        }
-      });
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging.set(true);
+  }
+
+  onDragLeave(): void {
+    this.isDragging.set(false);
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging.set(false);
+    this.setFile(event.dataTransfer?.files?.[0] ?? null);
   }
 
   clearFileSelection(): void {
-    this.selectedFile = null;
-    this.selectedFileType = null;
-    // Reset file input elements
-    const solarmanInput = document.getElementById('solarman-file') as HTMLInputElement;
-    const tshwaneInput = document.getElementById('tshwane-file') as HTMLInputElement;
-    if (solarmanInput) solarmanInput.value = '';
-    if (tshwaneInput) tshwaneInput.value = '';
+    this.selectedFile.set(null);
+    this.errorMessage.set(null);
+    const input = this.fileInput()?.nativeElement;
+    if (input) input.value = '';
   }
 
-  getSelectedFileName(): string {
-    return this.selectedFile ? this.selectedFile.name : 'No file selected';
-  }
+  uploadFile(): void {
+    const file = this.selectedFile();
+    if (!file) {
+      this.errorMessage.set('Please choose a file first');
+      return;
+    }
 
-  getFileSize(): string {
-    if (!this.selectedFile) return '';
-    const sizeInMB = (this.selectedFile.size / (1024 * 1024)).toFixed(2);
-    return `${sizeInMB} MB`;
-  }
+    const fileType = this.fileType();
+    this.isUploading.set(true);
+    this.errorMessage.set(null);
 
-  private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
+    this.fileUploadService.uploadFile(file, fileType).subscribe({
+      next: (response) => {
+        this.isUploading.set(false);
+        this.fileUploaded.emit({
+          data: response.data,
+          fileType,
+          fileId: response.fileId,
+          totalRecords: response.totalRecords
+        });
+      },
+      error: (error: Error) => {
+        this.isUploading.set(false);
+        this.errorMessage.set(error.message || 'Failed to upload file');
+      }
     });
   }
 
-  private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
-    });
+  private setFile(file: File | null): void {
+    this.errorMessage.set(null);
+    if (!file) {
+      this.selectedFile.set(null);
+      return;
+    }
+    const validationError = this.fileUploadService.getFileValidationError(file);
+    if (validationError) {
+      this.clearFileSelection();
+      this.errorMessage.set(validationError);
+      return;
+    }
+    this.selectedFile.set(file);
   }
 }

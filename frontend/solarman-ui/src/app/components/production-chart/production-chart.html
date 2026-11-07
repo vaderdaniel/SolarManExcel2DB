@@ -1,73 +1,44 @@
-<mat-card class="chart-card">
-  <mat-card-header>
-    <mat-card-title>
-      <mat-icon>wb_sunny</mat-icon>
-      Solar Production - Last 7 Days
-    </mat-card-title>
-  </mat-card-header>
+<section class="sm-card chart-card" aria-labelledby="production-chart-title">
+  <div class="chart-card__header">
+    <h2 id="production-chart-title">Solar production</h2>
+    <span class="chart-card__meta">Last 7 days · kWh</span>
+  </div>
 
-  <mat-card-content>
-    @if (isLoading) {
-      <div class="loading-state">
-        <p>Loading chart data...</p>
-      </div>
-    }
+  @if (isLoading && chartData.length === 0 && !hasError) {
+    <div class="loading-state" role="status">
+      <p>Loading chart data…</p>
+    </div>
+  }
 
-    @if (hasError && !isLoading) {
-      <div class="error-state">
-        <mat-icon>error_outline</mat-icon>
-        <p>{{ errorMessage }}</p>
-      </div>
-    }
+  @if (hasError && !isLoading) {
+    <div class="error-state" role="alert">
+      <p>{{ errorMessage }}</p>
+    </div>
+  }
 
-    @if (!isLoading && !hasError && chartData.length === 0) {
-      <div class="empty-state">
-        <mat-icon>info_outline</mat-icon>
-        <p>No production data available for the last 7 days</p>
-      </div>
-    }
+  @if (!isLoading && !hasError && chartData.length === 0) {
+    <div class="empty-state">
+      <p>No production data available for the last 7 days</p>
+    </div>
+  }
 
-    @if (!isLoading && !hasError && chartData.length > 0) {
-      <div class="chart-container">
-        <!-- Y-axis -->
-        <div class="y-axis">
-          @for (label of yAxisLabels; track label) {
-            <div class="y-axis-label">
-              {{ formatYAxisLabel(label) }}
-            </div>
-          }
-        </div>
-        <!-- Chart area -->
-        <div class="chart-area">
-          <!-- Grid lines -->
-          <div class="grid-lines">
-            @for (label of yAxisLabels; track label) {
-              <div class="grid-line"></div>
-            }
+  @if (!hasError && chartData.length > 0) {
+    <div class="bars" role="img" [attr.aria-label]="ariaLabel">
+      @for (bar of chartData; track bar.date) {
+        <div class="bar-wrapper">
+          <span class="bar-value" aria-hidden="true">{{ bar.label }}</span>
+          <div class="bar-track">
+            <div
+              class="bar"
+              [class.is-highlight]="bar.isBest"
+              [style.height.%]="bar.heightPercent"
+              [title]="bar.displayValue"
+            ></div>
           </div>
-          <!-- Bars -->
-          <div class="bars-container">
-            @for (bar of chartData; track bar) {
-              <div class="bar-wrapper">
-                <div
-                  class="bar"
-                  [style.height.%]="bar.heightPercent"
-                  [title]="bar.displayValue"
-                  >
-                  <div class="bar-tooltip">{{ bar.displayValue }}</div>
-                </div>
-                <div class="x-axis-label">{{ bar.displayDate }}</div>
-              </div>
-            }
-          </div>
+          <span class="x-axis-label" aria-hidden="true">{{ bar.weekday }}<br>{{ bar.dayMonth }}</span>
         </div>
-      </div>
-    }
-
-    @if (!isLoading && !hasError && chartData.length > 0) {
-      <div class="chart-info">
-        <small>Energy units in Watt-hours (Wh)</small>
-      </div>
-    }
-  </mat-card-content>
-</mat-card>
+      }
+    </div>
+    <p class="chart-info">Time-weighted energy per day in kWh. The darker bar is the best day.</p>
+  }
+</section>

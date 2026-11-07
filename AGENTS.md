@@ -6,7 +6,7 @@ This file provides comprehensive guidance to AI assistants (Claude Code, Warp, e
 
 ## 🌞 Project Overview
 SolarManExcel2DB is a comprehensive full-stack web application for importing and visualizing solar power generation data:
-- **Web UI** (Version 1.7): Angular + Spring Boot application with production visualization
+- **Web UI** (Version 2.0): Angular + Spring Boot application with production visualization
 
 This tool streamlines the process of transferring solar monitoring data from Excel files into a PostgreSQL database for analysis, reporting, and visualization.
 
@@ -217,13 +217,24 @@ There is no global error handler. Failures return `400` (validation, e.g. invali
 
 ## 📊 Web UI Features
 
+The UI uses the **"Daylight"** visual design: light grey ground, white cards, amber for solar, blue for grid, Space Grotesk headings over Inter body text. Design tokens are CSS custom properties (`--sm-*`) in `frontend/solarman-ui/src/styles.scss`, along with shared `.sm-card` / `.sm-btn` classes. Icons are inline SVG. Angular Material is only used for the preview table, its paginator and snack bars.
+
+### App shell
+- Header: SolarMan brand, **Overview** / **Import data** nav (`aria-current` on the active link), and a status pill ("All systems normal" / "API unavailable" / "Database disconnected")
+- `SystemStatusService` polls `/api/database/status` and `/latest-records` every 10 s for the whole app (started in `App`), and re-checks after every import
+
 ### Home Page (`/`)
-- CSS-based production bar chart — last 7 days, time-weighted, auto-refreshes after import
-- CSS-based Tshwane electricity usage bar chart — last 7 readings, kWh consumed between readings, auto-refreshes after import
-- System status panel — polls every 10 seconds, color-coded indicators
+- Four KPI cards (`EnergySummaryComponent`): latest day's production, 7-day total + daily average, best day, Tshwane usage over the last 7 readings
+- Solar production bar chart — last 7 days, time-weighted, kWh label on each bar, best day highlighted; bars are scaled to the week's maximum (no y-axis)
+- Tshwane electricity bar chart — kWh used since the previous reading, latest reading highlighted
+- System status section — API, database, latest SolarMan record, latest Tshwane reading, last check time
+- Both charts and the KPI cards reload after an import
 
 ### Upload Page (`/upload`)
-- File selection (SolarMan or Tshwane), data preview with pagination, import confirmation, results display
+- Three-step flow with a step indicator: **Choose file → Review → Done**
+- Choose: SolarMan / Tshwane radio cards, one file input (`#file-input`) inside a drop zone that also accepts drag-and-drop, inline validation errors
+- Review: paginated preview table with short column labels and an "Import N records" button
+- Done: inserted / updated / errors / date range, expandable error messages
 
 ### Angular Conventions (canonical — other docs link here)
 - **Standalone components only** — `NgModules` are never used. `standalone: true` is the default in Angular 21 and must not be set explicitly.
@@ -236,7 +247,8 @@ There is no global error handler. Failures return `400` (validation, e.g. invali
 - **Host bindings** inside the `host` object of `@Component`/`@Directive` — never `@HostBinding`/`@HostListener`.
 - **`NgOptimizedImage`** for static images (does not work for inline base64).
 - **Reactive forms** over template-driven forms.
-- **`ChartRefreshService.triggerRefresh()`** after a successful import → `ProductionChartComponent` and `TshwaneChartComponent` both reload.
+- **`ChartRefreshService.triggerRefresh()`** after a successful import → `ProductionChartComponent`, `TshwaneChartComponent`, `EnergySummaryComponent` and `SystemStatusService` all reload.
+- **`App` is OnPush**, so a routed page that keeps state in plain fields (not signals) is only re-checked on its own DOM events. After async work (HTTP callbacks) it must call `ChangeDetectorRef.markForCheck()`, as `UploadComponent` and the two chart components do. Otherwise the view silently stops updating (e.g. stuck on "Importing…"). Prefer signals in new code.
 
 TypeScript: use strict type checking, prefer type inference when the type is obvious, avoid `any` (use `unknown` when uncertain).
 
@@ -512,7 +524,7 @@ nerdctl buildkit may not be running in Rancher Desktop. Use `docker` directly fo
 <!-- backend/pom.xml -->
 <groupId>com.loots</groupId>
 <artifactId>solarman-ui-backend</artifactId>
-<version>1.7.5</version>
+<version>2.0.0</version>
 
 <properties>
   <tomcat.version>10.1.59</tomcat.version>
@@ -542,7 +554,7 @@ cd backend && mvn test
 mvn test -Dtest=DatabaseServiceTest          # single class
 mvn test -Dtest=ImportServiceTest#methodName # single method
 
-# Frontend (42 tests)
+# Frontend (53 unit tests, 33 e2e tests)
 cd frontend/solarman-ui && npx ng test --no-watch
 npx ng test                                  # watch mode
 npx playwright test                          # e2e (requires :4200)
@@ -581,6 +593,11 @@ Before editing a doc, verify the current fact against the code (dependency versi
 
 Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.md)**. This section is a teaser of the latest releases only — don't re-add older entries here when adding a new one; just add the new entry at the top of both this section and CHANGELOG.md, and drop the oldest entry here if there are more than three.
 
+### November 7, 2026 - "Daylight" UI Redesign (v2.0.0)
+- New visual design for the whole Angular UI: header nav with status pill, KPI cards, restyled charts, three-step import flow with drag-and-drop
+- New `EnergySummaryComponent` and app-wide `SystemStatusService`; Material toolbar/cards/icons removed
+- 53 frontend unit tests (+11) and 33 e2e tests passing; 61 backend tests unchanged
+
 ### September 12, 2026 - Security Patch (v1.7.5)
 - Backend: Tomcat 10.1.55 → 10.1.59 (3 CRITICAL CVEs fixed: CVE-2026-65182, CVE-2026-65905, CVE-2026-68525); confirmed clean via `mvn verify`
 - 61 backend tests passing
@@ -590,11 +607,8 @@ Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.m
 - Frontend: `npm update` resolved 27 of 32 npm-audit findings; remaining 5 deferred (dev/build tooling only, need Angular v22)
 - 61 backend tests passing; 42 frontend unit tests passing
 
-### April 30, 2026 - Tshwane Electricity Usage Bar Chart (v1.7.3)
-- Added `TshwaneChartComponent` + `GET /api/database/tshwane-usage` — kWh consumed between the last 7 Tshwane readings, auto-refreshes after import
-- 61 backend tests passing (+5 new); 42 frontend tests passing (+11 new)
-
 ### Version History
+- **v2.0.0** - "Daylight" UI redesign
 - **v1.7.5** - Security patch (Tomcat 10.1.59 CVEs)
 - **v1.7.4** - Security patches (Tomcat 10.1.55 CVEs, frontend npm audit fix)
 - **v1.7.3** - Tshwane electricity usage bar chart on home page

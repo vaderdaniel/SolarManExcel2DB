@@ -1,80 +1,87 @@
-<div class="upload-container">
-  <!-- File Upload View -->
+<div class="page">
+  <div class="page__header">
+    <h1>Import data</h1>
+    <p>Bring a SolarMan or Tshwane Excel export into the database. Existing timestamps are updated, new ones are added.</p>
+  </div>
+
+  <ol class="steps" aria-label="Import progress">
+    @for (label of stepLabels; track label; let i = $index) {
+      <li class="step" [class]="'step--' + stepState(i)" [attr.aria-current]="stepState(i) === 'current' ? 'step' : null">
+        <span class="step__dot" aria-hidden="true">
+          @if (stepState(i) === 'done') {
+            <svg class="sm-icon" width="14" height="14" viewBox="0 0 24 24" style="stroke-width: 3"><path d="M5 12l5 5L20 7"></path></svg>
+          } @else {
+            {{ i + 1 }}
+          }
+        </span>
+        {{ label }}
+      </li>
+    }
+  </ol>
+
   @if (currentView === 'upload') {
-    <div class="view-container">
-      <app-file-upload (fileUploaded)="onFileUploaded($event)"></app-file-upload>
-    </div>
+    <app-file-upload (fileUploaded)="onFileUploaded($event)"></app-file-upload>
   }
 
-  <!-- Preview View -->
   @if (currentView === 'preview') {
-    <div class="view-container">
-      <app-data-preview
-        [previewData]="previewData"
-        [fileType]="fileType"
-        [totalRecords]="totalRecords"
-        (confirmImport)="onImportConfirmed($event)"
-        (cancelImport)="onImportCanceled()"
-      ></app-data-preview>
-    </div>
+    <app-data-preview
+      [previewData]="previewData"
+      [fileType]="fileType"
+      [totalRecords]="totalRecords"
+      [isImporting]="isImporting"
+      (confirmImport)="onImportConfirmed($event)"
+      (cancelImport)="onImportCanceled()"
+    ></app-data-preview>
   }
 
-  <!-- Result View -->
   @if (currentView === 'result' && importResult) {
-    <div class="view-container">
-      <div class="import-result-container">
-        <mat-card class="result-card">
-          <mat-card-header>
-            <mat-card-title>
-              <mat-icon>task_alt</mat-icon>
-              Import Completed
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="result-stats">
-              <div class="stat-item">
-                <span class="stat-label">Records Inserted:</span>
-                <span class="stat-value">{{ importResult.recordsInserted }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Records Updated:</span>
-                <span class="stat-value">{{ importResult.recordsUpdated }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">First Record Date:</span>
-                <span class="stat-value">{{ importResult.firstRecordDate | date:'medium' }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Last Record Date:</span>
-                <span class="stat-value">{{ importResult.lastRecordDate | date:'medium' }}</span>
-              </div>
-              @if (importResult.errorCount > 0) {
-                <div class="stat-item">
-                  <span class="stat-label error">Errors:</span>
-                  <span class="stat-value error">{{ importResult.errorCount }}</span>
-                </div>
-              }
-            </div>
-          </mat-card-content>
-          <mat-card-actions class="result-actions">
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="resetToUpload()"
-              >
-              <mat-icon>add_circle</mat-icon>
-              Import Another File
-            </button>
-            <button
-              mat-raised-button
-              (click)="navigateToHome()"
-              >
-              <mat-icon>home</mat-icon>
-              Go to Home
-            </button>
-          </mat-card-actions>
-        </mat-card>
+    <section class="sm-card result" aria-labelledby="result-title">
+      <div class="result__header">
+        <span class="result__icon" aria-hidden="true">
+          <svg class="sm-icon" width="24" height="24" viewBox="0 0 24 24" style="stroke-width: 2.5"><path d="M5 12l5 5L20 7"></path></svg>
+        </span>
+        <div>
+          <h2 id="result-title">Import complete</h2>
+          <p>The overview charts have been refreshed.</p>
+        </div>
       </div>
-    </div>
+
+      <dl class="result__stats">
+        <div class="stat">
+          <dt>Inserted</dt>
+          <dd>{{ importResult.recordsInserted }}</dd>
+        </div>
+        <div class="stat">
+          <dt>Updated</dt>
+          <dd>{{ importResult.recordsUpdated }}</dd>
+        </div>
+        <div class="stat" [class.stat--error]="importResult.errorCount > 0">
+          <dt>Errors</dt>
+          <dd>{{ importResult.errorCount }}</dd>
+        </div>
+        <div class="stat">
+          <dt>Date range</dt>
+          <dd class="stat__range">
+            {{ importResult.firstRecordDate | date: 'd MMM y, HH:mm' }} → {{ importResult.lastRecordDate | date: 'd MMM y, HH:mm' }}
+          </dd>
+        </div>
+      </dl>
+
+      @if (importResult.errors && importResult.errors.length > 0) {
+        <details class="result__errors">
+          <summary>Show {{ importResult.errors.length }} error message{{ importResult.errors.length === 1 ? '' : 's' }}</summary>
+          <ul>
+            @for (error of importResult.errors; track $index) {
+              <li>{{ error }}</li>
+            }
+          </ul>
+        </details>
+      }
+
+      <div class="result__actions">
+        <button type="button" class="sm-btn sm-btn--primary" (click)="resetToUpload()">Import another file</button>
+        <button type="button" class="sm-btn sm-btn--secondary" (click)="navigateToHome()">View overview</button>
+      </div>
+    </section>
   }
 </div>

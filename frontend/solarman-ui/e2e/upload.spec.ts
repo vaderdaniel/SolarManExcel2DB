@@ -1,305 +1,164 @@
-import { test, expect } from '@playwright/test';
-import {
-  mockAllAPIs,
-  mockUploadResponse,
-  mockImportResult,
-} from './mock-api';
+import { test, expect, Page } from '@playwright/test';
+import { mockAllAPIs, mockUploadResponse, mockImportResult, excelFile } from './mock-api';
 
-test.describe('Upload Page', () => {
+async function mockUploadAndImport(page: Page, fileType: 'solarman' | 'tshwane' = 'solarman') {
+  await page.route(`**/api/upload/${fileType}`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ ...mockUploadResponse(), fileType }),
+    })
+  );
+  await page.route(`**/api/import/${fileType}`, (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockImportResult()) })
+  );
+}
+
+/** Choose step → Review step for a SolarMan file. */
+async function goToPreview(page: Page) {
+  await page.goto('/upload');
+  await page.locator('#file-input').setInputFiles(excelFile('solarman_export.xlsx'));
+  await page.getByRole('button', { name: 'Upload & preview' }).click();
+  await expect(page.locator('app-data-preview')).toBeVisible();
+}
+
+test.describe('Upload Page - Choose file', () => {
   test.beforeEach(async ({ page }) => {
     await mockAllAPIs(page);
   });
 
-  test('shows file selection view by default', async ({ page }) => {
+  test('shows the choose-file step by default', async ({ page }) => {
     await page.goto('/upload');
+    await expect(page.getByRole('heading', { level: 1, name: 'Import data' })).toBeVisible();
+    await expect(page.locator('.step[aria-current="step"]')).toContainText('Choose file');
     await expect(page.locator('app-file-upload')).toBeVisible();
-    await expect(page.locator('text=File Upload')).toBeVisible();
-    await expect(page.locator('text=Select and upload Excel files')).toBeVisible();
+    await expect(page.getByText('What are you importing?')).toBeVisible();
   });
 
-  test('SolarMan and Tshwane upload options are visible', async ({ page }) => {
+  test('SolarMan and Tshwane options are radios, SolarMan selected', async ({ page }) => {
     await page.goto('/upload');
-    await expect(page.locator('text=SolarMan Excel File')).toBeVisible();
-    await expect(page.locator('text=Tshwane Electricity File')).toBeVisible();
+    await expect(page.getByRole('radio', { name: /SolarMan inverter export/ })).toBeChecked();
+    await expect(page.getByRole('radio', { name: /Tshwane electricity readings/ })).not.toBeChecked();
   });
 
-  test('SolarMan and Tshwane file inputs accept Excel files', async ({ page }) => {
+  test('file input accepts Excel files', async ({ page }) => {
     await page.goto('/upload');
-    const solarmanInput = page.locator('#solarman-file');
-    const tshwaneInput = page.locator('#tshwane-file');
-    await expect(solarmanInput).toHaveAttribute('accept', '.xlsx,.xls');
-    await expect(tshwaneInput).toHaveAttribute('accept', '.xlsx,.xls');
+    await expect(page.locator('#file-input')).toHaveAttribute('accept', '.xlsx,.xls');
   });
 
-  test('upload guidelines are displayed', async ({ page }) => {
+  test('drop zone shows the limits for the selected export', async ({ page }) => {
     await page.goto('/upload');
-    await expect(page.locator('text=Upload Guidelines')).toBeVisible();
-    await expect(page.locator('text=Maximum file size: 10MB')).toBeVisible();
-    await expect(page.locator('text=Supported formats: .xlsx, .xls')).toBeVisible();
+    const hint = page.locator('.dropzone__hint');
+    await expect(hint).toContainText('.xlsx or .xls · up to 10 MB · 12 columns in fixed order');
+
+    await page.getByRole('radio', { name: /Tshwane electricity readings/ }).check();
+    await expect(hint).toContainText('Elektrisiteit Lesings');
+  });
+
+  test('choosing a file shows it and enables Upload & preview', async ({ page }) => {
+    await page.goto('/upload');
+    const uploadButton = page.getByRole('button', { name: 'Upload & preview' });
+    await expect(uploadButton).toBeDisabled();
+
+    await page.locator('#file-input').setInputFiles(excelFile('solarman_export.xlsx'));
+    await expect(page.locator('.selected-file')).toContainText('solarman_export.xlsx');
+    await expect(uploadButton).toBeEnabled();
+
+    await page.getByRole('button', { name: 'Remove file' }).click();
+    await expect(page.locator('.selected-file')).toHaveCount(0);
+    await expect(uploadButton).toBeDisabled();
+  });
+
+  test('a non-Excel file shows an inline error', async ({ page }) => {
+    await page.goto('/upload');
+    await page.locator('#file-input').setInputFiles({
+      name: 'readings.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from('a,b,c'),
+    });
+    await expect(page.getByRole('alert')).toContainText('Invalid file format');
+    await expect(page.getByRole('button', { name: 'Upload & preview' })).toBeDisabled();
   });
 });
 
 test.describe('Upload Workflow - SolarMan File', () => {
   test.beforeEach(async ({ page }) => {
     await mockAllAPIs(page);
+    await mockUploadAndImport(page);
   });
 
-  test('file selection shows file info and Upload button', async ({ page }) => {
-    await page.goto('/upload');
-
-    // Create a mock Excel file and trigger file selection
-    const buffer = Buffer.from('mock excel content');
-    await page.locator('#solarman-file').setInputFiles({
-      name: 'solarman_export.xlsx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      buffer,
-    });
-
-    // Should show file info
-    await expect(page.locator('.selected-file-info')).toBeVisible();
-    await expect(page.locator('text=solarman_export.xlsx')).toBeVisible();
-    await expect(page.locator('.file-type')).toContainText('solarman');
-
-    // Upload button should be visible
-    await expect(page.locator('button', { hasText: 'Upload & Preview' })).toBeVisible();
+  test('Upload & preview shows the review step', async ({ page }) => {
+    await goToPreview(page);
+    await expect(page.getByRole('heading', { name: 'Check the data before importing' })).toBeVisible();
+    await expect(page.locator('.step[aria-current="step"]')).toContainText('Review');
   });
 
-  test('Upload & Preview button triggers upload and shows preview', async ({ page }) => {
-    const uploadResponse = mockUploadResponse();
-    await page.route('**/api/upload/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(uploadResponse) })
-    );
-
-    await page.goto('/upload');
-
-    // Select a file
-    const buffer = Buffer.from('mock excel content');
-    await page.locator('#solarman-file').setInputFiles({
-      name: 'solarman_export.xlsx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      buffer,
-    });
-
-    // Click Upload & Preview
-    await page.locator('button', { hasText: 'Upload & Preview' }).click();
-
-    // Should transition to preview view
-    await expect(page.locator('app-data-preview')).toBeVisible();
-    await expect(page.locator('text=Data Preview')).toBeVisible();
-  });
-
-  test('preview shows record count and table', async ({ page }) => {
-    const uploadResponse = mockUploadResponse();
-    await page.route('**/api/upload/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(uploadResponse) })
-    );
-
-    await page.goto('/upload');
-
-    const buffer = Buffer.from('mock excel content');
-    await page.locator('#solarman-file').setInputFiles({
-      name: 'solarman_export.xlsx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      buffer,
-    });
-
-    await page.locator('button', { hasText: 'Upload & Preview' }).click();
-    await expect(page.locator('app-data-preview')).toBeVisible();
-
-    // Should show total records count
-    await expect(page.locator('text=Total records to import:')).toBeVisible();
+  test('preview shows record count, table and actions', async ({ page }) => {
+    await goToPreview(page);
     await expect(page.locator('.preview-info')).toContainText('150');
-
-    // Table should be visible
     await expect(page.locator('table')).toBeVisible();
-
-    // Confirm and Cancel buttons should be present
-    await expect(page.locator('button', { hasText: 'Confirm Import' })).toBeVisible();
-    await expect(page.locator('button', { hasText: 'Cancel' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Production W' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Import 150 records' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Back' })).toBeVisible();
   });
 
-  test('Confirm Import transitions to result view', async ({ page }) => {
-    const uploadResponse = mockUploadResponse();
-    const importResult = mockImportResult();
+  test('importing shows the result with inserted and updated counts', async ({ page }) => {
+    await goToPreview(page);
+    await page.getByRole('button', { name: 'Import 150 records' }).click();
 
-    await page.route('**/api/upload/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(uploadResponse) })
-    );
-    await page.route('**/api/import/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(importResult) })
-    );
-
-    await page.goto('/upload');
-
-    // Select file and upload
-    const buffer = Buffer.from('mock excel content');
-    await page.locator('#solarman-file').setInputFiles({
-      name: 'solarman_export.xlsx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      buffer,
-    });
-    await page.locator('button', { hasText: 'Upload & Preview' }).click();
-    await expect(page.locator('app-data-preview')).toBeVisible();
-
-    // Confirm import
-    await page.locator('button', { hasText: 'Confirm Import' }).click();
-
-    // Should show result view
-    await expect(page.locator('text=Import Completed')).toBeVisible();
+    const result = page.locator('.result');
+    await expect(result.getByRole('heading', { name: 'Import complete' })).toBeVisible();
+    await expect(page.locator('.step[aria-current="step"]')).toContainText('Done');
+    await expect(result.locator('.stat').nth(0)).toContainText('120');
+    await expect(result.locator('.stat').nth(1)).toContainText('30');
+    await expect(result.locator('.stat').nth(2)).toContainText('0');
   });
 
-  test('result view shows records inserted and updated stats', async ({ page }) => {
-    const uploadResponse = mockUploadResponse();
-    const importResult = mockImportResult();
+  test('Import another file resets to the choose-file step', async ({ page }) => {
+    await goToPreview(page);
+    await page.getByRole('button', { name: 'Import 150 records' }).click();
+    await expect(page.getByRole('heading', { name: 'Import complete' })).toBeVisible();
 
-    await page.route('**/api/upload/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(uploadResponse) })
-    );
-    await page.route('**/api/import/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(importResult) })
-    );
-
-    await page.goto('/upload');
-
-    const buffer = Buffer.from('mock excel content');
-    await page.locator('#solarman-file').setInputFiles({
-      name: 'solarman_export.xlsx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      buffer,
-    });
-    await page.locator('button', { hasText: 'Upload & Preview' }).click();
-    await expect(page.locator('app-data-preview')).toBeVisible();
-    await page.locator('button', { hasText: 'Confirm Import' }).click();
-
-    // Verify import stats
-    await expect(page.locator('text=Import Completed')).toBeVisible();
-    await expect(page.locator('text=Records Inserted:')).toBeVisible();
-    await expect(page.locator('text=120')).toBeVisible();
-    await expect(page.locator('text=Records Updated:')).toBeVisible();
-    await expect(page.locator('text=30')).toBeVisible();
-  });
-
-  test('Import Another File resets to upload view', async ({ page }) => {
-    const uploadResponse = mockUploadResponse();
-    const importResult = mockImportResult();
-
-    await page.route('**/api/upload/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(uploadResponse) })
-    );
-    await page.route('**/api/import/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(importResult) })
-    );
-
-    await page.goto('/upload');
-
-    const buffer = Buffer.from('mock excel content');
-    await page.locator('#solarman-file').setInputFiles({
-      name: 'solarman_export.xlsx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      buffer,
-    });
-    await page.locator('button', { hasText: 'Upload & Preview' }).click();
-    await expect(page.locator('app-data-preview')).toBeVisible();
-    await page.locator('button', { hasText: 'Confirm Import' }).click();
-    await expect(page.locator('text=Import Completed')).toBeVisible();
-
-    // Click Import Another File
-    await page.locator('button', { hasText: 'Import Another File' }).click();
-
-    // Should be back to upload view
+    await page.getByRole('button', { name: 'Import another file' }).click();
     await expect(page.locator('app-file-upload')).toBeVisible();
-    await expect(page.locator('app-file-upload mat-card-title')).toContainText('File Upload');
+    await expect(page.locator('.step[aria-current="step"]')).toContainText('Choose file');
   });
 
-  test('Go to Home navigates to home page', async ({ page }) => {
-    const uploadResponse = mockUploadResponse();
-    const importResult = mockImportResult();
+  test('View overview navigates to the home page', async ({ page }) => {
+    await goToPreview(page);
+    await page.getByRole('button', { name: 'Import 150 records' }).click();
+    await expect(page.getByRole('heading', { name: 'Import complete' })).toBeVisible();
 
-    await page.route('**/api/upload/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(uploadResponse) })
-    );
-    await page.route('**/api/import/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(importResult) })
-    );
-
-    await page.goto('/upload');
-
-    const buffer = Buffer.from('mock excel content');
-    await page.locator('#solarman-file').setInputFiles({
-      name: 'solarman_export.xlsx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      buffer,
-    });
-    await page.locator('button', { hasText: 'Upload & Preview' }).click();
-    await expect(page.locator('app-data-preview')).toBeVisible();
-    await page.locator('button', { hasText: 'Confirm Import' }).click();
-    await expect(page.locator('text=Import Completed')).toBeVisible();
-
-    // Click Go to Home
-    await page.locator('button', { hasText: 'Go to Home' }).click();
+    await page.getByRole('button', { name: 'View overview' }).click();
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator('text=Solar Production')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Energy overview' })).toBeVisible();
   });
 
-  test('Cancel from preview returns to upload view', async ({ page }) => {
-    const uploadResponse = mockUploadResponse();
-    await page.route('**/api/upload/solarman', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(uploadResponse) })
-    );
-
-    await page.goto('/upload');
-
-    const buffer = Buffer.from('mock excel content');
-    await page.locator('#solarman-file').setInputFiles({
-      name: 'solarman_export.xlsx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      buffer,
-    });
-    await page.locator('button', { hasText: 'Upload & Preview' }).click();
-    await expect(page.locator('app-data-preview')).toBeVisible();
-
-    // Click Cancel
-    await page.locator('button', { hasText: 'Cancel' }).click();
-
-    // Should be back to upload view
+  test('Back from preview returns to the choose-file step', async ({ page }) => {
+    await goToPreview(page);
+    await page.getByRole('button', { name: 'Back' }).click();
     await expect(page.locator('app-file-upload')).toBeVisible();
-    await expect(page.locator('app-file-upload mat-card-title')).toContainText('File Upload');
+    await expect(page.locator('app-data-preview')).toHaveCount(0);
   });
 });
 
 test.describe('Upload Workflow - Tshwane File', () => {
   test('Tshwane file upload works end-to-end', async ({ page }) => {
     await mockAllAPIs(page);
-
-    const uploadResponse = {
-      ...mockUploadResponse(),
-      fileType: 'tshwane',
-    };
-    const importResult = mockImportResult();
-
-    await page.route('**/api/upload/tshwane', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(uploadResponse) })
-    );
-    await page.route('**/api/import/tshwane', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(importResult) })
-    );
+    await mockUploadAndImport(page, 'tshwane');
 
     await page.goto('/upload');
+    await page.getByRole('radio', { name: /Tshwane electricity readings/ }).check();
+    await page.locator('#file-input').setInputFiles(excelFile('tshwane_electricity.xlsx'));
+    await expect(page.locator('.selected-file')).toContainText('tshwane_electricity.xlsx');
 
-    // Select Tshwane file
-    const buffer = Buffer.from('mock tshwane content');
-    await page.locator('#tshwane-file').setInputFiles({
-      name: 'tshwane_electricity.xlsx',
-      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      buffer,
-    });
+    const uploadRequest = page.waitForRequest('**/api/upload/tshwane');
+    await page.getByRole('button', { name: 'Upload & preview' }).click();
+    await uploadRequest;
+    await expect(page.locator('app-data-preview .badge')).toContainText('Tshwane');
 
-    await expect(page.locator('text=tshwane_electricity.xlsx')).toBeVisible();
-    await page.locator('button', { hasText: 'Upload & Preview' }).click();
-    await expect(page.locator('app-data-preview')).toBeVisible();
-
-    await page.locator('button', { hasText: 'Confirm Import' }).click();
-    await expect(page.locator('text=Import Completed')).toBeVisible();
-    await expect(page.locator('text=120')).toBeVisible();
+    await page.getByRole('button', { name: /^Import \d+ records$/ }).click();
+    await expect(page.getByRole('heading', { name: 'Import complete' })).toBeVisible();
+    await expect(page.locator('.result .stat').first()).toContainText('120');
   });
 });

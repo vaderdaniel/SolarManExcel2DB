@@ -1,0 +1,110 @@
+// Shared "Daylight" bar-chart styles for ProductionChartComponent and TshwaneChartComponent.
+// Each host sets --bar-color / --bar-color-strong.
+
+:host {
+  display: block;
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.chart-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+.chart-card__meta {
+  color: var(--sm-muted);
+  font-size: 13px;
+}
+
+.bars {
+  display: flex;
+  gap: 10px;
+}
+
+.bar-wrapper {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.bar-value {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar-track {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-bottom: 1px solid var(--sm-line);
+}
+
+.bar {
+  width: 100%;
+  max-width: 44px;
+  min-height: 2px;
+  border-radius: 8px 8px 2px 2px;
+  background: var(--bar-color);
+  transition: height 300ms ease;
+
+  &.is-highlight { background: var(--bar-color-strong); }
+}
+
+.x-axis-label {
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--sm-muted);
+  white-space: nowrap;
+}
+
+.chart-info {
+  margin: 0;
+  color: var(--sm-muted);
+  font-size: 13px;
+}
+
+.loading-state,
+.empty-state,
+.error-state {
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  color: var(--sm-muted);
+
+  p { margin: 0; }
+}
+
+.error-state { color: var(--sm-danger); }
+
+@media (max-width: 480px) {
+  .bars { gap: 4px; }
+  .bar-value { font-size: 11px; }
+  .x-axis-label { font-size: 11px; }
+}

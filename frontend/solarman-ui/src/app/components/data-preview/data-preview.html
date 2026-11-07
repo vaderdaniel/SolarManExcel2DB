@@ -1,65 +1,46 @@
-<mat-card class="preview-card">
-  <mat-card-header>
-    <mat-card-title>
-      <mat-icon>preview</mat-icon>
-      Data Preview - {{ getFileTypeTitle() }}
-    </mat-card-title>
-    <mat-card-subtitle>Review data before importing to database</mat-card-subtitle>
-  </mat-card-header>
+<section class="sm-card preview" aria-labelledby="preview-title">
+  <div class="preview__header">
+    <div>
+      <h2 id="preview-title">Check the data before importing</h2>
+      <p class="preview-info">
+        <strong>{{ recordCount() }}</strong> records will be imported. {{ summary() }}
+      </p>
+    </div>
+    <span class="badge">{{ sourceLabel() }}</span>
+  </div>
 
-  <mat-card-content>
-    <div class="preview-info">
-      <p><strong>Total records to import:</strong> {{ totalRecords > 0 ? totalRecords : dataSource.data.length }}</p>
-      @if (totalRecords > dataSource.data.length) {
-        <p><em>Showing first {{ dataSource.data.length }} records for preview</em></p>
+  <div class="table-scroll">
+    <table mat-table [dataSource]="dataSource" class="preview-table">
+      @for (column of columns(); track column.key) {
+        <ng-container [matColumnDef]="column.key">
+          <th mat-header-cell *matHeaderCellDef scope="col" [class.is-numeric]="column.numeric">{{ column.label }}</th>
+          <td mat-cell *matCellDef="let row" [class.is-numeric]="column.numeric">{{ formatCellValue(row[column.key]) }}</td>
+        </ng-container>
       }
-    </div>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+    </table>
+  </div>
 
-    <div class="table-container">
-      <table mat-table [dataSource]="dataSource" class="preview-table">
-        <!-- Dynamic columns -->
-        @for (column of displayedColumns; track column) {
-          <ng-container [matColumnDef]="column">
-            <th mat-header-cell *matHeaderCellDef class="table-header">{{ column }}</th>
-            <td mat-cell *matCellDef="let element" class="table-cell">
-              {{ formatCellValue(element[column]) }}
-            </td>
-          </ng-container>
-        }
+  @if (previewData().length > pageSizeOptions[0]) {
+    <mat-paginator
+      [pageSizeOptions]="pageSizeOptions"
+      [pageSize]="10"
+      showFirstLastButtons
+      aria-label="Preview pages"
+    ></mat-paginator>
+  }
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
+  @if (recordCount() > previewData().length) {
+    <p class="preview__note">The preview shows the first {{ previewData().length }} rows; all {{ recordCount() }} are imported.</p>
+  }
 
-      <mat-paginator
-        #paginator
-        [length]="dataSource.data.length"
-        [pageSizeOptions]="pageSizeOptions"
-        [pageSize]="10"
-        showFirstLastButtons
-        class="table-paginator">
-      </mat-paginator>
-    </div>
-  </mat-card-content>
-
-  <mat-card-actions class="preview-actions">
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="onConfirmImport()"
-      class="confirm-btn"
-      >
-      <mat-icon>check_circle</mat-icon>
-      Confirm Import
+  <div class="preview__actions">
+    <button type="button" class="sm-btn sm-btn--primary" (click)="onConfirmImport()" [disabled]="isImporting()">
+      {{ isImporting() ? 'Importing…' : 'Import ' + recordCount() + ' records' }}
     </button>
-
-    <button
-      mat-button
-      (click)="onCancelImport()"
-      class="cancel-btn"
-      >
-      <mat-icon>cancel</mat-icon>
-      Cancel
+    <button type="button" class="sm-btn sm-btn--secondary" (click)="onCancelImport()" [disabled]="isImporting()">
+      Back
     </button>
-  </mat-card-actions>
-</mat-card>
+  </div>
+</section>

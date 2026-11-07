@@ -1,10 +1,7 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { FileUploadComponent } from '../../components/file-upload/file-upload';
 import { DataPreviewComponent } from '../../components/data-preview/data-preview';
 import { ImportService } from '../../services/import.service';
@@ -13,18 +10,14 @@ import { ImportResult } from '../../models/import-result.model';
 
 @Component({
   selector: 'app-upload',
-  standalone: true,
   imports: [
-    CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    MatSnackBarModule,
+    DatePipe,
     FileUploadComponent,
     DataPreviewComponent
   ],
   templateUrl: './upload.html',
-  styleUrl: './upload.scss'
+  styleUrl: './upload.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UploadComponent {
   currentView: 'upload' | 'preview' | 'result' = 'upload';
@@ -34,6 +27,17 @@ export class UploadComponent {
   totalRecords: number = 0;
   importResult: ImportResult | null = null;
   isImporting = false;
+
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  readonly stepLabels = ['Choose file', 'Review', 'Done'] as const;
+  private readonly viewOrder = ['upload', 'preview', 'result'] as const;
+
+  stepState(index: number): 'done' | 'current' | 'todo' {
+    const current = this.viewOrder.indexOf(this.currentView);
+    if (index < current) return 'done';
+    return index === current ? 'current' : 'todo';
+  }
 
   constructor(
     private importService: ImportService,
@@ -64,10 +68,12 @@ export class UploadComponent {
             this.showSuccess(`Successfully imported ${result.recordsInserted + result.recordsUpdated} records!`);
             // Trigger chart refresh
             this.chartRefreshService.triggerRefresh();
+            this.cdr.markForCheck();
           },
           error: (error) => {
             this.isImporting = false;
             this.showError(error.message || 'Import failed');
+            this.cdr.markForCheck();
           }
         });
     } else {
@@ -81,10 +87,12 @@ export class UploadComponent {
             this.showSuccess('Data imported successfully!');
             // Trigger chart refresh
             this.chartRefreshService.triggerRefresh();
+            this.cdr.markForCheck();
           },
           error: (error) => {
             this.isImporting = false;
             this.showError(error.message || 'Import failed');
+            this.cdr.markForCheck();
           }
         });
     }

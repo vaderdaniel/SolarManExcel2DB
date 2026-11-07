@@ -1,9 +1,5 @@
-
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// Angular Material is still used for the preview table, its paginator and snack bars;
+// everything else is styled with the "Daylight" tokens below.
 @use '@angular/material' as mat;
 
 html {
@@ -12,28 +8,124 @@ html {
       primary: mat.$azure-palette,
       tertiary: mat.$blue-palette,
     ),
-    typography: Roboto,
+    typography: Inter,
     density: 0,
   ));
 }
 
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
+// ---- Daylight design tokens ----
+:root {
+  --sm-bg: #F3F5F7;
+  --sm-surface: #FFFFFF;
+  --sm-surface-sunken: #FAFBFC;
+  --sm-subtle: #EEF2F6;
+  --sm-ink: #15202B;
+  --sm-muted: #5B6672;
+  --sm-line: #E2E6EA;
+  --sm-line-soft: #EEF1F3;
+  --sm-line-strong: #C5CCD3;
 
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
+  --sm-solar: #F2A007;
+  --sm-solar-strong: #C27C00;
+  --sm-solar-ink: #8A5300;
+  --sm-grid: #2E6BD8;
+  --sm-grid-ink: #2457B0;
 
-  // Reset the user agent margin.
-  margin: 0;
+  --sm-ok: #1E7A46;
+  --sm-ok-ink: #1E6B3F;
+  --sm-ok-bg: #E8F5EE;
+  --sm-danger: #B42318;
+  --sm-danger-bg: #FDECEA;
+
+  --sm-radius: 14px;
+  --sm-radius-sm: 10px;
+  --sm-font-body: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sm-font-display: 'Space Grotesk', Inter, system-ui, sans-serif;
 }
-/* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+body {
+  color-scheme: light;
+  margin: 0;
+  background: var(--sm-bg);
+  color: var(--sm-ink);
+  font-family: var(--sm-font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a { color: var(--sm-grid-ink); }
+
+h1, h2, h3 { font-family: var(--sm-font-display); letter-spacing: -0.01em; }
+
+// ---- Shared building blocks ----
+.sm-card {
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius);
+  padding: 20px;
+}
+
+.sm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: var(--sm-radius-sm);
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+  &:focus-visible { outline: 3px solid var(--sm-grid); outline-offset: 2px; }
+}
+
+.sm-btn--primary {
+  background: var(--sm-ink);
+  color: #FFFFFF;
+  &:hover:not(:disabled) { background: #26333F; }
+}
+
+.sm-btn--secondary {
+  background: var(--sm-surface);
+  color: var(--sm-ink);
+  border-color: var(--sm-line-strong);
+  &:hover:not(:disabled) { background: var(--sm-subtle); }
+}
+
+.sm-icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sm-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sm-ok);
+
+  &.is-down { background: var(--sm-danger); }
+}
+
+.sm-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+// Snack bars raised by the upload flow
+.error-snackbar { --mat-snack-bar-container-color: var(--sm-danger); }
+.success-snackbar { --mat-snack-bar-container-color: var(--sm-ok); }

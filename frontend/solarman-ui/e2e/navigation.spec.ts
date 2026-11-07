@@ -6,46 +6,43 @@ test.describe('Navigation & Layout', () => {
     await mockAllAPIs(page);
   });
 
-  test('toolbar renders with app title', async ({ page }) => {
+  test('header renders with the SolarMan brand', async ({ page }) => {
     await page.goto('/');
-    const toolbar = page.locator('mat-toolbar');
-    await expect(toolbar).toBeVisible();
-    await expect(toolbar).toContainText('SolarMan Excel Import');
+    const header = page.locator('header.site-header');
+    await expect(header).toBeVisible();
+    await expect(header.locator('.brand')).toContainText('SolarMan');
   });
 
-  test('Home and Upload nav buttons are visible', async ({ page }) => {
+  test('Overview and Import data nav links are visible', async ({ page }) => {
     await page.goto('/');
-    const homeButton = page.locator('mat-toolbar button', { hasText: 'Home' });
-    const uploadButton = page.locator('mat-toolbar button', { hasText: 'Upload' });
-    await expect(homeButton).toBeVisible();
-    await expect(uploadButton).toBeVisible();
+    const nav = page.getByRole('navigation', { name: 'Main' });
+    await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Import data' })).toBeVisible();
   });
 
-  test('navigate to Upload page via toolbar button', async ({ page }) => {
+  test('navigate to Import data via the header', async ({ page }) => {
     await page.goto('/');
-    await page.locator('mat-toolbar button', { hasText: 'Upload' }).click();
+    await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Import data' }).click();
     await expect(page).toHaveURL(/\/upload/);
-    // Upload page should show file upload card
-    await expect(page.locator('text=File Upload')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Import data' })).toBeVisible();
   });
 
-  test('navigate back to Home via toolbar button', async ({ page }) => {
+  test('navigate back to Overview via the header', async ({ page }) => {
     await page.goto('/upload');
-    await page.locator('mat-toolbar button', { hasText: 'Home' }).click();
+    await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Overview' }).click();
     await expect(page).toHaveURL(/\/$/);
-    // Home page should show production chart
-    await expect(page.locator('text=Solar Production')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Energy overview' })).toBeVisible();
   });
 
-  test('active link highlighting on current route', async ({ page }) => {
+  test('current page is marked in the navigation', async ({ page }) => {
     await page.goto('/');
-    const homeButton = page.locator('mat-toolbar a.active-link, mat-toolbar button.active-link', { hasText: 'Home' });
-    // Home should have the active-link class when on home page
-    await expect(page.locator('mat-toolbar [routerlink="/"].active-link')).toBeVisible();
+    const nav = page.getByRole('navigation', { name: 'Main' });
+    await expect(nav.getByRole('link', { name: 'Overview' })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Import data' })).not.toHaveAttribute('aria-current', 'page');
 
-    // Navigate to upload
-    await page.locator('mat-toolbar button', { hasText: 'Upload' }).click();
-    await expect(page.locator('mat-toolbar [routerlink="/upload"].active-link')).toBeVisible();
+    await nav.getByRole('link', { name: 'Import data' }).click();
+    await expect(nav.getByRole('link', { name: 'Import data' })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Overview' })).not.toHaveAttribute('aria-current', 'page');
   });
 
   test('footer displays version info', async ({ page }) => {
@@ -53,13 +50,12 @@ test.describe('Navigation & Layout', () => {
     const footer = page.locator('footer');
     await expect(footer).toBeVisible();
     await expect(footer).toContainText('SolarManExcel2DB');
-    await expect(footer).toContainText('Version 1.7.5');
+    await expect(footer).toContainText('Version 2.0.0');
   });
 
-  test('wildcard routes redirect to Home', async ({ page }) => {
+  test('wildcard routes redirect to Overview', async ({ page }) => {
     await page.goto('/nonexistent-page');
-    // Should redirect to home page
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator('text=Solar Production')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Energy overview' })).toBeVisible();
   });
 });
