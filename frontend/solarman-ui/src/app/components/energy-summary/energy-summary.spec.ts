@@ -22,9 +22,9 @@ describe('EnergySummaryComponent', () => {
     { date: '2026-11-04', productionUnits: 20296.0 }
   ];
   const usage: TshwaneUsageStat[] = [
-    { readingDate: '2026-11-05T06:28:00', usageKwh: 11.87 },
-    { readingDate: '2026-11-02T06:06:00', usageKwh: 9.61 },
-    { readingDate: '2026-10-22T06:10:00', usageKwh: 0.88 }
+    { readingDate: '2026-11-05T06:28:00', previousReadingDate: '2026-11-02T06:06:00', usageKwh: 11.87, usageKwhPerDay: 3.94 },
+    { readingDate: '2026-11-02T06:06:00', previousReadingDate: '2026-10-30T06:28:00', usageKwh: 9.61, usageKwhPerDay: 3.22 },
+    { readingDate: '2026-10-22T06:10:00', previousReadingDate: '2026-10-21T06:29:00', usageKwh: 0.88, usageKwhPerDay: 0.89 }
   ];
 
   beforeEach(async () => {
@@ -46,14 +46,30 @@ describe('EnergySummaryComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should show the latest day, 3-day total, best day and Tshwane total', () => {
+  it('should show the latest day, 3-day total, best day and Tshwane kWh/day', () => {
     fixture.detectChanges();
     const [latest, total, best, tshwane] = component.kpis();
 
     expect(latest).toEqual(expect.objectContaining({ value: '19.0', note: 'Fri 6 Nov' }));
     expect(total).toEqual(expect.objectContaining({ label: 'Produced, last 3 days', value: '57.9', note: 'Average 19.3 kWh a day' }));
     expect(best).toEqual(expect.objectContaining({ value: '20.3', note: 'Wed 4 Nov' }));
-    expect(tshwane).toEqual(expect.objectContaining({ value: '22.4', note: '22 Oct – 5 Nov', tone: 'grid' }));
+    // 22.36 kWh from the reading before the oldest (21 Oct 06:29) to 5 Nov 06:28 ≈ 15 days
+    expect(tshwane).toEqual(expect.objectContaining({
+      value: '1.5', unit: 'kWh/day', note: '22.4 kWh over 15 days · 21 Oct – 5 Nov', tone: 'grid'
+    }));
+    expect(latest.unit).toBe('kWh');
+  });
+
+  it('should fall back to the total when the previous reading date is unknown', () => {
+    mockDatabaseService.getTshwaneUsageStats.mockReturnValue(of([
+      { readingDate: '2026-11-05T06:28:00', usageKwh: 11.87 },
+      { readingDate: '2026-11-02T06:06:00', usageKwh: 9.61 }
+    ]));
+    fixture.detectChanges();
+
+    expect(component.kpis()[3]).toEqual(expect.objectContaining({
+      value: '—', unit: 'kWh/day', note: '21.5 kWh in total'
+    }));
   });
 
   it('should render four KPI cards', () => {

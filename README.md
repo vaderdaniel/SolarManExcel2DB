@@ -3,7 +3,7 @@
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.oracle.com/java/)
 [![Angular](https://img.shields.io/badge/Angular-21.2-red.svg)](https://angular.dev/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-green.svg)](https://spring.io/projects/spring-boot)
-[![Version](https://img.shields.io/badge/version-2.0.2-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.3-informational.svg)](CHANGELOG.md)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://www.postgresql.org/)
 [![Grafana](https://img.shields.io/badge/Grafana-Latest-orange.svg)](https://grafana.com/)
 
@@ -154,6 +154,10 @@ This project includes comprehensive documentation organized into specialized fil
 ## 🎯 Recent Major Updates
 
 Full release history lives in **[CHANGELOG.md](CHANGELOG.md)**. This is a teaser of the latest releases only.
+
+### v2.0.3 - Tshwane KPI in kWh/day (November 7, 2026)
+- ✅ **Tshwane KPI card** shows average kWh/day over the last 7 readings, matching the chart
+- ✅ **55 frontend unit, 33 e2e and 64 backend tests passing**
 
 ### v2.0.2 - Tshwane Chart Shows kWh/day (November 7, 2026)
 - ✅ **Fair comparison**: the Tshwane chart plots average kWh/day since the previous reading, since readings are taken 1 to several days apart
@@ -314,7 +318,7 @@ cd frontend/solarman-ui && npm run build
 cd ../../backend && mvn clean package
 
 # Deploy single JAR
-java -jar target/solarman-ui-backend-2.0.2.jar
+java -jar target/solarman-ui-backend-2.0.3.jar
 
 # Access application at http://localhost:8080
 ```
@@ -349,7 +353,7 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 2.0.2 - Tshwane Chart Shows kWh/day  
+**Latest Version**: 2.0.3 - Tshwane KPI in kWh/day  
 **Last Updated**: November 7, 2026  
 **Status**: Production Ready ✅
 
@@ -402,7 +406,7 @@ For detailed Grafana documentation, see:
 ## 📸 Screenshots
 
 ### Overview (Home)
-- Four key-figure cards: latest day, 7-day total and average, best day, Tshwane usage
+- Four key-figure cards: latest day, 7-day total and average, best day, Tshwane average kWh/day
 - 7-day solar production chart (time-weighted, best day highlighted)
 - Tshwane electricity chart (average kWh/day since the previous reading)
 - System status strip with live API/database state and latest record times

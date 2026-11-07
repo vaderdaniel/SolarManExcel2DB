@@ -50,7 +50,7 @@ test.describe('Navigation & Layout', () => {
     const footer = page.locator('footer');
     await expect(footer).toBeVisible();
     await expect(footer).toContainText('SolarManExcel2DB');
-    await expect(footer).toContainText('Version 2.0.2');
+    await expect(footer).toContainText('Version 2.0.3');
   });
 
   test('wildcard routes redirect to Overview', async ({ page }) => {

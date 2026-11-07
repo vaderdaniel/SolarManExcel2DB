@@ -18,7 +18,9 @@ test.describe('Home Page - Key figures', () => {
     await expect(kpis).toHaveCount(4);
     await expect(kpis.nth(1)).toContainText('Produced, last 7 days');
     await expect(kpis.nth(3)).toContainText('Tshwane meter, last 7 readings');
-    await expect(kpis.nth(3)).toContainText('40.8');
+    await expect(kpis.nth(3)).toContainText('2.7');
+    await expect(kpis.nth(3)).toContainText('kWh/day');
+    await expect(kpis.nth(3)).toContainText('40.8 kWh over 15 days');
   });
 
   test('Import data button opens the import page', async ({ page }) => {

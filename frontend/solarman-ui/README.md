@@ -1,6 +1,6 @@
 # SolarMan UI — Angular Frontend
 
-Version 2.0.2 · Angular 21.2 · Vitest
+Version 2.0.3 · Angular 21.2 · Vitest
 
 For full project documentation see **[AGENTS.md](../../AGENTS.md)** at the repository root.
 
@@ -10,7 +10,7 @@ For full project documentation see **[AGENTS.md](../../AGENTS.md)** at the repos
 
 ```bash
 npm start                   # dev server on :4200
-npx ng test --no-watch      # unit tests (54 tests)
+npx ng test --no-watch      # unit tests (55 tests)
 npx ng test                 # unit tests in watch mode
 npx playwright test         # e2e tests (33 tests × 3 browsers; starts ng serve on :4200 if needed)
 npm run build               # production build → dist/solarman-ui/browser
@@ -41,7 +41,7 @@ src/app/
 │   └── upload/          # UploadComponent — step indicator, Choose file → Review → Done (result shown inline)
 ├── components/
 │   ├── _bar-chart.scss    # shared bar-chart styles (@use'd by both charts; host sets --bar-color)
-│   ├── energy-summary/    # four KPI cards (signals); reloads on import
+│   ├── energy-summary/    # four KPI cards (signals; Tshwane card in kWh/day); reloads on import
 │   ├── production-chart/  # amber bars, last 7 days, best day highlighted, reloads on import
 │   ├── tshwane-chart/     # blue bars, kWh/day since previous reading, latest highlighted, reloads on import
 │   ├── status-panel/      # status strip; reads SystemStatusService

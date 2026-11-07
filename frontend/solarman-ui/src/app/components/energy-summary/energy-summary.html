@@ -5,7 +5,7 @@
       <div class="kpi__value">
         {{ kpi.value }}
         @if (kpi.value !== '—') {
-          <span class="kpi__unit">kWh</span>
+          <span class="kpi__unit">{{ kpi.unit }}</span>
         }
       </div>
       <div class="kpi__note" [class]="'kpi__note--' + kpi.tone">{{ kpi.note }}</div>

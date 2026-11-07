@@ -2,6 +2,22 @@
 
 ---
 
+## v2.0.3 - Tshwane KPI in kWh/day
+
+**Release Date**: November 7, 2026
+**Version**: 2.0.3
+
+### Frontend
+- The "Tshwane meter, last 7 readings" KPI card now shows average **kWh/day** instead of total kWh, matching the chart. It divides the total kWh by the days the readings cover (from the reading before the oldest one to the newest); with Nov 2026 data, 40.8 kWh over 15 days = **2.7 kWh/day**
+- The card's note keeps the total and the range: "40.8 kWh over 15 days · 21 Oct – 5 Nov"
+- If the previous reading date is missing, the card shows "—" with the kWh total
+- `Kpi` gains a `unit` field (`kWh` or `kWh/day`)
+
+### ✅ Test Results
+- **55 frontend unit tests** (+1), **33 e2e tests** (Chromium + WebKit), 64 backend tests (unchanged)
+
+---
+
 ## v2.0.2 - Tshwane Chart Shows kWh/day
 
 **Release Date**: November 7, 2026

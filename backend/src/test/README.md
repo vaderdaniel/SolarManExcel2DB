@@ -6,7 +6,7 @@ This repository contains unit tests for both the backend (Spring Boot / JUnit 5)
 | Layer | Tests | Runner |
 |-------|-------|--------|
 | Backend | 64 | `mvn test` |
-| Frontend | 54 | `npx ng test --no-watch` |
+| Frontend | 55 | `npx ng test --no-watch` |
 | Frontend e2e | 33 (× 3 browsers) | `npx playwright test` |
 
 ---
@@ -252,7 +252,7 @@ When adding new tests:
 frontend/solarman-ui/src/app/
 ├── components/
 │   ├── energy-summary/
-│   │   └── energy-summary.spec.ts       # 5 tests
+│   │   └── energy-summary.spec.ts       # 6 tests
 │   ├── production-chart/
 │   │   └── production-chart.spec.ts     # 19 tests
 │   └── tshwane-chart/
@@ -328,8 +328,9 @@ Mirrors `ProductionChartComponent`'s chart-data processing, loading/error states
 - ✅ Clears `isImporting` after successful import
 - ✅ Clears `isImporting` after failed import
 
-### EnergySummaryComponent (5 tests)
-- ✅ Computes latest day, N-day total + average, best day and Tshwane total/date range
+### EnergySummaryComponent (6 tests)
+- ✅ Computes latest day, N-day total + average, best day and Tshwane kWh/day (total kWh ÷ days covered) with its date range
+- ✅ Falls back to "—" with the kWh total when the previous reading date is unknown
 - ✅ Renders four KPI cards
 - ✅ Shows "—" placeholders with "No data yet" when there is no data, and when the API fails
 - ✅ Reloads both data sources when `ChartRefreshService` triggers a refresh
