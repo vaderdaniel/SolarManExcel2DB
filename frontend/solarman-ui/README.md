@@ -1,6 +1,6 @@
 # SolarMan UI — Angular Frontend
 
-Version 2.0.0 · Angular 21.2 · Vitest
+Version 2.0.1 · Angular 21.2 · Vitest
 
 For full project documentation see **[AGENTS.md](../../AGENTS.md)** at the repository root.
 

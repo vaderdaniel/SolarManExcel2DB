@@ -416,8 +416,10 @@ ls backend/reports/               # maven-dependencies.json, jar-artifact.json, 
 - ✅ Tomcat 10.1.59 (CRITICAL CVE-2026-65182, CVE-2026-65905, CVE-2026-68525 patched)
 - ✅ Spring Framework 6.2.17 (CVE-2026-22737 patched)
 - ✅ commons-lang3 3.18.0 (CVE-2025-48924 patched)
-- ✅ Angular 21.2 (`@angular/core` 21.2.19; i18n XSS patched since 21.2.10)
-- ⚠️ 5 npm audit findings remain (4 moderate, 1 high) — require an Angular v22 major bump to fully resolve; confined to dev/build tooling (`ng serve` dev-server, Angular CLI's bundled MCP server), not shipped in the app or Docker image
+- ✅ Angular 21.2.26 (host-binding sanitization bypass, `HttpTransferCache` info leak and router advisories patched; i18n XSS patched since 21.2.10)
+- ✅ `npm audit --omit=dev` is clean (0 findings in shipped dependencies)
+- ⚠️ 16 moderate npm audit findings remain, all from `glob`/`minimatch` inside the npm libraries bundled with `@angular/cli` (`pacote`, `sigstore`, `cacache`…). The only fix is Angular CLI 22 (major bump); build tooling only, not shipped in the app or Docker image
+- Re-audit regularly: new advisories land between releases (the count went from 5 to 41 between Aug and Nov 2026 with no code change). Update the Angular framework packages with `npx ng update @angular/core@21 @angular/cli@21`, not `npm install`, because their peer versions are pinned to each other
 
 For full security docs: `backend/SECURITY.md`
 
@@ -524,7 +526,7 @@ nerdctl buildkit may not be running in Rancher Desktop. Use `docker` directly fo
 <!-- backend/pom.xml -->
 <groupId>com.loots</groupId>
 <artifactId>solarman-ui-backend</artifactId>
-<version>2.0.0</version>
+<version>2.0.1</version>
 
 <properties>
   <tomcat.version>10.1.59</tomcat.version>
@@ -593,6 +595,11 @@ Before editing a doc, verify the current fact against the code (dependency versi
 
 Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.md)**. This section is a teaser of the latest releases only — don't re-add older entries here when adding a new one; just add the new entry at the top of both this section and CHANGELOG.md, and drop the oldest entry here if there are more than three.
 
+### November 7, 2026 - Frontend Security Patches (v2.0.1)
+- npm audit: 41 findings (3 critical, 10 high) → 16 moderate; `npm audit --omit=dev` clean
+- Angular framework 21.2.19 → 21.2.26 via `ng update`; build tooling patched via `npm audit fix`
+- 53 frontend unit tests, 33 e2e tests and 61 backend tests passing
+
 ### November 7, 2026 - "Daylight" UI Redesign (v2.0.0)
 - New visual design for the whole Angular UI: header nav with status pill, KPI cards, restyled charts, three-step import flow with drag-and-drop
 - New `EnergySummaryComponent` and app-wide `SystemStatusService`; Material toolbar/cards/icons removed
@@ -602,12 +609,8 @@ Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.m
 - Backend: Tomcat 10.1.55 → 10.1.59 (3 CRITICAL CVEs fixed: CVE-2026-65182, CVE-2026-65905, CVE-2026-68525); confirmed clean via `mvn verify`
 - 61 backend tests passing
 
-### August 8, 2026 - Security Patches (v1.7.4)
-- Backend: Tomcat 10.1.54 → 10.1.55 (3 CRITICAL CVEs fixed); confirmed clean via `mvn verify`
-- Frontend: `npm update` resolved 27 of 32 npm-audit findings; remaining 5 deferred (dev/build tooling only, need Angular v22)
-- 61 backend tests passing; 42 frontend unit tests passing
-
 ### Version History
+- **v2.0.1** - Frontend security patches (npm audit, Angular 21.2.26)
 - **v2.0.0** - "Daylight" UI redesign
 - **v1.7.5** - Security patch (Tomcat 10.1.59 CVEs)
 - **v1.7.4** - Security patches (Tomcat 10.1.55 CVEs, frontend npm audit fix)

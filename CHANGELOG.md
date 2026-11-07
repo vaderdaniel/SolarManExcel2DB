@@ -2,6 +2,24 @@
 
 ---
 
+## v2.0.1 - Frontend Security Patches (npm audit)
+
+**Release Date**: November 7, 2026
+**Version**: 2.0.1
+
+`npm audit` had grown from the 5 findings recorded in v1.7.4 to **41 (28 moderate, 10 high, 3 critical)** as new advisories were published. The same count showed up locally and in the Docker build, which uses the same lock file. No code changes.
+
+### 🔐 Security Fixes (`frontend/solarman-ui/package.json`, `package-lock.json`)
+- `npm audit fix`: `@angular/build`/`@angular/cli` 21.2.29 (pulls patched `piscina` 5.3.2 and `undici` 7.30.1, both CRITICAL), `proxy-addr` 2.0.8 (CRITICAL), `vite` 7.3.7, `vitest` 4.1.12, `zod` 4.6.6, `@modelcontextprotocol/sdk` 1.32.1, `hono` 4.13.17, plus `body-parser`, `brace-expansion`, `fast-uri`, `source-map-js`, `qs`, `ip-address`
+- `npx ng update @angular/core@21`: Angular framework packages 21.2.19 → **21.2.26** (host-binding sanitization bypass, `HttpTransferCache` information leak, router advisory). These ship in the app. `npm audit fix` can't apply them because the packages' peer versions are pinned to each other
+
+### Result
+- **41 → 16** findings; **0 critical, 0 high**; `npm audit --omit=dev` reports **0**
+- The 16 remaining moderate findings are all `glob`/`minimatch` inside the npm libraries bundled with `@angular/cli`; fixing them needs Angular CLI 22
+- 53 unit tests, 66 e2e runs (Chromium + WebKit) and the production build pass
+
+---
+
 ## v2.0.0 - "Daylight" UI Redesign
 
 **Release Date**: November 7, 2026

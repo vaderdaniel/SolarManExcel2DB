@@ -3,7 +3,7 @@
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.oracle.com/java/)
 [![Angular](https://img.shields.io/badge/Angular-21.2-red.svg)](https://angular.dev/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-green.svg)](https://spring.io/projects/spring-boot)
-[![Version](https://img.shields.io/badge/version-2.0.0-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.1-informational.svg)](CHANGELOG.md)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://www.postgresql.org/)
 [![Grafana](https://img.shields.io/badge/Grafana-Latest-orange.svg)](https://grafana.com/)
 
@@ -155,6 +155,10 @@ This project includes comprehensive documentation organized into specialized fil
 
 Full release history lives in **[CHANGELOG.md](CHANGELOG.md)**. This is a teaser of the latest releases only.
 
+### v2.0.1 - Frontend Security Patches (November 7, 2026)
+- ✅ **npm audit**: 41 findings (3 critical, 10 high) → 16 moderate; nothing left in shipped dependencies
+- ✅ **Angular 21.2.26**: sanitization bypass, information leak and router advisories fixed
+
 ### v2.0.0 - "Daylight" UI Redesign (November 7, 2026)
 - ✅ **New visual design**: header navigation with status pill, KPI cards, restyled charts, three-step import with drag-and-drop
 - ✅ **53 frontend unit tests and 33 e2e tests passing**; backend unchanged
@@ -305,7 +309,7 @@ cd frontend/solarman-ui && npm run build
 cd ../../backend && mvn clean package
 
 # Deploy single JAR
-java -jar target/solarman-ui-backend-2.0.0.jar
+java -jar target/solarman-ui-backend-2.0.1.jar
 
 # Access application at http://localhost:8080
 ```
@@ -340,7 +344,7 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 2.0.0 - "Daylight" UI Redesign  
+**Latest Version**: 2.0.1 - Frontend Security Patches  
 **Last Updated**: November 7, 2026  
 **Status**: Production Ready ✅
 
