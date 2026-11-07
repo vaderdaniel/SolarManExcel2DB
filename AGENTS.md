@@ -119,7 +119,7 @@ backend/src/main/java/com/loots/solarmanui/
 │   ├── SolarManRecord.java
 │   ├── TshwaneRecord.java
 │   ├── ProductionStat.java          # {LocalDate date, Double productionUnits}
-│   ├── TshwaneUsageStat.java        # {LocalDateTime readingDate, Double usageKwh}
+│   ├── TshwaneUsageStat.java        # {readingDate, previousReadingDate, usageKwh, usageKwhPerDay}
 │   ├── ImportResult.java            # {recordsInserted, recordsUpdated, ...}
 │   ├── DatabaseStatus.java
 │   └── LatestRecords.java
@@ -172,17 +172,20 @@ ORDER BY production_date DESC LIMIT ?;
 ### `GET /api/database/tshwane-usage`
 ```json
 [
-  {"readingDate": "2026-04-29T08:53:00", "usageKwh": 10.71},
-  {"readingDate": "2026-04-28T07:00:00", "usageKwh": 13.14}
+  {"readingDate": "2026-11-05T06:28:00", "previousReadingDate": "2026-11-02T06:06:00", "usageKwh": 11.87, "usageKwhPerDay": 3.94},
+  {"readingDate": "2026-11-02T06:06:00", "previousReadingDate": "2026-10-30T06:28:00", "usageKwh": 9.61, "usageKwhPerDay": 3.22}
 ]
 ```
-Returns last 7 readings with kWh consumed between consecutive readings:
+Returns the last 7 readings with the kWh consumed since the previous reading (`usageKwh`) and that usage spread over the days between the two readings (`usageKwhPerDay`). Readings are irregular (1 to several days apart), so the Home chart plots `usageKwhPerDay`; the KPI card sums `usageKwh`. `usageKwhPerDay` is `null` if two readings share a timestamp.
 ```sql
 SELECT a.reading_date,
-  ROUND((a.cumulative_electricity_used - b.cumulative_electricity_used)::numeric, 2) AS usage_kwh
+  b.reading_date AS previous_reading_date,
+  ROUND((a.cumulative_electricity_used - b.cumulative_electricity_used)::numeric, 2) AS usage_kwh,
+  ROUND(((a.cumulative_electricity_used - b.cumulative_electricity_used)
+    / NULLIF(EXTRACT(EPOCH FROM (a.reading_date - b.reading_date)) / 86400, 0))::numeric, 2) AS usage_kwh_per_day
 FROM public.tshwane_electricity a
 LEFT JOIN LATERAL (
-  SELECT cumulative_electricity_used FROM public.tshwane_electricity
+  SELECT reading_date, cumulative_electricity_used FROM public.tshwane_electricity
   WHERE reading_date < a.reading_date ORDER BY reading_date DESC LIMIT 1
 ) b ON true
 WHERE b.cumulative_electricity_used IS NOT NULL
@@ -226,7 +229,7 @@ The UI uses the **"Daylight"** visual design: light grey ground, white cards, am
 ### Home Page (`/`)
 - Four KPI cards (`EnergySummaryComponent`): latest day's production, 7-day total + daily average, best day, Tshwane usage over the last 7 readings
 - Solar production bar chart — last 7 days, time-weighted, kWh label on each bar, best day highlighted; bars are scaled to the week's maximum (no y-axis)
-- Tshwane electricity bar chart — kWh used since the previous reading, latest reading highlighted
+- Tshwane electricity bar chart — average **kWh/day** since the previous reading (so readings taken days apart compare fairly), latest reading highlighted; tooltip shows the raw kWh and the gap in days
 - System status section — API, database, latest SolarMan record, latest Tshwane reading, last check time
 - Both charts and the KPI cards reload after an import
 
@@ -526,7 +529,7 @@ nerdctl buildkit may not be running in Rancher Desktop. Use `docker` directly fo
 <!-- backend/pom.xml -->
 <groupId>com.loots</groupId>
 <artifactId>solarman-ui-backend</artifactId>
-<version>2.0.1</version>
+<version>2.0.2</version>
 
 <properties>
   <tomcat.version>10.1.59</tomcat.version>
@@ -551,12 +554,12 @@ nerdctl buildkit may not be running in Rancher Desktop. Use `docker` directly fo
 
 ### Testing
 ```bash
-# Backend (61 tests)
+# Backend (64 tests)
 cd backend && mvn test
 mvn test -Dtest=DatabaseServiceTest          # single class
 mvn test -Dtest=ImportServiceTest#methodName # single method
 
-# Frontend (53 unit tests, 33 e2e tests)
+# Frontend (54 unit tests, 33 e2e tests)
 cd frontend/solarman-ui && npx ng test --no-watch
 npx ng test                                  # watch mode
 npx playwright test                          # e2e (requires :4200)
@@ -595,6 +598,11 @@ Before editing a doc, verify the current fact against the code (dependency versi
 
 Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.md)**. This section is a teaser of the latest releases only — don't re-add older entries here when adding a new one; just add the new entry at the top of both this section and CHANGELOG.md, and drop the oldest entry here if there are more than three.
 
+### November 7, 2026 - Tshwane Chart Shows kWh/day (v2.0.2)
+- Tshwane chart plots average kWh/day since the previous reading instead of raw kWh per reading (readings are 1 to several days apart)
+- `GET /api/database/tshwane-usage` adds `previousReadingDate` and `usageKwhPerDay` (computed in SQL); `usageKwh` unchanged
+- 64 backend tests (+3), 54 frontend unit tests (+1) and 33 e2e tests passing
+
 ### November 7, 2026 - Frontend Security Patches (v2.0.1)
 - npm audit: 41 findings (3 critical, 10 high) → 16 moderate; `npm audit --omit=dev` clean
 - Angular framework 21.2.19 → 21.2.26 via `ng update`; build tooling patched via `npm audit fix`
@@ -605,11 +613,8 @@ Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.m
 - New `EnergySummaryComponent` and app-wide `SystemStatusService`; Material toolbar/cards/icons removed
 - 53 frontend unit tests (+11) and 33 e2e tests passing; 61 backend tests unchanged
 
-### September 12, 2026 - Security Patch (v1.7.5)
-- Backend: Tomcat 10.1.55 → 10.1.59 (3 CRITICAL CVEs fixed: CVE-2026-65182, CVE-2026-65905, CVE-2026-68525); confirmed clean via `mvn verify`
-- 61 backend tests passing
-
 ### Version History
+- **v2.0.2** - Tshwane chart shows kWh/day since the previous reading
 - **v2.0.1** - Frontend security patches (npm audit, Angular 21.2.26)
 - **v2.0.0** - "Daylight" UI redesign
 - **v1.7.5** - Security patch (Tomcat 10.1.59 CVEs)

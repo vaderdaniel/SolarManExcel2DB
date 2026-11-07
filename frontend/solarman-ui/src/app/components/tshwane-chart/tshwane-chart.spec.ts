@@ -38,18 +38,19 @@ describe('TshwaneChartComponent', () => {
   // ==================== processChartData Tests ====================
 
   describe('processChartData', () => {
-    it('should scale bars to the largest reading and highlight the latest', () => {
+    it('should scale bars to the highest kWh/day and highlight the latest', () => {
       const stats: TshwaneUsageStat[] = [
-        { readingDate: '2026-04-29T08:53:00', usageKwh: 10.71 },
-        { readingDate: '2026-04-28T07:00:00', usageKwh: 13.14 },
-        { readingDate: '2026-04-27T09:14:00', usageKwh: 0.41 }
+        { readingDate: '2026-04-29T08:53:00', usageKwh: 10.71, usageKwhPerDay: 9.93 },
+        { readingDate: '2026-04-28T07:00:00', usageKwh: 13.14, usageKwhPerDay: 13.6 },
+        { readingDate: '2026-04-27T09:14:00', usageKwh: 0.41, usageKwhPerDay: 0.38 }
       ];
 
       mockDatabaseService.getTshwaneUsageStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
       expect(component.chartData.length).toBe(3);
-      expect(component.chartData[1].heightPercent).toBe(100); // 13.14 kWh on 28 Apr
+      expect(component.chartData[1].heightPercent).toBe(100); // 13.6 kWh/day on 28 Apr
+      expect(component.chartData[1].value).toBe(13.6);
       expect(component.chartData[2].isLatest).toBe(true);
       expect(component.chartData.filter(b => b.isLatest).length).toBe(1);
     });
@@ -70,8 +71,8 @@ describe('TshwaneChartComponent', () => {
 
     it('should calculate heightPercent correctly', () => {
       const stats: TshwaneUsageStat[] = [
-        { readingDate: '2026-04-29T08:53:00', usageKwh: 100 },
-        { readingDate: '2026-04-28T07:00:00', usageKwh: 50 }
+        { readingDate: '2026-04-29T08:53:00', usageKwh: 300, usageKwhPerDay: 100 },
+        { readingDate: '2026-04-28T07:00:00', usageKwh: 50, usageKwhPerDay: 50 }
       ];
 
       mockDatabaseService.getTshwaneUsageStats.mockReturnValue(of(stats));
@@ -84,20 +85,42 @@ describe('TshwaneChartComponent', () => {
       expect(halfBar.heightPercent).toBe(50);
     });
 
-    it('should display kWh values in tooltip', () => {
+    it('should show kWh/day, total kWh and the gap in the tooltip', () => {
       const stats: TshwaneUsageStat[] = [
-        { readingDate: '2026-04-29T08:53:00', usageKwh: 10.71 }
+        {
+          readingDate: '2026-11-05T06:28:00',
+          previousReadingDate: '2026-11-02T06:06:00',
+          usageKwh: 11.87,
+          usageKwhPerDay: 3.94
+        }
       ];
 
       mockDatabaseService.getTshwaneUsageStats.mockReturnValue(of(stats));
       fixture.detectChanges();
 
-      expect(component.chartData[0].displayValue).toBe('10.71 kWh');
+      expect(component.chartData[0].label).toBe('3.9');
+      expect(component.chartData[0].displayValue).toBe('3.94 kWh/day · 11.87 kWh over 3.0 days since 2 Nov');
+    });
+
+    it('should show an empty bar when kWh/day is unknown', () => {
+      const stats: TshwaneUsageStat[] = [
+        { readingDate: '2026-04-29T08:53:00', usageKwh: 10.71, usageKwhPerDay: 5 },
+        { readingDate: '2026-04-28T07:00:00', usageKwh: 0, usageKwhPerDay: null }
+      ];
+
+      mockDatabaseService.getTshwaneUsageStats.mockReturnValue(of(stats));
+      fixture.detectChanges();
+
+      const unknown = component.chartData[0];
+      expect(unknown.label).toBe('—');
+      expect(unknown.heightPercent).toBe(0);
+      expect(unknown.displayValue).toBe('0.00 kWh');
+      expect(component.chartData[1].heightPercent).toBe(100);
     });
 
     it('should format reading dates as d MMM HH:mm with weekday labels', () => {
       const stats: TshwaneUsageStat[] = [
-        { readingDate: '2026-04-29T08:53:00', usageKwh: 10.71 }
+        { readingDate: '2026-04-29T08:53:00', usageKwh: 10.71, usageKwhPerDay: 10.71 }
       ];
 
       mockDatabaseService.getTshwaneUsageStats.mockReturnValue(of(stats));

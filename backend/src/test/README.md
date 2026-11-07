@@ -5,8 +5,8 @@ This repository contains unit tests for both the backend (Spring Boot / JUnit 5)
 
 | Layer | Tests | Runner |
 |-------|-------|--------|
-| Backend | 61 | `mvn test` |
-| Frontend | 53 | `npx ng test --no-watch` |
+| Backend | 64 | `mvn test` |
+| Frontend | 54 | `npx ng test --no-watch` |
 | Frontend e2e | 33 (× 3 browsers) | `npx playwright test` |
 
 ---
@@ -52,10 +52,10 @@ mvn org.jacoco:jacoco-maven-plugin:prepare-agent test org.jacoco:jacoco-maven-pl
 
 ## Test Coverage Summary
 
-**Total: 61 backend tests** (DatabaseServiceTest: 15, DatabaseControllerTest: 11, ImportServiceTest: 19, ExcelProcessingServiceTest: 16)
+**Total: 64 backend tests** (DatabaseServiceTest: 18, DatabaseControllerTest: 11, ImportServiceTest: 19, ExcelProcessingServiceTest: 16)
 
-### DatabaseServiceTest (15 tests)
-Tests the core database service layer: production statistics (`getProductionStats`, 10 tests) and Tshwane usage statistics (`getTshwaneUsageStats`, 5 tests).
+### DatabaseServiceTest (18 tests)
+Tests the core database service layer: production statistics (`getProductionStats`, 10 tests) and Tshwane usage statistics (`getTshwaneUsageStats`, 8 tests).
 
 **Key Tests:**
 - ✅ Time-weighted production calculation using SQL window functions
@@ -65,6 +65,7 @@ Tests the core database service layer: production statistics (`getProductionStat
 - ✅ SQL query verification (LAG, EXTRACT, GREATEST functions)
 - ✅ Correct table/column usage (`public.loots_inverter`)
 - ✅ Tshwane usage: LATERAL join query verification, empty result, null timestamp, and SQL exception handling
+- ✅ Tshwane kWh/day: maps `previous_reading_date` and `usage_kwh_per_day`, handles a NULL rate (NULLIF guard), and verifies the per-day SQL
 
 **Example:**
 ```java
@@ -277,9 +278,9 @@ Playwright e2e specs live in `e2e/` (`home.spec.ts` 13, `navigation.spec.ts` 7, 
 
 ## Test Coverage Summary
 
-### TshwaneChartComponent (11 tests)
+### TshwaneChartComponent (12 tests)
 
-Mirrors `ProductionChartComponent`'s chart-data processing, loading/error states, and `ChartRefreshService` auto-refresh subscription, but sources data from `getTshwaneUsageStats()` (`GET /api/database/tshwane-usage`) instead of production stats. Also checks that only the latest reading is highlighted and that dates format as `d MMM HH:mm`.
+Mirrors `ProductionChartComponent`'s chart-data processing, loading/error states, and `ChartRefreshService` auto-refresh subscription, but sources data from `getTshwaneUsageStats()` (`GET /api/database/tshwane-usage`) instead of production stats. Bars plot `usageKwhPerDay` (kWh/day since the previous reading); tests check scaling to the highest rate, the tooltip text (`3.94 kWh/day · 11.87 kWh over 3.0 days since 2 Nov`), an empty bar when the rate is unknown, that only the latest reading is highlighted, and that dates format as `d MMM HH:mm`.
 
 ### ProductionChartComponent (19 tests)
 

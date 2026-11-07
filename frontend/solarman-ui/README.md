@@ -1,6 +1,6 @@
 # SolarMan UI — Angular Frontend
 
-Version 2.0.1 · Angular 21.2 · Vitest
+Version 2.0.2 · Angular 21.2 · Vitest
 
 For full project documentation see **[AGENTS.md](../../AGENTS.md)** at the repository root.
 
@@ -10,7 +10,7 @@ For full project documentation see **[AGENTS.md](../../AGENTS.md)** at the repos
 
 ```bash
 npm start                   # dev server on :4200
-npx ng test --no-watch      # unit tests (53 tests)
+npx ng test --no-watch      # unit tests (54 tests)
 npx ng test                 # unit tests in watch mode
 npx playwright test         # e2e tests (33 tests × 3 browsers; starts ng serve on :4200 if needed)
 npm run build               # production build → dist/solarman-ui/browser
@@ -43,7 +43,7 @@ src/app/
 │   ├── _bar-chart.scss    # shared bar-chart styles (@use'd by both charts; host sets --bar-color)
 │   ├── energy-summary/    # four KPI cards (signals); reloads on import
 │   ├── production-chart/  # amber bars, last 7 days, best day highlighted, reloads on import
-│   ├── tshwane-chart/     # blue bars, kWh since previous reading, latest highlighted, reloads on import
+│   ├── tshwane-chart/     # blue bars, kWh/day since previous reading, latest highlighted, reloads on import
 │   ├── status-panel/      # status strip; reads SystemStatusService
 │   ├── file-upload/       # source radio cards, drop zone (#file-input), drag-and-drop, inline errors
 │   └── data-preview/      # paginated Material table, "Import N records" / Back
@@ -55,7 +55,7 @@ src/app/
 │   └── import.service.ts          # POST /api/import/{fileType}
 └── models/
     ├── production-stat.model.ts    # { date: string; productionUnits: number }
-    ├── tshwane-usage-stat.model.ts # { readingDate: string; usageKwh: number }
+    ├── tshwane-usage-stat.model.ts # { readingDate; previousReadingDate?; usageKwh; usageKwhPerDay? }
     ├── database-status.model.ts
     ├── import-result.model.ts
     ├── solar-record.model.ts
@@ -116,8 +116,10 @@ export interface ProductionStat {
 
 // models/tshwane-usage-stat.model.ts
 export interface TshwaneUsageStat {
-  readingDate: string; // ISO datetime
-  usageKwh: number;    // kWh consumed since the previous reading
+  readingDate: string;                  // ISO datetime
+  previousReadingDate?: string | null;  // the reading before this one
+  usageKwh: number;                     // kWh consumed since the previous reading
+  usageKwhPerDay?: number | null;       // usageKwh ÷ days since the previous reading (charted)
 }
 
 // models/database-status.model.ts (also exports LatestRecords, DatabaseCredentials)

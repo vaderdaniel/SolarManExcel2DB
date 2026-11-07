@@ -82,8 +82,12 @@ test.describe('Home Page - Charts', () => {
 
     const chart = page.locator('app-tshwane-chart');
     await expect(chart.getByRole('heading', { name: 'Tshwane electricity' })).toBeVisible();
+    await expect(chart).toContainText('kWh/day since previous reading');
     await expect(chart.locator('.bar-wrapper')).toHaveCount(7);
     await expect(chart.locator('.bar.is-highlight')).toHaveCount(1);
+    // Latest reading: 11.87 kWh over ~3 days → 3.9 kWh/day
+    await expect(chart.locator('.bar-value').last()).toHaveText('3.9');
+    expect(await chart.locator('.bar').last().getAttribute('title')).toContain('3.94 kWh/day · 11.87 kWh over 3.0 days since 2 Nov');
   });
 });
 

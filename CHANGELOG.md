@@ -2,6 +2,26 @@
 
 ---
 
+## v2.0.2 - Tshwane Chart Shows kWh/day
+
+**Release Date**: November 7, 2026
+**Version**: 2.0.2
+
+Tshwane meter readings are taken 1 to several days apart, so the raw kWh per reading made a four-day gap look like a heavy-use day. The Home chart now plots the **average kWh per day** since the previous reading.
+
+### Backend
+- `GET /api/database/tshwane-usage` adds `previousReadingDate` and `usageKwhPerDay` (computed in SQL; `NULLIF` guards against two readings with the same timestamp). `usageKwh` is unchanged, so this is backward compatible
+- `TshwaneUsageStat` gains the two fields
+
+### Frontend
+- `TshwaneChartComponent` plots `usageKwhPerDay`; header reads "kWh/day since previous reading"; tooltip shows the rate, the raw kWh and the gap in days (e.g. `3.94 kWh/day · 11.87 kWh over 3.0 days since 2 Nov`); an unknown rate shows as an empty bar labelled "—"
+- The Tshwane KPI card still shows total kWh over the last 7 readings
+
+### ✅ Test Results
+- **64 backend tests** (+3), **54 frontend unit tests** (+1), **33 e2e tests** (Chromium + WebKit) passing
+
+---
+
 ## v2.0.1 - Frontend Security Patches (npm audit)
 
 **Release Date**: November 7, 2026

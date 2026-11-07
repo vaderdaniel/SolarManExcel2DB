@@ -10,12 +10,15 @@ interface ChartBar {
   weekday: string;
   dayMonth: string;
   displayDate: string;
+  /** kWh per day since the previous reading (0 when unknown). */
   value: number;
   heightPercent: number;
   label: string;
   displayValue: string;
   isLatest: boolean;
 }
+
+const MS_PER_DAY = 86_400_000;
 
 @Component({
   selector: 'app-tshwane-chart',
@@ -80,22 +83,38 @@ export class TshwaneChartComponent implements OnInit, OnDestroy {
       new Date(a.readingDate).getTime() - new Date(b.readingDate).getTime()
     );
 
-    const maxValue = Math.max(...sortedStats.map(s => s.usageKwh));
+    // Readings are irregular (1 to several days apart), so bars show the average
+    // kWh per day since the previous reading rather than the raw kWh per reading.
+    const perDay = (s: TshwaneUsageStat) => s.usageKwhPerDay ?? null;
+    const maxValue = Math.max(0, ...sortedStats.map(s => perDay(s) ?? 0));
     const latest = sortedStats[sortedStats.length - 1];
 
-    this.chartData = sortedStats.map(stat => ({
-      readingDate: stat.readingDate,
-      weekday: formatDate(stat.readingDate, 'EEE', 'en-US'),
-      dayMonth: formatDate(stat.readingDate, 'd MMM', 'en-US'),
-      displayDate: formatDate(stat.readingDate, 'd MMM HH:mm', 'en-US'),
-      value: stat.usageKwh,
-      heightPercent: maxValue > 0 ? (stat.usageKwh / maxValue) * 100 : 0,
-      label: stat.usageKwh.toFixed(1),
-      displayValue: `${stat.usageKwh.toFixed(2)} kWh`,
-      isLatest: stat === latest
-    }));
+    this.chartData = sortedStats.map(stat => {
+      const rate = perDay(stat);
+      return {
+        readingDate: stat.readingDate,
+        weekday: formatDate(stat.readingDate, 'EEE', 'en-US'),
+        dayMonth: formatDate(stat.readingDate, 'd MMM', 'en-US'),
+        displayDate: formatDate(stat.readingDate, 'd MMM HH:mm', 'en-US'),
+        value: rate ?? 0,
+        heightPercent: rate !== null && maxValue > 0 ? (rate / maxValue) * 100 : 0,
+        label: rate !== null ? rate.toFixed(1) : '—',
+        displayValue: this.describe(stat, rate),
+        isLatest: stat === latest
+      };
+    });
 
-    this.ariaLabel = 'Tshwane electricity used since the previous reading: ' +
-      this.chartData.map(b => `${b.displayDate} ${b.label} kWh`).join(', ');
+    this.ariaLabel = 'Tshwane electricity, average kWh per day since the previous reading: ' +
+      this.chartData.map(b => `${b.displayDate} ${b.label} kWh per day`).join(', ');
+  }
+
+  private describe(stat: TshwaneUsageStat, rate: number | null): string {
+    const total = `${stat.usageKwh.toFixed(2)} kWh`;
+    if (rate === null || !stat.previousReadingDate) {
+      return total;
+    }
+    const days = (new Date(stat.readingDate).getTime() - new Date(stat.previousReadingDate).getTime()) / MS_PER_DAY;
+    const since = formatDate(stat.previousReadingDate, 'd MMM', 'en-US');
+    return `${rate.toFixed(2)} kWh/day · ${total} over ${days.toFixed(1)} days since ${since}`;
   }
 }

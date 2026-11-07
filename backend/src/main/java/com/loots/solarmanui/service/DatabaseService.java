@@ -139,12 +139,17 @@ public class DatabaseService {
     public List<TshwaneUsageStat> getTshwaneUsageStats(int readings) {
         List<TshwaneUsageStat> stats = new ArrayList<>();
 
+        // usage_kwh_per_day spreads each reading's usage over the days since the previous
+        // reading, because readings are taken at irregular intervals (1 to several days apart).
         String sql =
             "SELECT a.reading_date, " +
-            "  ROUND((a.cumulative_electricity_used - b.cumulative_electricity_used)::numeric, 2) AS usage_kwh " +
+            "  b.reading_date AS previous_reading_date, " +
+            "  ROUND((a.cumulative_electricity_used - b.cumulative_electricity_used)::numeric, 2) AS usage_kwh, " +
+            "  ROUND(((a.cumulative_electricity_used - b.cumulative_electricity_used) " +
+            "    / NULLIF(EXTRACT(EPOCH FROM (a.reading_date - b.reading_date)) / 86400, 0))::numeric, 2) AS usage_kwh_per_day " +
             "FROM public.tshwane_electricity a " +
             "LEFT JOIN LATERAL ( " +
-            "  SELECT cumulative_electricity_used " +
+            "  SELECT reading_date, cumulative_electricity_used " +
             "  FROM public.tshwane_electricity " +
             "  WHERE reading_date < a.reading_date " +
             "  ORDER BY reading_date DESC LIMIT 1 " +
@@ -161,11 +166,16 @@ public class DatabaseService {
 
             while (rs.next()) {
                 java.sql.Timestamp ts = rs.getTimestamp("reading_date");
+                java.sql.Timestamp previousTs = rs.getTimestamp("previous_reading_date");
                 Double usageKwh = rs.getDouble("usage_kwh");
+                java.math.BigDecimal perDay = rs.getBigDecimal("usage_kwh_per_day");
 
                 if (ts != null) {
-                    LocalDateTime readingDate = ts.toLocalDateTime();
-                    stats.add(new TshwaneUsageStat(readingDate, usageKwh));
+                    stats.add(new TshwaneUsageStat(
+                        ts.toLocalDateTime(),
+                        previousTs != null ? previousTs.toLocalDateTime() : null,
+                        usageKwh,
+                        perDay != null ? perDay.doubleValue() : null));
                 }
             }
         } catch (SQLException e) {

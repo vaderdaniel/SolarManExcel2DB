@@ -15,16 +15,16 @@ export function mockProductionStats() {
   return stats;
 }
 
-/** Mock Tshwane usage: kWh between the last 7 readings, newest first */
+/** Mock Tshwane usage for the last 7 readings, newest first (real values from Nov 2026) */
 export function mockTshwaneUsage() {
   return [
-    { readingDate: '2026-11-05T06:28:00', usageKwh: 11.87 },
-    { readingDate: '2026-11-02T06:06:00', usageKwh: 9.61 },
-    { readingDate: '2026-10-30T06:28:00', usageKwh: 1.43 },
-    { readingDate: '2026-10-29T05:59:00', usageKwh: 3.18 },
-    { readingDate: '2026-10-27T07:37:00', usageKwh: 10.9 },
-    { readingDate: '2026-10-23T05:59:00', usageKwh: 2.9 },
-    { readingDate: '2026-10-22T06:10:00', usageKwh: 0.88 },
+    { readingDate: '2026-11-05T06:28:00', previousReadingDate: '2026-11-02T06:06:00', usageKwh: 11.87, usageKwhPerDay: 3.94 },
+    { readingDate: '2026-11-02T06:06:00', previousReadingDate: '2026-10-30T06:28:00', usageKwh: 9.61, usageKwhPerDay: 3.22 },
+    { readingDate: '2026-10-30T06:28:00', previousReadingDate: '2026-10-29T05:59:00', usageKwh: 1.43, usageKwhPerDay: 1.4 },
+    { readingDate: '2026-10-29T05:59:00', previousReadingDate: '2026-10-27T07:37:00', usageKwh: 3.18, usageKwhPerDay: 1.65 },
+    { readingDate: '2026-10-27T07:37:00', previousReadingDate: '2026-10-23T05:59:00', usageKwh: 10.9, usageKwhPerDay: 2.68 },
+    { readingDate: '2026-10-23T05:59:00', previousReadingDate: '2026-10-22T06:10:00', usageKwh: 2.9, usageKwhPerDay: 2.92 },
+    { readingDate: '2026-10-22T06:10:00', previousReadingDate: '2026-10-21T06:29:00', usageKwh: 0.88, usageKwhPerDay: 0.89 },
   ];
 }
 

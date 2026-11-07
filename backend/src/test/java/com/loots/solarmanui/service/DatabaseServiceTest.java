@@ -347,6 +347,57 @@ class DatabaseServiceTest {
     }
 
     @Test
+    void testGetTshwaneUsageStats_MapsPreviousReadingAndKwhPerDay() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(true).thenReturn(false);
+
+        LocalDateTime reading = LocalDateTime.of(2026, 11, 5, 6, 28);
+        LocalDateTime previous = LocalDateTime.of(2026, 11, 2, 6, 6);
+        when(resultSet.getTimestamp("reading_date")).thenReturn(java.sql.Timestamp.valueOf(reading));
+        when(resultSet.getTimestamp("previous_reading_date")).thenReturn(java.sql.Timestamp.valueOf(previous));
+        when(resultSet.getDouble("usage_kwh")).thenReturn(11.87);
+        when(resultSet.getBigDecimal("usage_kwh_per_day")).thenReturn(new java.math.BigDecimal("3.94"));
+
+        List<TshwaneUsageStat> stats = databaseService.getTshwaneUsageStats(7);
+
+        assertEquals(1, stats.size());
+        assertEquals(previous, stats.get(0).getPreviousReadingDate());
+        assertEquals(11.87, stats.get(0).getUsageKwh());
+        assertEquals(3.94, stats.get(0).getUsageKwhPerDay());
+    }
+
+    @Test
+    void testGetTshwaneUsageStats_KwhPerDayNullWhenSqlReturnsNull() throws SQLException {
+        // NULLIF guards against two readings with the same timestamp (division by zero)
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(true).thenReturn(false);
+        when(resultSet.getTimestamp("reading_date"))
+                .thenReturn(java.sql.Timestamp.valueOf(LocalDateTime.of(2026, 11, 5, 6, 28)));
+        when(resultSet.getDouble("usage_kwh")).thenReturn(0.0);
+        when(resultSet.getBigDecimal("usage_kwh_per_day")).thenReturn(null);
+
+        List<TshwaneUsageStat> stats = databaseService.getTshwaneUsageStats(7);
+
+        assertEquals(1, stats.size());
+        assertNull(stats.get(0).getUsageKwhPerDay());
+        assertNull(stats.get(0).getPreviousReadingDate());
+    }
+
+    @Test
+    void testGetTshwaneUsageStats_QueryComputesKwhPerDay() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(false);
+
+        databaseService.getTshwaneUsageStats(7);
+
+        verify(connection).prepareStatement(argThat(sql ->
+            sql.contains("b.reading_date AS previous_reading_date") &&
+            sql.contains("AS usage_kwh_per_day") &&
+            sql.contains("NULLIF(EXTRACT(EPOCH FROM (a.reading_date - b.reading_date)) / 86400, 0)")
+        ));
+    }
+
+    @Test
     void testGetTshwaneUsageStats_HandlesSQLException() throws SQLException {
         when(dataSource.getConnection()).thenThrow(new SQLException("Connection failed"));
 

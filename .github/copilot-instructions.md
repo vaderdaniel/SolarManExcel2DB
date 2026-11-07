@@ -15,9 +15,9 @@ Full-stack solar power data application: Excel files → PostgreSQL → Angular 
 
 ```bash
 cd backend && mvn spring-boot:run                 # dev server on :8080
-cd backend && mvn test                            # all 61 tests
+cd backend && mvn test                            # all 64 tests
 cd frontend/solarman-ui && npm start              # dev server on :4200
-cd frontend/solarman-ui && npx ng test --no-watch # 53 unit tests (Vitest)
+cd frontend/solarman-ui && npx ng test --no-watch # 54 unit tests (Vitest)
 ```
 
 See AGENTS.md's "Quick Start", "Update & Deployment Workflow" and "Testing" sections for the full set, including Docker/Kubernetes builds and rollouts.

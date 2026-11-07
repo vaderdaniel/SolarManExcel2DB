@@ -3,7 +3,7 @@
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.oracle.com/java/)
 [![Angular](https://img.shields.io/badge/Angular-21.2-red.svg)](https://angular.dev/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.10-green.svg)](https://spring.io/projects/spring-boot)
-[![Version](https://img.shields.io/badge/version-2.0.1-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.2-informational.svg)](CHANGELOG.md)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://www.postgresql.org/)
 [![Grafana](https://img.shields.io/badge/Grafana-Latest-orange.svg)](https://grafana.com/)
 
@@ -41,7 +41,7 @@ This prevents connection errors and ensures clean application startup.
 ### Web UI (Version 2.0)
 - 🌐 **Modern Web UI**: Angular 21 with the light "Daylight" design, signals and routing
 - 📊 **Production Visualization**: Interactive bar chart showing last 7 days of solar production
-- ⚡ **Tshwane Usage Visualization**: Bar chart showing kWh consumed between the last 7 Tshwane meter readings
+- ⚡ **Tshwane Usage Visualization**: Bar chart of average kWh/day between the last 7 Tshwane meter readings
 - 🔄 **Time-Weighted Calculations**: Accurate energy production metrics matching Grafana dashboards
 - 🧭 **Multi-Page Navigation**: Overview and Import pages with header navigation and a live status pill
 - 🔢 **Key Figures**: Latest day, 7-day total, best day and Tshwane usage at a glance
@@ -154,6 +154,11 @@ This project includes comprehensive documentation organized into specialized fil
 ## 🎯 Recent Major Updates
 
 Full release history lives in **[CHANGELOG.md](CHANGELOG.md)**. This is a teaser of the latest releases only.
+
+### v2.0.2 - Tshwane Chart Shows kWh/day (November 7, 2026)
+- ✅ **Fair comparison**: the Tshwane chart plots average kWh/day since the previous reading, since readings are taken 1 to several days apart
+- ✅ **API**: `tshwane-usage` adds `previousReadingDate` and `usageKwhPerDay`
+- ✅ **64 backend, 54 frontend unit and 33 e2e tests passing**
 
 ### v2.0.1 - Frontend Security Patches (November 7, 2026)
 - ✅ **npm audit**: 41 findings (3 critical, 10 high) → 16 moderate; nothing left in shipped dependencies
@@ -309,7 +314,7 @@ cd frontend/solarman-ui && npm run build
 cd ../../backend && mvn clean package
 
 # Deploy single JAR
-java -jar target/solarman-ui-backend-2.0.1.jar
+java -jar target/solarman-ui-backend-2.0.2.jar
 
 # Access application at http://localhost:8080
 ```
@@ -344,7 +349,7 @@ For technical support or questions:
 
 ---
 
-**Latest Version**: 2.0.1 - Frontend Security Patches  
+**Latest Version**: 2.0.2 - Tshwane Chart Shows kWh/day  
 **Last Updated**: November 7, 2026  
 **Status**: Production Ready ✅
 
@@ -399,7 +404,7 @@ For detailed Grafana documentation, see:
 ### Overview (Home)
 - Four key-figure cards: latest day, 7-day total and average, best day, Tshwane usage
 - 7-day solar production chart (time-weighted, best day highlighted)
-- Tshwane electricity chart (kWh used since the previous reading)
+- Tshwane electricity chart (average kWh/day since the previous reading)
 - System status strip with live API/database state and latest record times
 - Responsive down to phone width
 
