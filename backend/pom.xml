@@ -96,10 +96,10 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/src/main/resources/static</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../frontend/dist/solarman-ui</directory>
+                                    <directory>../frontend/solarman-ui/dist/solarman-ui/browser</directory>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>

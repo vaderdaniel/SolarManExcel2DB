@@ -46,7 +46,7 @@ This prevents connection errors and ensures clean application startup.
 - 🧭 **Multi-Page Navigation**: Dedicated Home and Upload pages with toolbar navigation
 - 📊 **Real-time Status**: Live database connectivity monitoring with 10-second polling
 - 🔄 **Auto-Refresh Charts**: Charts automatically update after data imports
-- 📂 **File Upload**: Drag-and-drop Excel file processing
+- 📂 **File Upload**: Excel file selection (SolarMan or Tshwane), up to 10 MB
 - 👀 **Data Preview**: Review data before importing with Material tables
 - 🚀 **Full File Import**: Processes thousands of records efficiently
 - 📈 **Import Results**: Detailed statistics and error reporting
@@ -305,6 +305,8 @@ java -jar target/solarman-ui-backend-1.7.5.jar
 # Access application at http://localhost:8080
 ```
 
+> The frontend must be built first: `mvn package` copies `frontend/solarman-ui/dist/solarman-ui/browser` into the JAR's `static/` directory (via `target/classes`, so nothing is written under `src/`).
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -334,7 +336,7 @@ For technical support or questions:
 ---
 
 **Latest Version**: 1.7.5 - Security Patch (Tomcat CVEs)  
-**Last Updated**: September 12, 2026  
+**Last Updated**: November 7, 2026  
 **Status**: Production Ready ✅
 
 ## 🔒 Security
@@ -370,8 +372,8 @@ The application integrates with Grafana for data visualization:
 
 **Access:**
 ```bash
-kubectl port-forward svc/grafana-service 3000:3000 -n default
-open http://localhost:3000
+open http://localhost:30000   # NodePort (Kubernetes)
+# or: kubectl port-forward svc/grafana-service 3000:3000 -n default && open http://localhost:3000
 ```
 
 **Backup & Restore:**

@@ -61,7 +61,7 @@ Spring Boot (port 8080)
     ↓ JDBC
 PostgreSQL (port 5432, database: LOOTS)
     ↓ read-only
-Grafana (port 3000 via port-forward)
+Grafana (port 3000; NodePort 30000)
 ```
 
 ### Kubernetes Startup Sequence
@@ -83,7 +83,7 @@ PostgreSQL (starts first)
 | `frontend-deployment.yaml` | Angular/nginx Deployment + NodePort 30080 |
 | `grafana-pvc.yaml` | Grafana 5Gi PVC |
 | `grafana-deployment.yaml` | Grafana Deployment (with postgres datasource) |
-| `grafana-service.yaml` | Grafana ClusterIP Service |
+| `grafana-service.yaml` | Grafana NodePort Service (30000) |
 
 ### Service Ports
 | Service | Internal | External |
@@ -91,7 +91,7 @@ PostgreSQL (starts first)
 | postgres-service | 5432 | none (ClusterIP) |
 | backend-service | 8080 | none (ClusterIP) |
 | frontend-service | 80 | 30080 (NodePort) |
-| grafana-service | 3000 | port-forward only |
+| grafana-service | 3000 | 30000 (NodePort) |
 
 ### Resource Limits
 | Pod | Memory Request/Limit | CPU Request/Limit |
@@ -189,22 +189,29 @@ WHERE b.cumulative_electricity_used IS NOT NULL
 ORDER BY a.reading_date DESC LIMIT 7;
 ```
 
+### `POST /api/database/configure`
+- Request body: `{ "username": "...", "password": "..." }`
+- Tests the credentials against the database and returns a `DatabaseStatus` (`200` if valid, `400` if not). Credentials are **not** stored.
+
 ### `POST /api/upload/{fileType}`
 - `fileType`: `solarman` | `tshwane`
 - Request: `multipart/form-data`, field `file`, max 10 MB
-- Response: JSON array of preview records
+- The file is kept in a temp dir for later import (files older than 1 hour are cleaned up)
+```json
+{ "previewData": [ { "Updated": "2026-04-26T18:45", "Production Power": 1234.0, "...": "..." } ], "totalRecords": 145, "fileType": "solarman", "fileId": "<uuid>" }
+```
 
 ### `POST /api/import/{fileType}`
-- Request body: JSON array from preview
+- Request body: `{ "fileId": "<uuid from upload>" }` (preferred — re-reads the full uploaded file) or `{ "data": [ ...previewData ] }` (legacy fallback)
 ```json
-{ "recordsInserted": 145, "recordsUpdated": 23, "firstRecordDate": "2026-04-01T00:00:00", "lastRecordDate": "2026-04-26T23:45:00", "errorCount": 0 }
+{ "recordsInserted": 145, "recordsUpdated": 23, "firstRecordDate": "2026-04-01T00:00:00", "lastRecordDate": "2026-04-26T23:45:00", "errorCount": 0, "errors": [] }
 ```
 
-### Error format (all endpoints)
-```json
-{ "error": "message", "status": 400, "timestamp": "2026-04-27T14:00:00" }
-```
-Status codes: `200` success · `400` bad request · `500` server error · `503` database unavailable
+### `GET /api/import/error-logs` · `DELETE /api/import/error-logs`
+- `GET` returns the in-memory import error log as a JSON array of strings (capped at 100 entries); `DELETE` clears it.
+
+### Errors
+There is no global error handler. Failures return `400` (validation, e.g. invalid file format or unknown `fileId`) or `500` (unexpected), with a **plain-text** message body. Exceptions: `GET /api/database/status` always returns `200` with `"connected": false` on failure; `POST /api/database/configure` returns a `DatabaseStatus` body with its `400`/`500`; `production-stats`, `tshwane-usage` and `latest-records` return an empty result with `200` when the query fails.
 
 ---
 
@@ -397,7 +404,7 @@ ls backend/reports/               # maven-dependencies.json, jar-artifact.json, 
 - ✅ Tomcat 10.1.59 (CRITICAL CVE-2026-65182, CVE-2026-65905, CVE-2026-68525 patched)
 - ✅ Spring Framework 6.2.17 (CVE-2026-22737 patched)
 - ✅ commons-lang3 3.18.0 (CVE-2025-48924 patched)
-- ✅ Angular 21.2.20 (XSS in i18n patched)
+- ✅ Angular 21.2 (`@angular/core` 21.2.19; i18n XSS patched since 21.2.10)
 - ⚠️ 5 npm audit findings remain (4 moderate, 1 high) — require an Angular v22 major bump to fully resolve; confined to dev/build tooling (`ng serve` dev-server, Angular CLI's bundled MCP server), not shipped in the app or Docker image
 
 For full security docs: `backend/SECURITY.md`
@@ -406,7 +413,7 @@ For full security docs: `backend/SECURITY.md`
 
 ## 📊 Grafana
 
-**Access**: `kubectl port-forward svc/grafana-service 3000:3000 -n default` → http://localhost:3000  
+**Access**: http://localhost:30000 (NodePort) — or `kubectl port-forward svc/grafana-service 3000:3000 -n default` → http://localhost:3000  
 **Login**: `admin` / `admin123`  
 **Datasource**: PostgreSQL-LOOTS (read-only `grafana` user, `grafana123`)
 
@@ -566,6 +573,8 @@ This file (`AGENTS.md`, symlinked as `CLAUDE.md`) is the **single source of trut
 | `backend/SECURITY.md` | Trivy scanning guide | Severity threshold or scan target changes (rarely) |
 | `grafana/README.md` | Dashboard inventory and datasource config | Dashboard added/changed, UID changes |
 
+On a **version bump**, also update the version in code, not just docs: `backend/pom.xml`, `frontend/solarman-ui/package.json` (`npm version X.Y.Z --no-git-tag-version`, which also updates the lock file), the footer in `frontend/solarman-ui/src/app/app.html`, and the matching assertion in `frontend/solarman-ui/e2e/navigation.spec.ts`.
+
 Before editing a doc, verify the current fact against the code (dependency versions in `pom.xml`/`package.json`, actual `@Test`/`it(` counts, actual directory structure) rather than incrementing the old number — the drift above happened exactly because numbers were copied forward instead of recounted.
 
 ## 📝 Recent Updates
@@ -599,6 +608,6 @@ Full release history with technical detail lives in **[CHANGELOG.md](CHANGELOG.m
 
 ---
 
-**Last Updated**: September 12, 2026
+**Last Updated**: November 7, 2026
 
 

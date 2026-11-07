@@ -30,7 +30,7 @@ RUN mvn dependency:go-offline -B
 COPY backend/src ./src
 
 # Copy Angular build output to static resources
-COPY --from=frontend-build /app/frontend/dist/solarman-ui ./src/main/resources/static/
+COPY --from=frontend-build /app/frontend/dist/solarman-ui/browser ./src/main/resources/static/
 
 # Build Spring Boot application
 RUN mvn clean package -DskipTests

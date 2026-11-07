@@ -43,8 +43,9 @@ mvn test -Dtest=DatabaseServiceTest#testGetProductionStats_SuccessfulCalculation
 ```
 
 ### Generate Test Coverage Report
+JaCoCo is not configured in `pom.xml`, so invoke the plugin explicitly:
 ```bash
-mvn test jacoco:report
+mvn org.jacoco:jacoco-maven-plugin:prepare-agent test org.jacoco:jacoco-maven-plugin:report
 # Report available at: target/site/jacoco/index.html
 ```
 
@@ -269,6 +270,8 @@ npx ng test --no-watch    # run once
 npx ng test               # watch mode (re-runs on file change)
 npx playwright test       # e2e tests (requires :4200 running)
 ```
+
+Playwright e2e specs live in `e2e/` (`home.spec.ts` 11, `navigation.spec.ts` 7, `upload.spec.ts` 13 — 31 tests, each run in Chromium, Firefox and WebKit) with API responses mocked via `e2e/mock-api.ts`.
 
 ## Test Coverage Summary
 

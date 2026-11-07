@@ -12,8 +12,8 @@ For full project documentation see **[AGENTS.md](../../AGENTS.md)** at the repos
 npm start                   # dev server on :4200
 npx ng test --no-watch      # unit tests (42 tests)
 npx ng test                 # unit tests in watch mode
-npx playwright test         # e2e tests (requires :4200 running)
-npx ng build --configuration production --output-path=dist/solarman-ui
+npx playwright test         # e2e tests (31 tests × 3 browsers; requires :4200 running)
+npm run build               # production build → dist/solarman-ui/browser
 ```
 
 ---
@@ -100,21 +100,24 @@ export interface TshwaneUsageStat {
   usageKwh: number;    // kWh consumed since the previous reading
 }
 
-// Inline in services / components:
+// models/database-status.model.ts (also exports LatestRecords, DatabaseCredentials)
 export interface DatabaseStatus {
   connected: boolean;
   message: string;
   apiStatus: 'ready' | 'unavailable';
-  lastChecked: string;
+  lastChecked?: Date;
 }
 
+// models/import-result.model.ts
 export interface ImportResult {
   recordsInserted: number;
   recordsUpdated: number;
-  firstRecordDate: string;
-  lastRecordDate: string;
+  firstRecordDate: Date;
+  lastRecordDate: Date;
   errorCount: number;
   errors: string[];
+  success: boolean;   // not sent by the backend
+  message?: string;
 }
 ```
 

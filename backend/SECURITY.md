@@ -15,8 +15,8 @@ mvn verify -DskipTests  # scan only, skip tests
 **Build fails on:** CRITICAL severity only
 
 ### Current Status
-- ✅ Tomcat 10.1.54 — no CRITICAL CVEs
-- ✅ Spring Boot 3.5.10 — all dependencies patched
+- ✅ Tomcat 10.1.59 — no CRITICAL CVEs (pinned via `<tomcat.version>`; see [CHANGELOG.md](../CHANGELOG.md) v1.7.5)
+- ✅ Spring Boot 3.5.10 / Spring Framework 6.2.17 — all dependencies patched
 - ✅ Zero CRITICAL vulnerabilities detected
 
 

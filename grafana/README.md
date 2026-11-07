@@ -4,7 +4,7 @@ This directory contains backup configurations for Grafana dashboards that visual
 
 ## 🚀 Quick Reference
 
-**Access:** `kubectl port-forward svc/grafana-service 3000:3000 -n default` → http://localhost:3000  
+**Access:** http://localhost:30000 (NodePort, Kubernetes) — or `kubectl port-forward svc/grafana-service 3000:3000 -n default` → http://localhost:3000  
 **Login:** `admin` / `admin123`  
 **Database user:** `grafana` / `grafana123` (read-only)
 
@@ -52,9 +52,9 @@ curl -s -u admin:admin123 'http://localhost:3000/api/datasources' | jq '.[].uid'
 ## 📍 Dashboard Access
 
 The Grafana instance is running in a pod and accessible at:
-- **URL**: http://localhost:3000
+- **URL**: http://localhost:30000 (NodePort `grafana-service`), or http://localhost:3000 via port-forward
 - **Username**: admin
-- **Password**: 
+- **Password**: admin123
 
 ## 📊 Available Dashboards
 
@@ -189,7 +189,7 @@ Panels 1-2 use stacked bar charts displaying average daily energy per ISO week. 
 **UID**: `by-week-dashboard`  
 **Title**: By ISO week number  
 **Time Range**: Ignored (uses all available data)  
-**Refresh Rate**: 5 minutes
+**Refresh Rate**: 1 hour
 
 #### Description
 Displays seasonal patterns by aggregating data across all years for each ISO week number (1-53). Unlike other dashboards, this ignores the time range picker and always uses all available data in the database.
@@ -347,7 +347,7 @@ The project includes a script that automatically fixes datasource UIDs and impor
 This script will:
 - Automatically detect the correct datasource UID
 - Update all dashboard datasource references
-- Import all four dashboards
+- Import every dashboard in `grafana/dashboards/` (currently five)
 - Provide success/failure feedback for each dashboard
 
 ### Method 2: Using Grafana UI
@@ -457,15 +457,14 @@ This accounts for varying intervals between measurements to provide accurate ene
 ## 📝 Notes
 
 - Dashboards automatically filter data using Grafana's `$__timeFilter(updated)` macro
-- Time zones are set to UTC in both dashboards
-- Both dashboards use stacked bar charts for energy metrics
-- Battery SoC is displayed on a separate right-hand axis (0-100%)
-- Dashboard refresh intervals: 5 minutes, 30 minutes, 1 hour
+- Time zone: Grafana default (browser) on all dashboards
+- Daily, Weekly and Monthly Stats use stacked bar charts for energy metrics, with battery SoC on a separate right-hand axis (0-100%)
+- Refresh intervals: 5 minutes (Daily, Weekly, Monthly Stats), 1 hour (By Week Number), on demand (Tshwane Daily)
 
 ---
 
-**Last Updated**: April 29, 2026  
-**Maintained By**: Daniel Oots
+**Last Updated**: November 7, 2026  
+**Maintained By**: Danie Loots
 
 ## 🔧 Troubleshooting
 
